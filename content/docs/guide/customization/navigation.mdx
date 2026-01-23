@@ -1,0 +1,72 @@
+---
+title: Navigation
+description: How to update navigation items and links
+publishedAt: 2024-01-01
+order: 4
+
+---
+
+# Navigation
+
+Guide to updating navigation items, links, and the search functionality.
+
+## Navigation Component
+
+The navigation is defined in `components/Navigation.tsx`.
+
+## Adding/Removing Navigation Items
+
+Edit the `navItems` array in `components/Navigation.tsx`:
+
+```tsx
+const navItems = [
+  { href: '/', label: 'Home' },
+  { href: '/docs', label: 'Documentation' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/projects', label: 'Projects' },  // Add new item
+]
+```
+
+## Updating Site Name
+
+Change the site name/logo:
+
+```tsx
+<Link href="/" className="text-xl font-bold">
+  Your Site Name  // Change this
+</Link>
+```
+
+## Search Bar
+
+The search bar is automatically included in the navigation. It searches across all documentation.
+
+To customize search behavior, edit `components/DocsSearchBar.tsx`.
+
+## CV Download Button
+
+The CV download button is in the navigation. To update:
+
+1. **Place your CV** in `public/assets/general/pdfs/cv.pdf`
+2. **Or update the link** in `components/Navigation.tsx`:
+
+```tsx
+<a
+  href="/assets/general/pdfs/your-cv.pdf"
+  download
+  className="..."
+>
+  Download CV
+</a>
+```
+
+## Mobile Menu
+
+The mobile menu automatically includes all navigation items. It's responsive and appears on small screens.
+
+## Next Steps
+
+- [Homepage](/docs/guide/customization/homepage) - Customize homepage
+- [Footer](/docs/guide/customization/footer) - Update footer
+
+

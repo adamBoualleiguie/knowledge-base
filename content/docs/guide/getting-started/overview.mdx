@@ -1,0 +1,65 @@
+---
+title: Getting Started
+description: Quick start guide and basic concepts for your portfolio website
+publishedAt: 2024-01-01
+order: 1
+---
+
+# Getting Started
+
+This section will help you get started quickly with your portfolio website. Learn the basic concepts and structure.
+
+## Understanding the Structure
+
+Your portfolio website uses a hierarchical structure for documentation:
+
+- **Sections** (top level) - Major categories like "Guide", "Knowledge Base"
+- **Subsections** (second level) - Categories within sections like "Getting Started", "Features"
+- **Documents** (individual pages) - The actual content files
+
+## File Structure
+
+All content is stored in the `content/` directory:
+
+```
+content/
+├── docs/              # Documentation files
+│   ├── guide/        # Guide section
+│   └── knowledge-base/ # Knowledge Base section
+└── blog/              # Blog posts
+```
+
+## Basic Concepts
+
+### Frontmatter
+
+Every content file needs frontmatter at the top:
+
+```mdx
+---
+title: Your Document Title
+description: A brief description
+publishedAt: 2024-01-15
+updatedAt: 2024-01-20  # Optional
+---
+```
+
+### URL Structure
+
+The URL matches your folder structure:
+
+- `content/docs/guide/overview.mdx` → `/docs/guide/overview`
+- `content/docs/guide/getting-started/overview.mdx` → `/docs/guide/getting-started/overview`
+- `content/blog/my-post.mdx` → `/blog/my-post`
+
+### Overview Pages
+
+Major sections can have overview pages that describe what the section contains. When an overview page exists, the section title becomes clickable in the sidebar.
+
+## Next Steps
+
+- [Understanding Documentation Structure](/docs/guide/getting-started/structure) - Learn about sections and subsections
+- [Creating Your First Document](/docs/guide/getting-started/first-document) - Create your first documentation page
+- [Understanding Features](/docs/guide/features/overview) - Learn about all available features
+- [Troubleshooting](/docs/guide/getting-started/troubleshooting) - Common issues and solutions
+

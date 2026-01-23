@@ -1,0 +1,357 @@
+---
+title: Adding Documentation
+description: Complete guide to adding documentation with examples
+publishedAt: 2024-01-01
+order: 2
+---
+
+# Adding Documentation
+
+Complete guide to adding documentation to your portfolio website with detailed examples.
+
+## Understanding Documentation Structure
+
+Documentation uses a hierarchical structure:
+
+- **Sections** (top level) - Created from folder names
+- **Subsections** (second level) - Created from nested folders  
+- **Documents** (individual pages) - MDX files
+
+## Step 1: Create the Folder Structure
+
+### Simple Section (Section → Documents)
+
+```bash
+mkdir -p content/docs/my-section
+```
+
+**Structure:**
+```
+content/docs/my-section/
+├── overview.mdx
+├── getting-started.mdx
+└── advanced.mdx
+```
+
+**Result in Sidebar:**
+- 📁 My Section (collapsible)
+  - 📄 Overview
+  - 📄 Getting Started
+  - 📄 Advanced
+
+### Section with Subsections
+
+```bash
+mkdir -p content/docs/my-section/basics
+mkdir -p content/docs/my-section/advanced
+```
+
+**Structure:**
+```
+content/docs/my-section/
+├── overview.mdx
+├── basics/
+│   ├── introduction.mdx
+│   └── quick-start.mdx
+└── advanced/
+    ├── configuration.mdx
+    └── optimization.mdx
+```
+
+**Result in Sidebar:**
+- 📁 My Section (collapsible)
+  - 📄 Overview
+  - 📁 Basics (collapsible)
+    - 📄 Introduction
+    - 📄 Quick Start
+  - 📁 Advanced (collapsible)
+    - 📄 Configuration
+    - 📄 Optimization
+
+## Step 2: Create Documents with Frontmatter
+
+Every documentation file needs frontmatter:
+
+```mdx
+---
+title: Your Document Title
+description: A brief description of what this document covers
+publishedAt: 2024-01-15
+updatedAt: 2024-01-20  # Optional
+order: 1  # Optional: Controls display order (lower numbers appear first)
+---
+```
+
+### Required Fields
+
+- **`title`**: Document title (appears in sidebar and page header)
+- **`description`**: Brief description (appears in listings and meta tags)
+- **`publishedAt`**: Publication date (YYYY-MM-DD format)
+
+### Optional Fields
+
+- **`updatedAt`**: Last update date (YYYY-MM-DD format)
+- **`order`**: Display order number (lower numbers appear first, defaults to alphabetical)
+
+## Step 3: Write Your Content
+
+Write content using Markdown or MDX:
+
+```mdx
+---
+title: Installation Guide
+description: Step-by-step installation instructions
+publishedAt: 2024-01-15
+---
+
+# Installation Guide
+
+This is the main heading (H1). It appears as the page title.
+
+## Introduction
+
+This is a section heading (H2). It will appear in the table of contents.
+
+### Prerequisites
+
+Before you begin, make sure you have:
+
+- Node.js 20.19.4 or higher
+- Yarn package manager
+- Git installed
+
+## Installation Steps
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/yourproject.git
+cd yourproject
+```
+
+### Step 2: Install Dependencies
+
+```bash
+yarn install
+```
+
+### Step 3: Start Development Server
+
+```bash
+yarn dev
+```
+
+## Verification
+
+To verify the installation worked:
+
+1. Open your browser
+2. Navigate to `http://localhost:3000`
+3. You should see the homepage
+
+## Next Steps
+
+- Read the [Configuration Guide](/docs/guide/customization/overview)
+- Check out [Features](/docs/guide/features/overview)
+```
+
+## Step 4: Set Document Order
+
+Control the display order of your documents using the `order` field:
+
+```mdx
+---
+title: Getting Started
+description: Quick start guide
+publishedAt: 2024-01-01
+order: 1  # This document appears first
+---
+```
+
+**Ordering Rules:**
+- Lower numbers appear first (1, 2, 3...)
+- Documents without `order` are sorted alphabetically at the end
+- Use `order: 1` for overview pages
+- Leave gaps (10, 20, 30...) if you might add documents in between
+
+**Example:**
+```mdx
+---
+title: Overview
+order: 1
+---
+
+---
+title: Installation
+order: 2
+---
+
+---
+title: Configuration
+order: 3
+---
+```
+
+For complete ordering setup (sections, subsections, and documents), see [Documentation Ordering System](/docs/guide/customization/section-ordering).
+
+## Step 5: Overview Pages
+
+Create overview pages for major sections to make section titles clickable:
+
+```mdx
+---
+title: API Documentation
+description: Complete API reference and endpoint documentation
+publishedAt: 2024-01-01
+---
+
+# API Documentation
+
+Welcome to the API documentation section.
+
+## What's in this section
+
+- **Endpoints**: Detailed documentation for all API endpoints
+- **Reference**: Complete API reference
+- **Authentication**: How to authenticate
+
+## Quick Links
+
+- [API Endpoints](/docs/api/endpoints)
+- [API Reference](/docs/api/reference)
+```
+
+**File location**: `content/docs/api/overview.mdx`
+
+**Result**: Section title "API" becomes clickable in sidebar
+
+## Complete Example
+
+Here's a complete example of a documentation section:
+
+### File Structure
+
+```
+content/docs/installation/
+├── overview.mdx
+├── prerequisites.mdx
+├── setup.mdx
+└── troubleshooting.mdx
+```
+
+### overview.mdx
+
+```mdx
+---
+title: Installation
+description: Installation guides and setup instructions
+publishedAt: 2024-01-01
+---
+
+# Installation
+
+This section provides comprehensive installation and setup guides.
+
+## What's in this section
+
+- **Prerequisites**: System requirements
+- **Setup**: Step-by-step installation
+- **Troubleshooting**: Common issues and solutions
+
+## Quick Links
+
+- [Prerequisites](/docs/installation/prerequisites)
+- [Setup](/docs/installation/setup)
+- [Troubleshooting](/docs/installation/troubleshooting)
+```
+
+### prerequisites.mdx
+
+```mdx
+---
+title: Prerequisites
+description: System requirements and prerequisites
+publishedAt: 2024-01-01
+---
+
+# Prerequisites
+
+Before installing, ensure your system meets these requirements.
+
+## System Requirements
+
+- **Node.js**: 20.19.4 or higher
+- **Yarn**: Latest version
+- **Git**: For cloning the repository
+- **Operating System**: macOS, Linux, or Windows
+
+## Installing Node.js
+
+<Callout type="info" title="Node.js Version">
+Make sure you're using Node.js 20.19.4 or higher. You can check your version with `node --version`.
+</Callout>
+
+### macOS
+
+```bash
+# Using Homebrew
+brew install node@20
+
+# Or download from nodejs.org
+```
+
+### Linux
+
+```bash
+# Using nvm (recommended)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+nvm install 20.19.4
+nvm use 20.19.4
+```
+
+### Windows
+
+Download the installer from [nodejs.org](https://nodejs.org/).
+
+## Installing Yarn
+
+```bash
+npm install -g yarn
+```
+
+## Verifying Installation
+
+```bash
+node --version  # Should show v20.19.4 or higher
+yarn --version  # Should show latest version
+git --version   # Should show git version
+```
+
+## Next Steps
+
+Once you have the prerequisites installed, proceed to [Setup](/docs/installation/setup).
+```
+
+## Best Practices
+
+1. **Use descriptive titles**: Make titles clear and specific
+2. **Add descriptions**: Help users understand what the document covers
+3. **Use headings**: Structure content with H2, H3, H4 headings
+4. **Link between docs**: Use internal links to connect related content
+5. **Create overview pages**: Add overview pages for major sections
+6. **Use examples**: Include code examples and screenshots
+7. **Keep it organized**: Group related documents in the same section
+
+## URL Structure
+
+The URL matches your folder structure:
+
+- `content/docs/installation/overview.mdx` → `/docs/installation/overview`
+- `content/docs/guide/getting-started/structure.mdx` → `/docs/guide/getting-started/structure`
+
+## Next Steps
+
+- [Adding Blog Posts](/docs/guide/adding-content/blog-posts) - Learn about blog posts
+- [Using Features](/docs/guide/features/overview) - Learn about all features
+- [Customization](/docs/guide/customization/overview) - Customize your site
+

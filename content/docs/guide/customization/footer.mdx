@@ -1,0 +1,70 @@
+---
+title: Footer
+description: How to update footer content and links
+publishedAt: 2024-01-01
+order: 6
+
+---
+
+# Footer
+
+Guide to updating footer content, links, and social media.
+
+## Footer Component
+
+The footer is defined in `components/Footer.tsx`.
+
+## Updating Footer Content
+
+Edit `components/Footer.tsx` to update:
+
+1. **Footer text**
+2. **Social media links**
+3. **Footer sections**
+4. **Copyright information**
+
+## Social Media Links
+
+Update social media links:
+
+```tsx
+const socialLinks = [
+  { href: 'https://github.com/yourusername', label: 'GitHub' },
+  { href: 'https://twitter.com/yourusername', label: 'Twitter' },
+  { href: 'https://linkedin.com/in/yourusername', label: 'LinkedIn' },
+]
+```
+
+## Footer Sections
+
+Add or remove footer sections:
+
+```tsx
+const footerSections = [
+  {
+    title: 'Documentation',
+    links: [
+      { href: '/docs', label: 'Overview' },
+      { href: '/docs/guide', label: 'Guide' },
+    ],
+  },
+  // Add more sections
+]
+```
+
+## Copyright Information
+
+Update copyright text:
+
+```tsx
+<p className="...">
+  © {new Date().getFullYear()} Your Name. All rights reserved.
+</p>
+```
+
+## Next Steps
+
+- [Metadata](/docs/guide/customization/metadata) - Update site metadata
+- [Deployment](/docs/guide/deployment/overview) - Deploy your website
+
+

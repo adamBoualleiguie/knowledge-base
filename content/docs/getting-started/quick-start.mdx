@@ -1,0 +1,149 @@
+---
+title: Quick Start
+description: Get up and running in minutes
+publishedAt: 2024-01-01
+---
+
+# Quick Start
+
+Get your portfolio website up and running in minutes.
+
+<Callout type="info" title="Info">
+I instrumented a sample Python Application and sent data to both Datadog and Elastic Stack to evaluate my experience. Some takeaways are subjective and based on personal preference.
+</Callout>
+
+## Installation
+
+```bash
+# Install dependencies
+yarn install
+
+# Start development server
+yarn dev
+```
+
+## Architecture Overview
+
+The project follows a simple architecture:
+
+1. **Content MDX Files**: Your documentation and blog content written in MDX format
+2. **Contentlayer**: Processes and transforms MDX files into structured data
+3. **Next.js Pages**: Renders the content as static pages
+4. **Static Site**: The final generated static website
+5. **Users**: Access the website through their browsers
+
+## Code Examples
+
+Here are examples of different programming languages:
+
+### YAML Configuration
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  app:
+    image: node:20
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+```
+
+### Java Example
+
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+```
+
+### C Example
+
+```c
+#include <stdio.h>
+
+int main() {
+    printf("Hello, World!\n");
+    return 0;
+}
+```
+
+## Create Your First Document
+
+1. Create a file in `content/docs/` (for example, `network_security_config.xml`):
+
+<Callout type="note">
+When merging this configuration with `otelcol-config.yml`, be aware that array values like `exporters` replace existing values. Always ensure `spanmetrics` is included in the trace pipeline to avoid runtime errors.
+</Callout>
+
+```mdx
+---
+title: My First Document
+description: A sample document
+publishedAt: 2024-01-15
+---
+
+# My First Document
+
+This is my first document!
+```
+
+2. The document will automatically appear in the sidebar.
+
+## Create Your First Blog Post
+
+1. Create a file in `content/blog/`:
+
+```mdx
+---
+title: My First Blog Post
+description: A sample blog post
+publishedAt: 2024-01-15
+author: Your Name
+tags: [tutorial, getting-started]
+---
+
+# My First Blog Post
+
+Welcome to my blog!
+```
+
+2. The post will appear in the blog listing.
+
+## Architecture Diagram
+
+Here's a visual representation of the project architecture:
+
+<ExcalidrawDiagram 
+  src="/assets/docs/other/diagram.excalidraw"
+  caption="Project Architecture Overview"
+  initialZoom={0.5}
+/>
+
+## Using Callout Components
+
+You can use different types of callouts in your documentation:
+
+<Callout type="info">
+This is an info callout with helpful information.
+</Callout>
+
+<Callout type="success" title="Success">
+This is a success callout indicating something completed successfully.
+</Callout>
+
+<Callout type="warning" title="Warning">
+This is a warning callout for important cautions.
+</Callout>
+
+<Callout type="note" title="Note">
+This is a note callout for additional context. You can reference files like `network_security_config.xml` or directories like `opentelemetry-demo` and they will be highlighted.
+</Callout>
+
+<Callout type="danger" title="Danger">
+This is a danger callout in red for critical warnings or dangerous operations.
+</Callout>
+

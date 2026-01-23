@@ -1,0 +1,80 @@
+---
+title: Understanding Documentation Structure
+description: Learn how the documentation structure works with sections, subsections, and documents
+publishedAt: 2024-01-01
+order: 2
+---
+
+# Understanding Documentation Structure
+
+The documentation uses a hierarchical structure that automatically creates a collapsible sidebar navigation.
+
+## How It Works
+
+The sidebar automatically organizes your docs into three levels:
+
+1. **Sections** (top level) - Created from the first folder name
+2. **Subsections** (second level) - Created from nested folders
+3. **Documents** (individual pages) - The actual MDX files
+
+## Example Structure
+
+```
+content/docs/
+├── guide/                    # Section: "Guide"
+│   ├── overview.mdx          # Document (in _root)
+│   ├── getting-started/      # Subsection: "Getting Started"
+│   │   ├── overview.mdx      # Document
+│   │   └── structure.mdx     # Document
+│   └── features/             # Subsection: "Features"
+│       ├── overview.mdx      # Document
+│       └── callouts.mdx      # Document
+└── knowledge-base/            # Section: "Knowledge Base"
+    ├── overview.mdx          # Document (in _root)
+    └── foundations/           # Subsection: "Foundations"
+        └── overview.mdx       # Document
+```
+
+## Sidebar Display
+
+This structure creates:
+
+- 📁 **Guide** (collapsible section)
+  - 📄 Overview
+  - 📁 Getting Started (collapsible subsection)
+    - 📄 Overview
+    - 📄 Structure
+  - 📁 Features (collapsible subsection)
+    - 📄 Overview
+    - 📄 Callouts
+
+- 📁 **Knowledge Base** (collapsible section)
+  - 📄 Overview
+  - 📁 Foundations (collapsible subsection)
+    - 📄 Overview
+
+## Overview Pages
+
+If you create an `overview.mdx` file in a section directory, the section title becomes clickable:
+
+```
+content/docs/guide/overview.mdx  → Section title "Guide" becomes clickable
+```
+
+## Custom Ordering
+
+You can define custom order for sections and subsections. See [Custom Section Ordering](/docs/guide/customization/section-ordering) for details.
+
+## Best Practices
+
+1. **Use descriptive folder names**: They become section titles
+2. **Keep folder names lowercase**: Use hyphens for spaces (e.g., `getting-started`)
+3. **Group related docs**: Put related documents in the same section
+4. **Use subsections sparingly**: Only when you have many related docs
+5. **Create overview pages**: Add overview pages for major sections
+
+## Next Steps
+
+- [Creating Your First Document](/docs/guide/getting-started/first-document) - Create your first page
+- [Adding Documentation](/docs/guide/adding-content/documentation) - Detailed guide on adding docs
+

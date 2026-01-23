@@ -1,0 +1,277 @@
+---
+title: Excalidraw Diagrams
+description: Complete guide to embedding interactive Excalidraw diagrams
+publishedAt: 2024-01-01
+order: 3
+
+---
+
+# Excalidraw Diagrams
+
+Excalidraw diagrams allow you to embed interactive diagrams in your documentation. These diagrams support theme switching, fullscreen mode, and zoom controls.
+
+## Overview
+
+Excalidraw is a virtual whiteboard for sketching hand-drawn like diagrams. You can create diagrams in Excalidraw and embed them in your documentation with full interactivity.
+
+## Features
+
+- ✅ **Theme Support**: Automatically matches your website's theme (light/dark)
+- ✅ **Fullscreen Mode**: Click the fullscreen button to view in fullscreen
+- ✅ **Zoom Controls**: Zoom in, zoom out, and reset zoom
+- ✅ **Centered Display**: Diagrams are automatically centered
+- ✅ **Responsive**: Adapts to different screen sizes
+- ✅ **Clean UI**: Default Excalidraw UI elements are hidden for a clean look
+
+## Step 1: Create Your Diagram
+
+1. Go to [Excalidraw](https://excalidraw.com/)
+2. Create your diagram
+3. Click the menu (three dots) → **Save to file**
+4. Save as `.excalidraw` file (JSON format)
+
+## Step 2: Save the File
+
+Save your `.excalidraw` file in the `public/assets/docs/` directory:
+
+```
+public/assets/docs/
+├── other/
+│   └── diagram.excalidraw
+└── knowledge-base/
+    └── architectures/
+        └── system-architecture.excalidraw
+```
+
+## Step 3: Embed in Your Content
+
+Use the `<ExcalidrawDiagram>` component in your MDX:
+
+```mdx
+<ExcalidrawDiagram 
+  src="/assets/docs/other/diagram.excalidraw"
+  caption="Project Architecture Overview"
+  initialZoom={0.5}
+/>
+```
+
+## Component Props
+
+### Required Props
+
+- **`src`**: Path to the `.excalidraw` file (relative to `public/`)
+  - Example: `"/assets/docs/other/diagram.excalidraw"`
+
+### Optional Props
+
+- **`alt`**: Alt text for accessibility
+  - Example: `"Architecture diagram showing system components"`
+  
+- **`caption`**: Caption text displayed below the diagram
+  - Example: `"Project Architecture Overview"`
+  
+- **`initialZoom`**: Initial zoom level (default: `1` = 100%)
+  - `0.5` = 50% zoom (good for large diagrams)
+  - `1` = 100% zoom (default)
+  - `2` = 200% zoom (for detailed diagrams)
+
+## Examples
+
+### Basic Diagram
+
+**MDX Syntax:**
+```mdx
+## Architecture Diagram
+
+Here's a visual representation of the project architecture:
+
+<ExcalidrawDiagram 
+  src="/assets/docs/other/diagram.excalidraw"
+/>
+```
+
+**Rendered Result:**
+
+Here's a visual representation of the project architecture:
+
+<ExcalidrawDiagram 
+  src="/assets/docs/other/diagram.excalidraw"
+/>
+
+### Diagram with Caption
+
+**MDX Syntax:**
+```mdx
+## System Architecture
+
+<ExcalidrawDiagram 
+  src="/assets/docs/knowledge-base/architectures/system-architecture.excalidraw"
+  caption="Complete system architecture showing all components and their relationships"
+/>
+```
+
+**Rendered Result:**
+
+<ExcalidrawDiagram 
+  src="/assets/docs/other/diagram.excalidraw"
+  caption="Complete system architecture showing all components and their relationships"
+/>
+
+### Large Diagram with Custom Zoom
+
+**MDX Syntax:**
+```mdx
+## Complete System Overview
+
+<ExcalidrawDiagram 
+  src="/assets/docs/knowledge-base/architectures/complete-system.excalidraw"
+  caption="Complete system overview - use zoom controls to explore details"
+  initialZoom={0.5}
+/>
+```
+
+**Rendered Result:**
+
+<ExcalidrawDiagram 
+  src="/assets/docs/other/diagram.excalidraw"
+  caption="Complete system overview - use zoom controls to explore details"
+  initialZoom={0.5}
+/>
+
+### Diagram with Alt Text
+
+**MDX Syntax:**
+```mdx
+## Data Flow Diagram
+
+<ExcalidrawDiagram 
+  src="/assets/docs/other/data-flow.excalidraw"
+  alt="Data flow diagram showing how data moves through the system"
+  caption="Data Flow Architecture"
+/>
+```
+
+**Rendered Result:**
+
+<ExcalidrawDiagram 
+  src="/assets/docs/other/diagram.excalidraw"
+  alt="Data flow diagram showing how data moves through the system"
+  caption="Data Flow Architecture"
+/>
+
+## Complete Example
+
+Here's a complete example using Excalidraw diagrams:
+
+```mdx
+---
+title: System Architecture
+description: Overview of the system architecture
+publishedAt: 2024-01-15
+
+---
+
+# System Architecture
+
+This document describes the overall system architecture.
+
+## High-Level Overview
+
+<ExcalidrawDiagram 
+  src="/assets/docs/knowledge-base/architectures/high-level.excalidraw"
+  caption="High-level system architecture"
+  initialZoom={0.5}
+/>
+
+The diagram above shows the main components of our system.
+
+## Detailed Component View
+
+<ExcalidrawDiagram 
+  src="/assets/docs/knowledge-base/architectures/components.excalidraw"
+  caption="Detailed view of individual components"
+  initialZoom={1}
+/>
+
+This diagram provides a detailed view of each component.
+
+## Data Flow
+
+<ExcalidrawDiagram 
+  src="/assets/docs/knowledge-base/architectures/data-flow.excalidraw"
+  caption="Data flow through the system"
+  initialZoom={0.75}
+/>
+```
+
+## File Organization
+
+Organize your Excalidraw files logically:
+
+```
+public/assets/docs/
+├── other/
+│   ├── general-diagram.excalidraw
+│   └── overview.excalidraw
+└── knowledge-base/
+    ├── architectures/
+    │   ├── system-architecture.excalidraw
+    │   ├── data-flow.excalidraw
+    │   └── component-diagram.excalidraw
+    └── projects/
+        └── project-diagram.excalidraw
+```
+
+## Zoom Levels
+
+Choose the appropriate initial zoom level:
+
+- **`initialZoom={0.5}`**: Good for large diagrams that need to fit on screen
+- **`initialZoom={1}`**: Default - shows diagram at 100%
+- **`initialZoom={2}`**: Useful for detailed diagrams that need to be larger
+
+## Controls
+
+The diagram includes a toolbar with:
+
+- **Zoom In** (+): Increase zoom level
+- **Zoom Out** (-): Decrease zoom level
+- **Reset Zoom**: Return to initial zoom level
+- **Fullscreen**: View diagram in fullscreen mode
+
+## Best Practices
+
+1. **Use descriptive filenames**: `project-architecture.excalidraw`, `data-flow.excalidraw`
+2. **Add captions**: Help readers understand what the diagram shows
+3. **Choose appropriate zoom**: Large diagrams benefit from `initialZoom={0.5}`
+4. **Organize files**: Keep diagrams in logical locations (by section or topic)
+5. **Test both themes**: Make sure diagrams look good in both light and dark modes
+6. **Add alt text**: Improve accessibility with descriptive alt text
+
+## Troubleshooting
+
+### Diagram Not Loading
+
+- Verify the file path is correct (relative to `public/`)
+- Check the file exists in the specified location
+- Ensure the file is valid JSON
+- Check browser console for errors
+
+### Diagram Not Centered
+
+- The diagram should automatically center on load
+- If not centered, check the diagram's element positions in Excalidraw
+- Try adjusting the initial zoom level
+
+### Theme Not Matching
+
+- The diagram theme automatically matches your website theme
+- If it doesn't match, check that `next-themes` is properly configured
+- The diagram uses the same theme as the rest of your site
+
+## Next Steps
+
+- [Tabbed Content](/docs/guide/features/tabbed-content) - Learn about multi-tab sections
+- [Images & Videos](/docs/guide/features/images-videos) - Learn about media components
+- [Code Blocks](/docs/guide/features/code-blocks) - Learn about syntax highlighting
+

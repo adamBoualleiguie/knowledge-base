@@ -1,0 +1,180 @@
+---
+title: Troubleshooting
+description: Common issues and solutions when working with your portfolio website
+publishedAt: 2024-01-01
+order: 4
+
+---
+
+# Troubleshooting
+
+Common issues and their solutions when working with your portfolio website.
+
+## Content Not Appearing
+
+### Issue: Document not showing in sidebar
+
+**Solutions:**
+1. Check that the file is in the correct directory (`content/docs/` or `content/blog/`)
+2. Verify frontmatter is correct (YAML format with proper indentation)
+3. Restart the dev server: `yarn dev`
+4. Check for syntax errors in MDX files
+5. Ensure the file has a `.mdx` extension
+
+### Issue: Changes not reflecting
+
+**Solutions:**
+1. Hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)
+2. Clear the `.next` cache: `rm -rf .next`
+3. Restart the dev server
+4. Check for build errors: `yarn build`
+
+## Build Errors
+
+### Issue: TypeScript errors
+
+**Solutions:**
+1. Run `yarn build` to see all errors
+2. Check for missing imports
+3. Verify all TypeScript types are correct
+4. Check MDX syntax (proper closing of code blocks, etc.)
+
+### Issue: Contentlayer errors
+
+**Solutions:**
+1. Verify frontmatter format is correct
+2. Check for invalid YAML syntax
+3. Ensure all required fields are present
+4. Check file paths are correct
+
+## Styling Issues
+
+### Issue: Styles not applying
+
+**Solutions:**
+1. Clear `.next` cache: `rm -rf .next`
+2. Rebuild: `yarn build`
+3. Check Tailwind classes are correct
+4. Verify `globals.css` is imported in `layout.tsx`
+
+### Issue: Dark mode not working
+
+**Solutions:**
+1. Check `ThemeProvider` is in `layout.tsx`
+2. Verify `next-themes` is installed
+3. Check browser console for errors
+4. Ensure theme toggle component is present
+
+## Component Issues
+
+### Issue: Callouts not displaying
+
+**Solutions:**
+1. Check the component is imported in `mdx-components.tsx`
+2. Verify the syntax: `<Callout type="info">...</Callout>`
+3. Check for proper closing tags
+4. Ensure the type is valid: `info`, `success`, `warning`, `error`, `note`, `danger`
+
+### Issue: Excalidraw diagrams not loading
+
+**Solutions:**
+1. Verify the file path is correct (relative to `public/`)
+2. Check the file exists in `public/assets/docs/`
+3. Ensure the file is valid JSON
+4. Check browser console for errors
+5. Verify `@excalidraw/excalidraw` is installed
+
+### Issue: Code blocks not highlighting
+
+**Solutions:**
+1. Check the language is specified: ` ```bash`
+2. Verify the language is supported
+3. Check `shiki` is installed
+4. Ensure code block component is in `mdx-components.tsx`
+
+## Search Issues
+
+### Issue: Search not working
+
+**Solutions:**
+1. Check `DocsSearchBar` component is in navigation
+2. Verify docs are being passed to the component
+3. Check browser console for errors
+4. Ensure search modal is rendering correctly
+
+## Navigation Issues
+
+### Issue: Sidebar not showing
+
+**Solutions:**
+1. Check `DocsSidebar` component is in the page
+2. Verify docs are being passed correctly
+3. Check for JavaScript errors in console
+4. Ensure the component is not hidden on mobile (it's hidden by default on small screens)
+
+### Issue: Links not working
+
+**Solutions:**
+1. Verify URLs are correct (start with `/docs/` or `/blog/`)
+2. Check the file exists at that path
+3. Ensure frontmatter is correct
+4. Check for typos in URLs
+
+## Deployment Issues
+
+### Issue: Build fails on deployment
+
+**Solutions:**
+1. Check build logs for errors
+2. Verify all dependencies are in `package.json`
+3. Check Node.js version matches (20.19.4)
+4. Ensure environment variables are set
+5. Check for missing files or assets
+
+### Issue: Static generation errors
+
+**Solutions:**
+1. Check `generateStaticParams` functions
+2. Verify all content files are valid
+3. Check for missing required fields
+4. Ensure all paths are correct
+
+## Performance Issues
+
+### Issue: Slow page loads
+
+**Solutions:**
+1. Optimize images (compress, use appropriate formats)
+2. Check for large dependencies
+3. Enable Next.js optimizations
+4. Use static generation where possible
+5. Check bundle size: `yarn build`
+
+## Getting More Help
+
+If you're still experiencing issues:
+
+1. Check the [Next.js Documentation](https://nextjs.org/docs)
+2. Check the [Contentlayer Documentation](https://www.contentlayer.dev/)
+3. Review the [Guide Overview](/docs/guide/overview) for examples
+4. Check existing content files for reference
+5. Review browser console for errors
+
+## Common Mistakes
+
+1. **Missing frontmatter**: Every file needs frontmatter
+2. **Incorrect YAML syntax**: Use proper indentation
+3. **Wrong file location**: Files must be in `content/docs/` or `content/blog/`
+4. **Invalid MDX syntax**: Check for unclosed tags or code blocks
+5. **Missing dependencies**: Run `yarn install` after adding new packages
+
+## Still Need Help?
+
+If you've tried all the solutions above and still have issues:
+
+1. Check the error messages carefully
+2. Review the relevant section in this guide
+3. Look at working examples in existing content
+4. Check the component source code for usage examples
+
+

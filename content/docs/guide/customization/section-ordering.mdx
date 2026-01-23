@@ -1,0 +1,257 @@
+---
+title: Documentation Ordering System
+description: Complete guide to controlling the order of sections, subsections, and documents
+publishedAt: 2024-01-01
+order: 2
+---
+
+# Documentation Ordering System
+
+The documentation uses a **global ordering system** that gives you complete control over how sections, subsections, and individual documents are displayed in the sidebar and navigation.
+
+## Overview
+
+The ordering system has three levels:
+
+1. **Section Order** - Controls the order of top-level sections (e.g., "Guide", "Knowledge Base")
+2. **Subsection Order** - Controls the order of subsections within each section
+3. **Document Order** - Controls the order of individual documents within subsections
+
+## How It Works
+
+### 1. Section and Subsection Ordering
+
+Section and subsection ordering is configured in `config/docs-order.config.ts`:
+
+```typescript
+export const docsOrderConfig: DocsOrderConfig = {
+  // Top-level sections order
+  sections: [
+    'guide',
+    'knowledge-base',
+  ],
+  
+  // Subsection order within each section
+  subsections: {
+    'guide': [
+      'overview',
+      'getting-started',
+      'adding-content',
+      'features',
+      'customization',
+      'deployment',
+    ],
+    'knowledge-base': [
+      'overview',
+      'foundations',
+      'platforms',
+      'projects',
+      'architectures',
+      'cicd',
+      'cloud',
+      'toolbox',
+      'notes-and-deep-dives',
+    ],
+  },
+}
+```
+
+### 2. Document Ordering
+
+Document ordering is set using the `order` field in each document's frontmatter:
+
+```mdx
+---
+title: My Document
+description: Description of my document
+publishedAt: 2024-01-01
+order: 1
+---
+```
+
+**Lower numbers appear first.** Documents without an `order` field will be sorted alphabetically at the end.
+
+## Setting Up Ordering
+
+### Step 1: Configure Section/Subsection Order
+
+Edit `config/docs-order.config.ts`:
+
+```typescript
+export const docsOrderConfig: DocsOrderConfig = {
+  sections: [
+    'guide',           // First section
+    'knowledge-base',  // Second section
+    'api',             // Third section (if you add it)
+  ],
+  
+  subsections: {
+    'guide': [
+      'overview',        // First subsection
+      'getting-started', // Second subsection
+      'features',        // Third subsection
+    ],
+    // Add more sections as needed
+  },
+}
+```
+
+### Step 2: Add Order to Documents
+
+Add the `order` field to each document's frontmatter:
+
+```mdx
+---
+title: Getting Started
+description: Quick start guide
+publishedAt: 2024-01-01
+order: 1  # This document appears first in its subsection
+---
+```
+
+## Examples
+
+### Example 1: Ordering Documents in a Subsection
+
+If you have a "Features" subsection with multiple documents:
+
+```mdx
+---
+title: Features Overview
+publishedAt: 2024-01-01
+order: 1  # Appears first
+---
+
+---
+title: Callouts
+publishedAt: 2024-01-01
+order: 2  # Appears second
+---
+
+---
+title: Code Blocks
+publishedAt: 2024-01-01
+order: 5  # Appears fifth
+---
+```
+
+### Example 2: Adding a New Section
+
+1. **Add to section order** in `config/docs-order.config.ts`:
+
+```typescript
+sections: [
+  'guide',
+  'knowledge-base',
+  'api',  // New section
+],
+```
+
+2. **Add subsection order** (if needed):
+
+```typescript
+subsections: {
+  'api': [
+    'overview',
+    'authentication',
+    'endpoints',
+  ],
+},
+```
+
+3. **Add order to documents**:
+
+```mdx
+---
+title: API Overview
+publishedAt: 2024-01-01
+order: 1
+---
+```
+
+## Best Practices
+
+1. **Start with order 1** - Use 1, 2, 3... for sequential ordering
+2. **Leave gaps** - Use 10, 20, 30... if you might add documents in between later
+3. **Always set order for overview pages** - Overview pages should typically be `order: 1`
+4. **Update the config file** - When adding new sections/subsections, update `config/docs-order.config.ts`
+5. **Be consistent** - Use the same ordering pattern across all subsections
+
+## How Ordering Affects Navigation
+
+The ordering system affects:
+
+- ✅ **Sidebar Display** - Documents appear in the specified order
+- ✅ **Prev/Next Navigation** - Navigation buttons follow the same order
+- ✅ **Document Listing** - The main docs page respects ordering
+
+## Troubleshooting
+
+### Documents Not Appearing in Order
+
+1. **Check the order field** - Make sure `order` is set in frontmatter
+2. **Check the config file** - Verify section/subsection order in `config/docs-order.config.ts`
+3. **Rebuild the site** - Run `yarn build` to regenerate content
+
+### New Section Not Appearing
+
+1. **Add to sections array** - Add the section name to `sections` in `config/docs-order.config.ts`
+2. **Add subsection order** - If the section has subsections, add them to `subsections`
+3. **Rebuild** - Run `yarn build`
+
+### Documents Without Order
+
+Documents without an `order` field will be sorted alphabetically by title at the end of their subsection.
+
+## Complete Example
+
+Here's a complete example of setting up ordering for a new section:
+
+**1. Update `config/docs-order.config.ts`:**
+
+```typescript
+export const docsOrderConfig: DocsOrderConfig = {
+  sections: [
+    'guide',
+    'knowledge-base',
+    'tutorials',  // New section
+  ],
+  
+  subsections: {
+    'tutorials': [
+      'overview',
+      'beginner',
+      'intermediate',
+      'advanced',
+    ],
+  },
+}
+```
+
+**2. Create documents with order:**
+
+```mdx
+---
+title: Tutorials Overview
+publishedAt: 2024-01-01
+order: 1
+---
+
+---
+title: Getting Started Tutorial
+publishedAt: 2024-01-01
+order: 1
+---
+
+---
+title: Advanced Techniques
+publishedAt: 2024-01-01
+order: 1
+---
+```
+
+## Next Steps
+
+- [Adding Documentation](/docs/guide/adding-content/documentation) - Learn how to add new documents
+- [Styling](/docs/guide/customization/styling) - Customize appearance
+- [Navigation](/docs/guide/customization/navigation) - Update navigation

@@ -1,0 +1,50 @@
+---
+title: Platforms
+description: How to run Kubernetes and infrastructure - real setups, commands, and gotchas
+publishedAt: 2024-01-01
+order: 1
+
+---
+
+# Platforms
+
+This section documents how to run Kubernetes and infrastructure. Here you'll find real setups, commands, errors, gotchas, and actual working configurations.
+
+## What's Covered
+
+- **Kubernetes Platforms**: k3s, kubeadm, RKE, Rancher, managed K8s (EKS, GKE, AKS)
+- **Setup Methods**: From scratch, HA control plane, networking, upgrades
+- **Real-World Configurations**: Actual working setups with all the details
+
+## Structure
+
+```
+platforms/
+├── kubernetes
+│   ├── k3s
+│   │   ├── setup-multipass
+│   │   ├── setup-proxmox
+│   │   ├── networking
+│   │   └── upgrades
+│   ├── kubeadm
+│   │   ├── from-scratch
+│   │   ├── ha-control-plane
+│   │   └── etcd
+│   ├── rke
+│   ├── rancher
+│   └── managed-k8s
+│       ├── eks
+│       ├── gke
+│       └── aks
+```
+
+## Documentation Style
+
+Each platform guide includes:
+- Commands
+- Errors and solutions
+- Gotchas
+- Real setups
+- Troubleshooting
+
+

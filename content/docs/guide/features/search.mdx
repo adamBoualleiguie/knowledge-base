@@ -1,0 +1,74 @@
+---
+title: Global Search
+description: Complete guide to the global search functionality
+publishedAt: 2024-01-01
+order: 7
+
+---
+
+# Global Search
+
+The documentation includes a global search bar that allows users to quickly find documentation pages across the entire site.
+
+## Overview
+
+The search bar is available in the top navigation menu site-wide and provides real-time search results as you type.
+
+## Features
+
+- ✅ **Always Visible**: Search bar is available in the top navigation menu site-wide
+- ✅ **Real-Time Search**: Results update as you type (debounced for performance)
+- ✅ **Keyboard Shortcut**: Press `⌘K` (Mac) or `Ctrl+K` (Windows/Linux) to open search
+- ✅ **Centered Modal**: Search modal appears centered on the screen
+- ✅ **Keyboard Navigation**: Use arrow keys to navigate results, Enter to select
+- ✅ **Escape to Close**: Press Escape or click outside to close
+
+## How to Use
+
+1. **Click the search icon** in the navigation bar or press `⌘K` / `Ctrl+K`
+2. **Type your search query** - results appear in real-time
+3. **Navigate results** with arrow keys or mouse
+4. **Click or press Enter** to navigate to a result
+5. **Press Escape** or click outside to close
+
+## Search Results
+
+Results show:
+- **Title**: The document title
+- **Path**: Breadcrumb showing the document location (e.g., `docs › api › endpoints`)
+
+## Search Behavior
+
+- **Searches**: Page titles, headings, and slugs/paths
+- **Debounced**: Input is debounced (150-300ms) for performance
+- **No Backend Required**: All search is done client-side
+- **Case Insensitive**: Search is case-insensitive
+
+## Example
+
+When you type "installation", you might see:
+- Installation Overview (`docs › installation › overview`)
+- Installation Prerequisites (`docs › installation › prerequisites`)
+- Installation Setup (`docs › installation › setup`)
+
+## Tips
+
+- Use specific keywords for better results
+- Search works across all documentation sections
+- Results are sorted by relevance
+- The search includes all documentation pages
+
+## Keyboard Shortcuts
+
+- **`⌘K` / `Ctrl+K`**: Open search
+- **`↑` / `↓`**: Navigate results
+- **`Enter`**: Select result
+- **`Escape`**: Close search
+
+## Next Steps
+
+- [Table of Contents](/docs/guide/features/table-of-contents) - Learn about auto-generated TOC
+- [Adding Documentation](/docs/guide/adding-content/documentation) - Learn how to add docs
+- [Features Overview](/docs/guide/features/overview) - See all features
+
+

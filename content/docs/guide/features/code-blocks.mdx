@@ -1,0 +1,455 @@
+---
+title: Code Blocks
+description: Complete guide to enhanced code blocks with syntax highlighting
+publishedAt: 2024-01-01
+order: 5
+
+---
+
+# Code Blocks
+
+Enhanced code blocks with syntax highlighting, copy functionality, and beautiful formatting.
+
+## Overview
+
+Code blocks automatically provide syntax highlighting for all major programming languages, along with a copy button and language badge.
+
+## Features
+
+- ✅ **Syntax Highlighting**: Beautiful color-coded syntax for all languages
+- ✅ **Copy Button**: One-click copy to clipboard (appears on hover)
+- ✅ **Line Numbers**: Optional line numbers for easier reference
+- ✅ **Language Badge**: Shows the programming language
+- ✅ **Filename Support**: Display filename above code block
+- ✅ **Dark Theme**: Beautiful dark theme matching your site
+- ✅ **Responsive**: Works perfectly on all screen sizes
+
+## Basic Usage
+
+Use standard markdown code fences:
+
+````mdx
+```javascript
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+```
+````
+
+## Supported Languages
+
+The code blocks support **all major programming languages** including:
+
+- **Shell/Bash**: `bash`, `sh`, `zsh`
+- **YAML**: `yaml`, `yml`
+- **JSON**: `json`
+- **JavaScript/TypeScript**: `javascript`, `js`, `typescript`, `ts`, `tsx`, `jsx`
+- **Java**: `java`
+- **C/C++**: `c`, `cpp`, `c++`
+- **Python**: `python`, `py`
+- **Go**: `go`
+- **Rust**: `rust`, `rs`
+- **Ruby**: `ruby`, `rb`
+- **PHP**: `php`
+- **SQL**: `sql`
+- **HTML/CSS**: `html`, `css`
+- **Docker**: `dockerfile`, `docker`
+- **Kubernetes**: `yaml` (with k8s context)
+- And **many more**!
+
+## Examples
+
+### JavaScript
+
+**MDX Syntax:**
+````mdx
+```javascript
+function calculateTotal(items) {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+const total = calculateTotal([
+  { name: 'Apple', price: 1.50 },
+  { name: 'Banana', price: 0.75 }
+]);
+
+console.log(`Total: $${total}`);
+```
+````
+
+**Rendered Result:**
+
+```javascript
+function calculateTotal(items) {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+const total = calculateTotal([
+  { name: 'Apple', price: 1.50 },
+  { name: 'Banana', price: 0.75 }
+]);
+
+console.log(`Total: $${total}`);
+```
+
+### TypeScript
+
+**MDX Syntax:**
+````mdx
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+function getUser(id: number): Promise<User> {
+  return fetch(`/api/users/${id}`)
+    .then(response => response.json());
+}
+```
+````
+
+**Rendered Result:**
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+function getUser(id: number): Promise<User> {
+  return fetch(`/api/users/${id}`)
+    .then(response => response.json());
+}
+```
+
+### Bash/Shell
+
+**MDX Syntax:**
+````mdx
+```bash
+#!/bin/bash
+
+# Install dependencies
+yarn install
+
+# Start development server
+yarn dev
+
+# Run tests
+yarn test
+```
+````
+
+**Rendered Result:**
+
+```bash
+#!/bin/bash
+
+# Install dependencies
+yarn install
+
+# Start development server
+yarn dev
+
+# Run tests
+yarn test
+```
+
+### YAML
+
+**MDX Syntax:**
+````mdx
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: app
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+```
+````
+
+**Rendered Result:**
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: app
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+```
+
+### JSON
+
+**MDX Syntax:**
+````mdx
+```json
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0"
+  }
+}
+```
+````
+
+**Rendered Result:**
+
+```json
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0"
+  }
+}
+```
+
+### Python
+
+**MDX Syntax:**
+````mdx
+```python
+def calculate_fibonacci(n):
+    """Calculate the nth Fibonacci number."""
+    if n <= 1:
+        return n
+    return calculate_fibonacci(n - 1) + calculate_fibonacci(n - 2)
+
+# Example usage
+result = calculate_fibonacci(10)
+print(f"Fibonacci(10) = {result}")
+```
+````
+
+**Rendered Result:**
+
+```python
+def calculate_fibonacci(n):
+    """Calculate the nth Fibonacci number."""
+    if n <= 1:
+        return n
+    return calculate_fibonacci(n - 1) + calculate_fibonacci(n - 2)
+
+# Example usage
+result = calculate_fibonacci(10)
+print(f"Fibonacci(10) = {result}")
+```
+
+### Java
+
+**MDX Syntax:**
+````mdx
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+        
+        int sum = add(5, 3);
+        System.out.println("Sum: " + sum);
+    }
+    
+    public static int add(int a, int b) {
+        return a + b;
+    }
+}
+```
+````
+
+**Rendered Result:**
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+        
+        int sum = add(5, 3);
+        System.out.println("Sum: " + sum);
+    }
+    
+    public static int add(int a, int b) {
+        return a + b;
+    }
+}
+```
+
+### C
+
+**MDX Syntax:**
+````mdx
+```c
+#include <stdio.h>
+
+int main() {
+    int numbers[] = {1, 2, 3, 4, 5};
+    int sum = 0;
+    
+    for (int i = 0; i < 5; i++) {
+        sum += numbers[i];
+    }
+    
+    printf("Sum: %d\n", sum);
+    return 0;
+}
+```
+````
+
+**Rendered Result:**
+
+```c
+#include <stdio.h>
+
+int main() {
+    int numbers[] = {1, 2, 3, 4, 5};
+    int sum = 0;
+    
+    for (int i = 0; i < 5; i++) {
+        sum += numbers[i];
+    }
+    
+    printf("Sum: %d\n", sum);
+    return 0;
+}
+```
+
+### Go
+
+**MDX Syntax:**
+````mdx
+```go
+package main
+
+import "fmt"
+
+func main() {
+    message := "Hello, World!"
+    fmt.Println(message)
+    
+    numbers := []int{1, 2, 3, 4, 5}
+    sum := 0
+    for _, num := range numbers {
+        sum += num
+    }
+    fmt.Printf("Sum: %d\n", sum)
+}
+```
+````
+
+**Rendered Result:**
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    message := "Hello, World!"
+    fmt.Println(message)
+    
+    numbers := []int{1, 2, 3, 4, 5}
+    sum := 0
+    for _, num := range numbers {
+        sum += num
+    }
+    fmt.Printf("Sum: %d\n", sum)
+}
+```
+
+## With Filename
+
+You can display a filename above the code block:
+
+**MDX Syntax:**
+````mdx
+```javascript:app.js
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+```
+````
+
+**Rendered Result:**
+
+```javascript:app.js
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+```
+
+**Format**: ` ```language:filename` 
+
+## Copy Functionality
+
+- **Hover over any code block** to see the copy button
+- **Click to copy** the entire code block
+- **Visual feedback** when code is copied
+- **Works on all devices** including mobile
+
+## Best Practices
+
+1. **Always specify language**: Helps with syntax highlighting
+2. **Use descriptive code**: Add comments when needed
+3. **Keep blocks focused**: Don't make code blocks too long
+4. **Use filenames**: When showing file contents, include filename
+5. **Test your code**: Make sure code examples actually work
+6. **Format properly**: Use proper indentation and formatting
+
+## Code Block Styling
+
+Code blocks automatically:
+- Use monospace font (JetBrains Mono)
+- Apply dark theme (github-dark)
+- Show proper indentation
+- Handle long lines with horizontal scroll
+- Maintain proper spacing
+- Display line numbers
+
+## Inline Code
+
+For inline code, use single backticks:
+
+```mdx
+You can reference files like `config.json` or functions like `calculateTotal()`.
+```
+
+Inline code is styled with:
+- Distinct background color
+- Monospace font
+- Proper padding
+- Theme-aware colors
+
+## Next Steps
+
+- [Images & Videos](/docs/guide/features/images-videos) - Learn about media components
+- [Tabbed Content](/docs/guide/features/tabbed-content) - Learn about multi-tab sections
+- [Callout Components](/docs/guide/features/callouts) - Learn about styled information boxes
+

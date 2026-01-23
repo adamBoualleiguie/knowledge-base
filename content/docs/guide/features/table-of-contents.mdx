@@ -1,0 +1,97 @@
+---
+title: Table of Contents
+description: Complete guide to the auto-generated table of contents
+publishedAt: 2024-01-01
+order: 8
+
+---
+
+# Table of Contents
+
+The "ON THIS PAGE" sidebar automatically extracts headings from your document content and creates a table of contents.
+
+## Overview
+
+The table of contents appears on the right side of documentation pages and automatically updates as you scroll, highlighting the current section.
+
+## Features
+
+- ✅ **Automatic Extraction**: Headings (H2, H3, H4) are automatically extracted from your MDX content
+- ✅ **Hierarchical Display**: Headings are shown with proper indentation based on level
+- ✅ **Smooth Scrolling**: Clicking a heading smoothly scrolls to that section
+- ✅ **Active Highlighting**: The current section is highlighted as you scroll
+- ✅ **Dynamic Updates**: Updates when switching tabs in tabbed content
+- ✅ **Excludes Callouts**: Headings inside callout components are excluded
+
+## What Gets Displayed
+
+- ✅ **H2 Headings** (##): Main sections - shown in bold
+- ✅ **H3 Headings** (###): Subsections - indented
+- ✅ **H4 Headings** (####): Sub-subsections - more indented
+- ❌ **H1 Headings** (#): Page title - excluded from TOC
+- ❌ **Code Examples**: Headings in code blocks are ignored
+- ❌ **Callout Headings**: Headings inside callout components are excluded
+- ❌ **Tab Content**: Headings in inactive tabs are excluded (active tab headings are included)
+
+## Example
+
+For a document with these headings:
+
+```mdx
+# Page Title (not in TOC)
+
+## Installation
+### Prerequisites
+### Steps
+
+## Configuration
+### Basic Setup
+### Advanced Options
+```
+
+The TOC will show:
+- **Installation** (H2 - bold)
+  - Prerequisites (H3 - indented)
+  - Steps (H3 - indented)
+- **Configuration** (H2 - bold)
+  - Basic Setup (H3 - indented)
+  - Advanced Options (H3 - indented)
+
+## How It Works
+
+1. **On Page Load**: Headings are automatically extracted from the rendered content
+2. **As You Scroll**: The active heading is highlighted based on scroll position
+3. **On Tab Switch**: If you have tabbed content, the TOC updates when you switch tabs
+4. **On Content Change**: The TOC automatically updates if content changes dynamically
+
+## Best Practices
+
+1. **Use H2 for main sections**: These appear as top-level items in the TOC
+2. **Use H3 for subsections**: These appear indented under H2 headings
+3. **Use H4 for deeper nesting**: These appear more indented
+4. **Avoid using H1 in content**: It's reserved for the page title
+5. **Structure logically**: Use a clear hierarchy for better navigation
+6. **Keep headings descriptive**: Help users understand what each section covers
+
+## Tips
+
+- The TOC automatically appears on documentation pages
+- It's positioned on the right side of the content
+- It's sticky and stays visible as you scroll
+- Click any heading to jump to that section
+- The active section is highlighted with a colored indicator
+
+## Visual Indicator
+
+The active heading in the TOC has:
+- A colored vertical line on the left
+- Bold text
+- Active color highlighting
+
+## Next Steps
+
+- [Adding Documentation](/docs/guide/adding-content/documentation) - Learn how to structure content
+- [Tabbed Content](/docs/guide/features/tabbed-content) - Learn about tabs and TOC integration
+- [Features Overview](/docs/guide/features/overview) - See all features
+
+

@@ -1,0 +1,269 @@
+---
+title: Adding Blog Posts
+description: Complete guide to adding blog posts with examples
+publishedAt: 2024-01-01
+order: 3
+
+---
+
+# Adding Blog Posts
+
+Complete guide to adding blog posts to your portfolio website.
+
+## Understanding Blog Posts
+
+Blog posts are displayed chronologically with tags, dates, and descriptions. They appear on the blog listing page and can be featured on the homepage.
+
+## Step 1: Create a Blog Post File
+
+Create a new `.mdx` file in the `content/blog/` directory:
+
+```bash
+touch content/blog/my-first-post.mdx
+```
+
+**URL**: The file name becomes the URL slug
+- `content/blog/my-first-post.mdx` → `/blog/my-first-post`
+
+## Step 2: Add Frontmatter
+
+Blog posts require frontmatter with metadata:
+
+```mdx
+---
+title: My First Blog Post
+description: A brief description that appears in listings
+publishedAt: 2024-01-15
+
+updatedAt: 2024-01-20  # Optional
+author: Your Name  # Optional
+tags: [web-development, nextjs, tutorial]  # Optional array
+---
+```
+
+### Required Fields
+
+- **`title`**: Blog post title
+- **`description`**: Brief description (appears in listings)
+- **`publishedAt`**: Publication date (YYYY-MM-DD format)
+
+### Optional Fields
+
+- **`updatedAt`**: Last update date (YYYY-MM-DD format)
+- **`author`**: Author name
+- **`tags`**: Array of tags for categorization
+
+## Step 3: Write Your Blog Post
+
+Write your content using Markdown or MDX:
+
+```mdx
+---
+title: Building a Modern Portfolio
+description: How I built my portfolio website with Next.js
+publishedAt: 2024-01-15
+
+author: Your Name
+tags: [nextjs, web-development, portfolio]
+---
+
+# Building a Modern Portfolio
+
+This is my blog post about building a portfolio website...
+
+## Introduction
+
+Here's the introduction to my blog post. I'll explain what I'm going to cover.
+
+## Main Content
+
+More content here with **bold text**, *italic text*, and `inline code`.
+
+### Code Example
+
+```javascript
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+```
+
+### Lists
+
+- First item
+- Second item
+- Third item
+
+## Conclusion
+
+This is the conclusion of my blog post.
+```
+
+## Complete Example
+
+Here's a complete example blog post:
+
+```mdx
+---
+title: Getting Started with Next.js 14
+description: A comprehensive guide to building modern web applications with Next.js 14
+publishedAt: 2024-01-15
+
+updatedAt: 2024-01-20
+author: John Doe
+tags: [nextjs, react, web-development, tutorial]
+---
+
+# Getting Started with Next.js 14
+
+Next.js 14 brings exciting new features and improvements. In this post, I'll walk you through getting started with the latest version.
+
+## Introduction
+
+Next.js is a React framework that enables you to build full-stack web applications. Version 14 introduces the App Router, Server Components, and many performance improvements.
+
+## What's New in Next.js 14
+
+### App Router
+
+The App Router is now stable and provides a new way to structure your application:
+
+```typescript
+// app/page.tsx
+export default function Home() {
+  return <h1>Hello, Next.js 14!</h1>
+}
+```
+
+### Server Components
+
+Server Components allow you to render components on the server:
+
+```typescript
+// app/components/ServerComponent.tsx
+export default async function ServerComponent() {
+  const data = await fetch('https://api.example.com/data')
+  return <div>{/* Render data */}</div>
+}
+```
+
+## Getting Started
+
+### Installation
+
+```bash
+npx create-next-app@latest my-app
+cd my-app
+npm run dev
+```
+
+### Project Structure
+
+```
+my-app/
+├── app/
+│   ├── page.tsx
+│   ├── layout.tsx
+│   └── components/
+├── public/
+└── package.json
+```
+
+## Best Practices
+
+1. Use Server Components by default
+2. Leverage the App Router for better performance
+3. Optimize images with Next.js Image component
+4. Use TypeScript for type safety
+
+## Conclusion
+
+Next.js 14 is a powerful framework for building modern web applications. The new features make it easier than ever to create fast, scalable applications.
+
+## Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Next.js GitHub](https://github.com/vercel/next.js)
+- [Next.js Blog](https://nextjs.org/blog)
+```
+
+## Organizing Blog Posts
+
+You can organize blog posts in subfolders:
+
+```
+content/blog/
+├── 2024/
+│   ├── january/
+│   │   └── my-post.mdx
+│   └── february/
+│       └── another-post.mdx
+└── 2023/
+    └── december/
+        └── old-post.mdx
+```
+
+**URL Structure:**
+- `content/blog/2024/january/my-post.mdx` → `/blog/2024/january/my-post`
+
+## Using Features in Blog Posts
+
+You can use all the same features as documentation:
+
+### Callouts
+
+```mdx
+<Callout type="info" title="Tip">
+This is a helpful tip for readers.
+</Callout>
+```
+
+### Code Blocks
+
+````mdx
+```javascript
+function example() {
+  return "Hello, World!";
+}
+```
+````
+
+### Images
+
+```mdx
+<DocImage
+  src="/assets/blog/images/screenshot.png"
+  alt="Screenshot"
+  caption="This is a screenshot"
+/>
+```
+
+### Videos
+
+```mdx
+<DocVideo
+  src="/assets/blog/videos/demo.mp4"
+  caption="Demo video"
+  controls
+/>
+```
+
+## Best Practices
+
+1. **Write engaging descriptions**: They appear in listings
+2. **Use tags**: Categorize your posts for better organization
+3. **Include dates**: Help readers understand when content was published
+4. **Use headings**: Structure long posts with headings
+5. **Add examples**: Include code examples and screenshots
+6. **Link to related content**: Connect to other posts or documentation
+
+## Display on Homepage
+
+The latest blog posts automatically appear on the homepage. The number of posts shown can be customized in `app/page.tsx`.
+
+## Next Steps
+
+- [Adding Documentation](/docs/guide/adding-content/documentation) - Learn about documentation
+- [Using Features](/docs/guide/features/overview) - Learn about all features
+- [Customization](/docs/guide/customization/overview) - Customize your site
+
+

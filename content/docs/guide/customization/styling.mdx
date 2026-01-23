@@ -1,0 +1,162 @@
+---
+title: Colors & Styling
+description: How to customize colors, fonts, and overall appearance
+publishedAt: 2024-01-01
+order: 3
+
+---
+
+# Colors & Styling
+
+Complete guide to customizing the colors, fonts, and overall appearance of your portfolio website.
+
+## Color Scheme
+
+Colors are defined in `app/globals.css` using CSS variables.
+
+### Primary Colors
+
+The primary color is used for links, buttons, and highlights:
+
+```css
+:root {
+  --primary: 18 100% 55%;  /* Light mode: #FF5E19 */
+  --primary-foreground: 0 0% 100%;
+}
+
+.dark {
+  --primary: 18 100% 60%;  /* Dark mode: #FF5E19 */
+  --primary-foreground: 0 0% 100%;
+}
+```
+
+### Background Colors
+
+```css
+:root {
+  --background: 0 0% 100%;  /* Light mode: white */
+  --foreground: 222.2 84% 4.9%;  /* Light mode: dark text */
+}
+
+.dark {
+  --background: 0 0% 0%;  /* Dark mode: black */
+  --foreground: 210 13% 81%;  /* Dark mode: light text */
+}
+```
+
+### Customizing Colors
+
+To change colors, edit `app/globals.css`:
+
+1. **Find the color variable** you want to change
+2. **Update the HSL values** (Hue, Saturation, Lightness)
+3. **Save and rebuild**
+
+Example: Change primary color to blue:
+
+```css
+:root {
+  --primary: 221.2 83.2% 53.3%;  /* Blue */
+}
+```
+
+## Typography
+
+### Fonts
+
+Fonts are configured in `app/layout.tsx`:
+
+```tsx
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'] })
+```
+
+To change fonts:
+
+1. **Import a different font** from `next/font/google`
+2. **Update the font variable**
+3. **Apply to the body element**
+
+Example: Use Roboto instead of Inter:
+
+```tsx
+import { Roboto } from 'next/font/google'
+
+const roboto = Roboto({ 
+  weight: ['400', '500', '700'],
+  subsets: ['latin'] 
+})
+```
+
+### Font Sizes
+
+Font sizes use Tailwind's default scale. To customize:
+
+1. **Edit `tailwind.config.js`**
+2. **Extend the fontSize**:
+
+```js
+module.exports = {
+  theme: {
+    extend: {
+      fontSize: {
+        'xs': '0.75rem',
+        'sm': '0.875rem',
+        'base': '1rem',
+        'lg': '1.125rem',
+        'xl': '1.25rem',
+        // ... add custom sizes
+      },
+    },
+  },
+}
+```
+
+## Tailwind Configuration
+
+Customize Tailwind in `tailwind.config.js`:
+
+```js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        // Add custom colors
+        'custom-blue': '#3b82f6',
+      },
+      fontFamily: {
+        // Add custom fonts
+        'custom': ['Custom Font', 'sans-serif'],
+      },
+      spacing: {
+        // Add custom spacing
+        '128': '32rem',
+      },
+    },
+  },
+}
+```
+
+## Dark Mode
+
+Dark mode is handled by `next-themes`. The theme automatically switches based on:
+
+1. **System preference** (default)
+2. **User selection** (via theme toggle)
+
+To customize dark mode colors, edit the `.dark` class styles in `app/globals.css`.
+
+## Best Practices
+
+1. **Use CSS variables**: Makes it easy to change colors globally
+2. **Test both themes**: Ensure colors work in light and dark mode
+3. **Maintain contrast**: Ensure text is readable on backgrounds
+4. **Be consistent**: Use the same colors throughout the site
+
+## Next Steps
+
+- [Navigation](/docs/guide/customization/navigation) - Update navigation
+- [Homepage](/docs/guide/customization/homepage) - Customize homepage
+
+

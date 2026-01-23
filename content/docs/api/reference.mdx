@@ -1,0 +1,63 @@
+---
+title: API Reference
+description: Complete API reference documentation
+publishedAt: 2024-01-03
+---
+
+# API Reference
+
+Complete reference for all APIs and components.
+
+## Components
+
+### Navigation
+
+The main navigation component.
+
+```tsx
+import { Navigation } from '@/components/Navigation'
+
+<Navigation />
+```
+
+### Footer
+
+The footer component.
+
+```tsx
+import { Footer } from '@/components/Footer'
+
+<Footer />
+```
+
+## Content Types
+
+### Doc
+
+Documentation content type from Contentlayer.
+
+```typescript
+{
+  title: string
+  description?: string
+  publishedAt: string
+  updatedAt?: string
+}
+```
+
+### Blog
+
+Blog post content type from Contentlayer.
+
+```typescript
+{
+  title: string
+  description: string
+  publishedAt: string
+  updatedAt?: string
+  author?: string
+  tags?: string[]
+}
+```
+
+

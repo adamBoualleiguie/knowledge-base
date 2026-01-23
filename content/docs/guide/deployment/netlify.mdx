@@ -1,0 +1,68 @@
+---
+title: Deploy to Netlify
+description: Step-by-step guide to deploying to Netlify
+publishedAt: 2024-01-01
+order: 3
+
+---
+
+# Deploy to Netlify
+
+Guide to deploying your portfolio website to Netlify.
+
+## Step 1: Push to GitHub
+
+1. **Create a GitHub repository**
+2. **Push your code**:
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/yourusername/yourrepo.git
+git push -u origin main
+```
+
+## Step 2: Import to Netlify
+
+1. **Go to [netlify.com](https://netlify.com)**
+2. **Sign in** with your GitHub account
+3. **Click "Add new site" → "Import an existing project"**
+4. **Select your repository**
+
+## Step 3: Configure Build Settings
+
+Set the build settings:
+
+- **Build command**: `yarn build`
+- **Publish directory**: `.next`
+- **Install command**: `yarn install`
+
+## Step 4: Deploy
+
+1. **Click "Deploy site"**
+2. **Wait for build** to complete
+3. **Your site is live!**
+
+## Environment Variables
+
+If you need environment variables:
+
+1. **Go to Site Settings**
+2. **Click "Environment variables"**
+3. **Add your variables**
+
+## Custom Domain
+
+To add a custom domain:
+
+1. **Go to Site Settings**
+2. **Click "Domain management"**
+3. **Add your domain**
+4. **Follow DNS instructions**
+
+## Next Steps
+
+- [Static Export](/docs/guide/deployment/static-export) - Deploy as static files
+
+

@@ -1,0 +1,246 @@
+---
+title: Metadata Card
+description: Display author, read time, last updated, and tags in a sidebar card
+publishedAt: 2024-01-01
+order: 8
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Metadata Card
+
+The Metadata Card is a sidebar component that displays important information about your blog posts and documentation pages, including author, read time, last updated date, and tags.
+
+## Overview
+
+The Metadata Card provides readers with quick access to key information about your content:
+
+- **Author** - Who wrote the content (with optional profile photo)
+- **Read Time** - Estimated reading time (automatically calculated)
+- **Last Updated** - When the content was last modified
+- **Tags** - Relevant tags for categorization
+
+## Blog Posts
+
+Metadata cards are **automatically displayed** on all blog posts. The card appears on the right side of the page (on desktop) and includes all available metadata.
+
+### Example Blog Post Frontmatter
+
+```mdx
+---
+title: Building a Modern Portfolio Website
+description: Learn how I built this portfolio website using Next.js and Contentlayer
+publishedAt: 2024-01-20
+updatedAt: 2024-01-25
+author: Your Name
+authorPhoto: your-name.jpg
+tags: [nextjs, web-development, portfolio]
+---
+```
+
+The metadata card will automatically show:
+- Author: "Your Name" (with circular profile photo if provided)
+- Read Time: Calculated from content (e.g., "5 min read")
+- Last Updated: "Jan 25, 2024"
+- Tags: nextjs, web-development, portfolio
+
+## Documentation Pages
+
+For documentation pages, metadata cards are **optional** and can be enabled per document using the `showMetadata` field in the frontmatter.
+
+### Enabling Metadata Card in Docs
+
+Add `showMetadata: true` to your document's frontmatter:
+
+```mdx
+---
+title: Getting Started Guide
+description: A comprehensive guide to getting started
+publishedAt: 2024-01-01
+updatedAt: 2024-01-15
+author: Your Name
+tags: [guide, tutorial, getting-started]
+showMetadata: true
+---
+```
+
+### Disabling Metadata Card
+
+By default, metadata cards are **hidden** in documentation. If you don't want to show the metadata card, simply omit the `showMetadata` field or set it to `false`:
+
+```mdx
+---
+title: Quick Reference
+description: A quick reference guide
+publishedAt: 2024-01-01
+showMetadata: false
+---
+```
+
+## Available Fields
+
+### Required Fields
+
+- `title` - The title of the content
+- `publishedAt` - Publication date (used for "Last Updated" if `updatedAt` is not provided)
+
+### Optional Fields
+
+- `author` - Author name (string)
+- `authorPhoto` - Path to author profile photo (string)
+  - Can be a full path: `/assets/authors/author.jpg`
+  - Or just the filename: `author.jpg` (will be resolved to `/assets/authors/author.jpg`)
+  - Supported formats: JPG, PNG, WebP
+  - Photo will be displayed as a circular profile picture
+- `updatedAt` - Last update date (if not provided, uses `publishedAt`)
+- `tags` - Array of tags (e.g., `[tag1, tag2, tag3]`)
+- `showMetadata` - Boolean to show/hide metadata card (docs only, defaults to `false`)
+
+## Read Time Calculation
+
+Read time is automatically calculated based on word count:
+- Average reading speed: 200 words per minute
+- Rounded up to the nearest minute
+- Only displayed if greater than 0
+
+## Layout
+
+### Desktop
+
+On desktop screens (≥1024px), the metadata card appears:
+- **Blog posts**: Right side of the content area
+- **Documentation**: Right side, above the Table of Contents (if enabled)
+
+### Mobile/Tablet
+
+On smaller screens, the metadata card is hidden to save space. The information is still available in the page header or can be accessed through other means.
+
+## Author Photos
+
+You can display author profile photos in the metadata card, similar to SigNoz's design. The photo appears as a circular profile picture next to the author name.
+
+### Setting Up Author Photos
+
+1. **Create the directory** (if it doesn't exist):
+   ```
+   public/assets/authors/
+   ```
+
+2. **Add author photos** to this directory:
+   - Use lowercase filenames with hyphens for spaces
+   - Example: `dhruv-ahuja.jpg`, `john-doe.png`
+   - Supported formats: JPG, PNG, WebP
+
+3. **Reference in frontmatter**:
+   ```mdx
+   ---
+   author: Dhruv Ahuja
+   authorPhoto: dhruv-ahuja.jpg
+   ---
+   ```
+
+   Or use a full path:
+   ```mdx
+   ---
+   author: Dhruv Ahuja
+   authorPhoto: /assets/authors/dhruv-ahuja.jpg
+   ---
+   ```
+
+### Photo Display
+
+- Photos are displayed as **circular profile pictures** (40x40px)
+- If no photo is provided, a user icon is shown instead
+- Photos are automatically optimized by Next.js Image component
+- Photos work in both light and dark themes
+
+## Styling
+
+The metadata card features:
+- Clean, card-based design
+- Circular author profile photos (when provided)
+- Icons for each metadata type (fallback when no photo)
+- Responsive layout
+- Sticky positioning (stays visible while scrolling)
+- Consistent with your theme (dark/light mode)
+
+## Examples
+
+### Blog Post with Full Metadata (Including Author Photo)
+
+```mdx
+---
+title: OpenTelemetry Histograms Explained
+description: A detailed guide to OpenTelemetry histograms
+publishedAt: 2024-01-19
+updatedAt: 2024-01-20
+author: Dhruv Ahuja
+authorPhoto: dhruv-ahuja.jpg
+tags: [OpenTelemetry, Metrics, Observability]
+---
+
+# OpenTelemetry Histograms Explained
+
+Your content here...
+```
+
+**Note:** Make sure the author photo file (`dhruv-ahuja.jpg`) exists in `public/assets/authors/` directory.
+
+### Documentation with Metadata (Including Author Photo)
+
+```mdx
+---
+title: API Reference
+description: Complete API reference documentation
+publishedAt: 2024-01-01
+updatedAt: 2024-01-15
+author: Development Team
+authorPhoto: /assets/authors/team.jpg
+tags: [api, reference, documentation]
+showMetadata: true
+---
+
+# API Reference
+
+Your documentation content...
+```
+
+### Documentation without Metadata
+
+```mdx
+---
+title: Quick Start
+description: Get started quickly
+publishedAt: 2024-01-01
+---
+
+# Quick Start
+
+Your documentation content...
+```
+
+## Best Practices
+
+1. **Always include `updatedAt`** - Helps readers know when content was last updated
+2. **Use relevant tags** - Tags help with discoverability and categorization
+3. **Include author information** - Especially useful for team documentation
+4. **Add author photos** - Profile photos make content more personal and professional
+5. **Use consistent naming** - Use lowercase with hyphens for author photo filenames (e.g., `john-doe.jpg`)
+6. **Optimize photos** - Keep author photos small (recommended: 200x200px or less) for faster loading
+7. **Enable selectively in docs** - Only enable `showMetadata` for important or frequently updated documentation pages
+
+## Integration with Other Features
+
+The metadata card works seamlessly with:
+- **Table of Contents** - In docs, appears above the TOC on the right sidebar
+- **Responsive Design** - Automatically hides on mobile devices
+- **Theme System** - Adapts to light/dark mode
+- **Reading Progress** - Positioned to stay visible while scrolling
+
+## Next Steps
+
+- Learn about [Table of Contents](/docs/guide/features/table-of-contents)
+- Explore [Blog Posts](/docs/guide/adding-content/blog-posts)
+- Check out [Documentation Pages](/docs/guide/adding-content/documentation)
+

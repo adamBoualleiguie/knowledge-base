@@ -1,0 +1,395 @@
+---
+title: Images & Videos
+description: Complete guide to displaying images and videos with enhanced features
+publishedAt: 2024-01-01
+order: 6
+
+---
+
+# Images & Videos
+
+Enhanced image and video components with hover effects, fullscreen viewing, and responsive design.
+
+## Overview
+
+You can display images and videos in your documentation with enhanced features like hover-to-zoom, fullscreen-on-click, and automatic aspect ratio maintenance.
+
+## Images
+
+### Basic Usage
+
+Use the `<DocImage>` component:
+
+```mdx
+<DocImage
+  src="/assets/docs/images/screenshot.png"
+  alt="Description of the image"
+  caption="Optional caption text"
+/>
+```
+
+### Component Props
+
+- **`src`** (required): Path to the image (relative to `public/`)
+- **`alt`** (required): Alt text for accessibility
+- **`caption`** (optional): Caption text displayed below the image
+- **`width`** (optional): Image width in pixels
+- **`height`** (optional): Image height in pixels
+
+### Features
+
+- ✅ **Maintains Aspect Ratio**: Images are never flattened or distorted
+- ✅ **Hover Effect**: Images slightly zoom on hover
+- ✅ **Fullscreen View**: Click to view in fullscreen mode
+- ✅ **Responsive**: Automatically adapts to screen size
+- ✅ **Caption Support**: Optional caption below the image
+
+### Examples
+
+#### Basic Image
+
+**MDX Syntax:**
+```mdx
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="Monitoring dashboard"
+/>
+```
+
+**Rendered Result:**
+
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="Monitoring dashboard showing system metrics"
+/>
+
+#### Image with Caption
+
+**MDX Syntax:**
+```mdx
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="Monitoring dashboard"
+  caption="Example monitoring dashboard showing CPU, memory, and network metrics"
+/>
+```
+
+**Rendered Result:**
+
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="Monitoring dashboard"
+  caption="Example monitoring dashboard showing CPU, memory, and network metrics"
+/>
+
+#### Image with Dimensions
+
+**MDX Syntax:**
+```mdx
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="System architecture diagram"
+  caption="Complete system architecture"
+  width={1200}
+  height={800}
+/>
+```
+
+**Rendered Result:**
+
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="System architecture diagram"
+  caption="Complete system architecture"
+  width={1200}
+  height={800}
+/>
+
+### Complete Example
+
+**MDX Syntax:**
+```mdx
+## Installation Steps
+
+### Step 1: Download the Package
+
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="Download page screenshot"
+  caption="Navigate to the download page"
+/>
+
+### Step 2: Run the Installer
+
+Follow the installation wizard:
+
+<DocVideo
+  src="/assets/docs/videos/example-tutorial.mp4"
+  poster="/assets/docs/images/example-dashboard.png"
+  caption="Complete installation process"
+  controls
+/>
+
+### Step 3: Verify Installation
+
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="Verification screen"
+  caption="Check that installation was successful"
+/>
+```
+
+**Rendered Result:**
+
+## Installation Steps
+
+### Step 1: Download the Package
+
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="Download page screenshot"
+  caption="Navigate to the download page"
+/>
+
+### Step 2: Run the Installer
+
+Follow the installation wizard:
+
+<DocVideo
+  src="/assets/docs/videos/example-tutorial.mp4"
+  poster="/assets/docs/images/example-dashboard.png"
+  caption="Complete installation process"
+  controls
+/>
+
+### Step 3: Verify Installation
+
+<DocImage
+  src="/assets/docs/images/example-dashboard.png"
+  alt="Verification screen"
+  caption="Check that installation was successful"
+/>
+
+## Videos
+
+### Basic Usage
+
+Use the `<DocVideo>` component:
+
+```mdx
+<DocVideo
+  src="/assets/docs/videos/tutorial.mp4"
+  poster="/assets/docs/images/video-thumbnail.png"
+  caption="Optional caption text"
+  controls
+/>
+```
+
+### Component Props
+
+- **`src`** (required): Path to the video file (relative to `public/`)
+- **`poster`** (optional): Path to poster/thumbnail image
+- **`caption`** (optional): Caption text displayed below the video
+- **`controls`** (optional): Show video controls (play, pause, volume, etc.)
+- **`autoplay`** (optional): Auto-play video (default: `false`)
+- **`loop`** (optional): Loop video (default: `false`)
+- **`muted`** (optional): Mute video (default: `false`)
+
+### Features
+
+- ✅ **Video Controls**: Play, pause, volume, fullscreen
+- ✅ **Poster Image**: Show a thumbnail before playing
+- ✅ **Responsive**: Maintains aspect ratio
+- ✅ **Caption Support**: Optional caption below the video
+
+### Examples
+
+#### Basic Video
+
+**MDX Syntax:**
+```mdx
+<DocVideo
+  src="/assets/docs/videos/example-tutorial.mp4"
+  controls
+/>
+```
+
+**Rendered Result:**
+
+<DocVideo
+  src="/assets/docs/videos/example-tutorial.mp4"
+  controls
+/>
+
+#### Video with Poster and Caption
+
+**MDX Syntax:**
+```mdx
+<DocVideo
+  src="/assets/docs/videos/example-tutorial.mp4"
+  poster="/assets/docs/images/example-dashboard.png"
+  caption="Step-by-step tutorial on setting up monitoring"
+  controls
+/>
+```
+
+**Rendered Result:**
+
+<DocVideo
+  src="/assets/docs/videos/example-tutorial.mp4"
+  poster="/assets/docs/images/example-dashboard.png"
+  caption="Step-by-step tutorial on setting up monitoring"
+  controls
+/>
+
+#### Autoplay Video (Muted)
+
+**MDX Syntax:**
+```mdx
+<DocVideo
+  src="/assets/docs/videos/example-tutorial.mp4"
+  poster="/assets/docs/images/example-dashboard.png"
+  autoplay
+  loop
+  muted
+  controls
+/>
+```
+
+**Rendered Result:**
+
+<DocVideo
+  src="/assets/docs/videos/example-tutorial.mp4"
+  poster="/assets/docs/images/example-dashboard.png"
+  autoplay
+  loop
+  muted
+  controls
+/>
+
+### Complete Example
+
+```mdx
+## Video Tutorial
+
+Watch this video to learn how to set up the system:
+
+<DocVideo
+  src="/assets/docs/videos/complete-setup.mp4"
+  poster="/assets/docs/images/setup-thumb.png"
+  caption="Complete setup tutorial - 5 minutes"
+  controls
+/>
+
+## Quick Demo
+
+<DocVideo
+  src="/assets/docs/videos/quick-demo.mp4"
+  poster="/assets/docs/images/demo-thumb.png"
+  caption="Quick 30-second demo"
+  autoplay
+  loop
+  muted
+  controls
+/>
+```
+
+## Using Regular Markdown Images
+
+You can also use regular markdown image syntax, and it will automatically be converted to the enhanced image component:
+
+```mdx
+![Alt text](/assets/docs/images/screenshot.png "Optional title/caption")
+```
+
+## File Organization
+
+Organize your media files in the `public/assets/` directory:
+
+```
+public/assets/
+├── docs/              # Documentation assets
+│   ├── images/        # Screenshots, diagrams
+│   │   ├── installation/
+│   │   │   ├── step-1.png
+│   │   │   └── step-2.png
+│   │   └── api/
+│   │       └── endpoints-diagram.png
+│   └── videos/        # Tutorial videos
+│       └── installation/
+│           └── complete-tutorial.mp4
+├── blog/              # Blog post assets
+│   ├── images/
+│   └── videos/
+└── general/           # Shared assets
+    ├── images/
+    └── videos/
+```
+
+## Best Practices
+
+### Images
+
+1. **File Location**: Place images in `public/assets/docs/images/` (for docs) or `public/assets/blog/images/` (for blog)
+2. **Naming**: Use descriptive, lowercase names with hyphens (e.g., `dashboard-overview.png`, `installation-step-1.png`)
+3. **Format**: Use PNG for screenshots, JPG for photos, SVG for icons
+4. **Size**: Optimize images before uploading (recommended max 2MB)
+5. **Aspect Ratio**: Specify width/height to maintain proper proportions
+6. **Alt Text**: Always provide descriptive alt text for accessibility
+7. **Organization**: Group related assets in subdirectories for large documentation sections
+
+### Videos
+
+1. **File Location**: Place videos in `public/assets/docs/videos/` (for docs) or `public/assets/blog/videos/` (for blog)
+2. **Format**: Use MP4 format for best browser compatibility
+3. **Size**: Compress videos to reasonable file sizes (recommended max 50MB)
+4. **Duration**: Keep tutorial videos concise (2-5 minutes recommended)
+5. **Poster**: Include a poster image for better UX
+6. **Naming**: Use descriptive names matching the content (e.g., `installation-tutorial.mp4`)
+
+## Complete Example
+
+```mdx
+---
+title: Installation Guide
+description: Step-by-step installation with media
+publishedAt: 2024-01-15
+
+---
+
+# Installation Guide
+
+## Step 1: Download the Package
+
+<DocImage
+  src="/assets/docs/images/installation/download-page.png"
+  alt="Download page screenshot"
+  caption="Navigate to the download page"
+/>
+
+## Step 2: Run the Installer
+
+Follow the installation wizard:
+
+<DocVideo
+  src="/assets/docs/videos/installation/installation-tutorial.mp4"
+  poster="/assets/docs/images/installation/installer-thumb.png"
+  caption="Complete installation process"
+  controls
+/>
+
+## Step 3: Verify Installation
+
+<DocImage
+  src="/assets/docs/images/installation/verify-install.png"
+  alt="Verification screen"
+  caption="Check that installation was successful"
+/>
+```
+
+## Next Steps
+
+- [Code Blocks](/docs/guide/features/code-blocks) - Learn about syntax highlighting
+- [Tabbed Content](/docs/guide/features/tabbed-content) - Learn about multi-tab sections
+- [Excalidraw Diagrams](/docs/guide/features/excalidraw) - Learn about interactive diagrams
+

@@ -1,0 +1,84 @@
+---
+title: Site Metadata
+description: How to update site metadata and SEO
+publishedAt: 2024-01-01
+order: 7
+
+---
+
+# Site Metadata
+
+Guide to updating site metadata, SEO tags, and Open Graph information.
+
+## Metadata Configuration
+
+Site metadata is defined in `app/layout.tsx`.
+
+## Basic Metadata
+
+Update basic metadata:
+
+```tsx
+export const metadata = {
+  title: 'Your Portfolio',
+  description: 'Your portfolio website description',
+  // ... more metadata
+}
+```
+
+## Open Graph Tags
+
+Update Open Graph tags for social media sharing:
+
+```tsx
+export const metadata = {
+  openGraph: {
+    title: 'Your Portfolio',
+    description: 'Your portfolio website description',
+    url: 'https://yourdomain.com',
+    siteName: 'Your Portfolio',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+}
+```
+
+## Twitter Cards
+
+Update Twitter card metadata:
+
+```tsx
+export const metadata = {
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Your Portfolio',
+    description: 'Your portfolio website description',
+    images: ['/twitter-image.png'],
+  },
+}
+```
+
+## Favicon
+
+Update favicon:
+
+1. **Place favicon files** in `public/`
+2. **Update links** in `app/layout.tsx`:
+
+```tsx
+<link rel="icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+```
+
+## Next Steps
+
+- [Deployment](/docs/guide/deployment/overview) - Deploy your website
+
+

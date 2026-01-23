@@ -1,0 +1,190 @@
+---
+title: Creating Your First Document
+description: Step-by-step guide to creating your first documentation page
+publishedAt: 2024-01-01
+order: 3
+
+---
+
+# Creating Your First Document
+
+This guide will walk you through creating your first documentation page step by step.
+
+## Step 1: Choose a Location
+
+Decide where your document should go:
+
+- **New section**: Create a new folder in `content/docs/`
+- **Existing section**: Add to an existing folder
+- **New subsection**: Create a nested folder
+
+## Step 2: Create the File
+
+Create a new `.mdx` file with a descriptive name:
+
+```bash
+# Example: Create a new document in the guide section
+touch content/docs/guide/my-first-document.mdx
+```
+
+## Step 3: Add Frontmatter
+
+Every document needs frontmatter at the top:
+
+```mdx
+---
+title: My First Document
+description: This is my first documentation page
+publishedAt: 2024-01-15
+
+---
+```
+
+**Required fields:**
+- `title`: The document title (appears in sidebar and page header)
+- `description`: Brief description (appears in listings and meta tags)
+- `publishedAt`: Publication date (YYYY-MM-DD format)
+
+**Optional fields:**
+- `updatedAt`: Last update date (YYYY-MM-DD format)
+
+## Step 4: Write Your Content
+
+Write your content using Markdown or MDX:
+
+```mdx
+---
+title: My First Document
+description: This is my first documentation page
+publishedAt: 2024-01-15
+
+---
+
+# My First Document
+
+This is the main heading (H1). It appears as the page title.
+
+## Introduction
+
+This is a section heading (H2). It will appear in the table of contents.
+
+### Subsection
+
+This is a subsection (H3). It will also appear in the table of contents.
+
+## Content Examples
+
+You can use **bold text**, *italic text*, and `inline code`.
+
+### Lists
+
+- Unordered list item 1
+- Unordered list item 2
+- Unordered list item 3
+
+1. Ordered list item 1
+2. Ordered list item 2
+3. Ordered list item 3
+
+### Code Blocks
+
+```bash
+echo "Hello, World!"
+```
+
+### Links
+
+- [Internal link](/docs/guide/overview)
+- [External link](https://example.com)
+
+## Next Steps
+
+- Learn about [Callout Components](/docs/guide/features/callouts)
+- Learn about [Code Blocks](/docs/guide/features/code-blocks)
+- Learn about [Images & Videos](/docs/guide/features/images-videos)
+```
+
+## Step 5: View Your Document
+
+1. Start the development server: `yarn dev`
+2. Navigate to your document URL: `/docs/guide/my-first-document`
+3. Your document should appear in the sidebar automatically
+
+## Complete Example
+
+Here's a complete example document:
+
+```mdx
+---
+title: Installation Guide
+description: Step-by-step installation instructions
+publishedAt: 2024-01-15
+
+updatedAt: 2024-01-20
+---
+
+# Installation Guide
+
+This guide will help you install the project.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- Node.js 20.19.4 or higher
+- Yarn package manager
+- Git installed
+
+## Installation Steps
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/yourproject.git
+cd yourproject
+```
+
+### Step 2: Install Dependencies
+
+```bash
+yarn install
+```
+
+### Step 3: Start Development Server
+
+```bash
+yarn dev
+```
+
+## Verification
+
+To verify the installation worked:
+
+1. Open your browser
+2. Navigate to `http://localhost:3000`
+3. You should see the homepage
+
+## Troubleshooting
+
+If you encounter issues, check the [Troubleshooting Guide](/docs/guide/getting-started/troubleshooting).
+
+## Next Steps
+
+- Read the [Configuration Guide](/docs/guide/customization/overview)
+- Check out [Features](/docs/guide/features/overview)
+```
+
+## Tips
+
+1. **Use descriptive titles**: Make titles clear and specific
+2. **Add descriptions**: Help users understand what the document covers
+3. **Use headings**: Structure your content with H2, H3, H4 headings
+4. **Link between docs**: Use internal links to connect related content
+5. **Add examples**: Include code examples and screenshots when helpful
+
+## Next Steps
+
+- [Adding Documentation](/docs/guide/adding-content/documentation) - Detailed guide
+- [Using Features](/docs/guide/features/overview) - Learn about all features
+
+

@@ -1,0 +1,443 @@
+---
+title: Tabbed Content
+description: Complete guide to creating tabbed content sections
+publishedAt: 2024-01-01
+order: 4
+
+---
+
+# Tabbed Content
+
+Tabbed content allows you to create sections where readers can choose between different methods, interfaces, or approaches. This is perfect for documentation that has multiple options or variations.
+
+## Overview
+
+Tabbed content lets you organize related content into tabs, making it easy for readers to switch between different options without scrolling through long pages.
+
+## Features
+
+- ✅ **Dynamic Content Switching**: Content changes when tabs are clicked
+- ✅ **Auto-Updating TOC**: The "ON THIS PAGE" section automatically updates when tabs change
+- ✅ **Progress Bar**: Reading progress bar updates correctly with tabbed content
+- ✅ **Scroll Spy**: Active heading highlighting works with tabbed content
+- ✅ **Keyboard Accessible**: Full keyboard navigation support
+
+## Basic Usage
+
+Use the `<TabbedContent>` and `<TabPanel>` components:
+
+````mdx
+<TabbedContent>
+  <TabPanel id="method1" label="Method 1">
+    Content for method 1 goes here.
+  </TabPanel>
+
+  <TabPanel id="method2" label="Method 2">
+    Content for method 2 goes here.
+  </TabPanel>
+</TabbedContent>
+````
+
+## Component Props
+
+### TabbedContent
+
+No props required. This is the container component.
+
+### TabPanel
+
+- **`id`** (required): Unique identifier for the tab
+- **`label`** (required): Text displayed on the tab button
+
+## Examples
+
+### Installation Methods
+
+**MDX Syntax:**
+````mdx
+## Installation Methods
+
+<TabbedContent>
+  <TabPanel id="docker" label="Docker">
+    ### Docker Installation
+    
+    Install using Docker:
+    
+    \`\`\`bash
+    docker run -d -p 3000:3000 myapp
+    \`\`\`
+    
+    ### Docker Compose
+    
+    Or use Docker Compose:
+    
+    \`\`\`yaml
+    version: '3'
+    services:
+      app:
+        image: myapp:latest
+        ports:
+          - "3000:3000"
+    \`\`\`
+  </TabPanel>
+
+  <TabPanel id="kubernetes" label="Kubernetes">
+    ### Kubernetes Installation
+    
+    Install using Kubernetes:
+    
+    \`\`\`yaml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: myapp
+    spec:
+      containers:
+      - name: app
+        image: myapp:latest
+        ports:
+        - containerPort: 3000
+    \`\`\`
+  </TabPanel>
+
+  <TabPanel id="npm" label="NPM">
+    ### NPM Installation
+    
+    Install using NPM:
+    
+    \`\`\`bash
+    npm install -g myapp
+    myapp start
+    \`\`\`
+  </TabPanel>
+</TabbedContent>
+````
+
+**Rendered Result:**
+
+<TabbedContent>
+  <TabPanel id="docker-example" label="Docker">
+    ### Docker Installation
+    
+    Install using Docker:
+    
+    ```bash
+    docker run -d -p 3000:3000 myapp
+    ```
+    
+    ### Docker Compose
+    
+    Or use Docker Compose:
+    
+    ```yaml
+    version: '3'
+    services:
+      app:
+        image: myapp:latest
+        ports:
+          - "3000:3000"
+    ```
+  </TabPanel>
+
+  <TabPanel id="kubernetes-example" label="Kubernetes">
+    ### Kubernetes Installation
+    
+    Install using Kubernetes:
+    
+    ```yaml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: myapp
+    spec:
+      containers:
+      - name: app
+        image: myapp:latest
+        ports:
+        - containerPort: 3000
+    ```
+  </TabPanel>
+
+  <TabPanel id="npm-example" label="NPM">
+    ### NPM Installation
+    
+    Install using NPM:
+    
+    ```bash
+    npm install -g myapp
+    myapp start
+    ```
+  </TabPanel>
+</TabbedContent>
+
+### Multiple Interfaces
+
+**MDX Syntax:**
+````mdx
+## API Interfaces
+
+<TabbedContent>
+  <TabPanel id="rest" label="REST API">
+    ### REST API
+    
+    Use the REST API endpoint:
+    
+    \`\`\`bash
+    curl -X POST https://api.example.com/v1/users \
+      -H "Content-Type: application/json" \
+      -d '{"name": "John Doe"}'
+    \`\`\`
+  </TabPanel>
+
+  <TabPanel id="graphql" label="GraphQL">
+    ### GraphQL API
+    
+    Use the GraphQL endpoint:
+    
+    \`\`\`graphql
+    mutation {
+      createUser(name: "John Doe") {
+        id
+        name
+      }
+    }
+    \`\`\`
+  </TabPanel>
+</TabbedContent>
+````
+
+**Rendered Result:**
+
+<TabbedContent>
+  <TabPanel id="rest-example" label="REST API">
+    ### REST API
+    
+    Use the REST API endpoint:
+    
+    ```bash
+    curl -X POST https://api.example.com/v1/users \
+      -H "Content-Type: application/json" \
+      -d '{"name": "John Doe"}'
+    ```
+  </TabPanel>
+
+  <TabPanel id="graphql-example" label="GraphQL">
+    ### GraphQL API
+    
+    Use the GraphQL endpoint:
+    
+    ```graphql
+    mutation {
+      createUser(name: "John Doe") {
+        id
+        name
+      }
+    }
+    ```
+  </TabPanel>
+</TabbedContent>
+
+### Platform-Specific Guides
+
+**MDX Syntax:**
+````mdx
+## Platform Installation
+
+<TabbedContent>
+  <TabPanel id="macos" label="macOS">
+    ### macOS Installation
+    
+    \`\`\`bash
+    # Using Homebrew
+    brew install myapp
+    
+    # Or download from website
+    curl -O https://example.com/myapp-macos.dmg
+    \`\`\`
+  </TabPanel>
+
+  <TabPanel id="linux" label="Linux">
+    ### Linux Installation
+    
+    \`\`\`bash
+    # Ubuntu/Debian
+    sudo apt-get install myapp
+    
+    # Fedora
+    sudo dnf install myapp
+    \`\`\`
+  </TabPanel>
+
+  <TabPanel id="windows" label="Windows">
+    ### Windows Installation
+    
+    1. Download the installer from the website
+    2. Run the installer
+    3. Follow the installation wizard
+  </TabPanel>
+</TabbedContent>
+````
+
+**Rendered Result:**
+
+<TabbedContent>
+  <TabPanel id="macos-example" label="macOS">
+    ### macOS Installation
+    
+    ```bash
+    # Using Homebrew
+    brew install myapp
+    
+    # Or download from website
+    curl -O https://example.com/myapp-macos.dmg
+    ```
+  </TabPanel>
+
+  <TabPanel id="linux-example" label="Linux">
+    ### Linux Installation
+    
+    ```bash
+    # Ubuntu/Debian
+    sudo apt-get install myapp
+    
+    # Fedora
+    sudo dnf install myapp
+    ```
+  </TabPanel>
+
+  <TabPanel id="windows-example" label="Windows">
+    ### Windows Installation
+    
+    1. Download the installer from the website
+    2. Run the installer
+    3. Follow the installation wizard
+  </TabPanel>
+</TabbedContent>
+
+## Complete Example
+
+Here's a complete example with multiple tabs:
+
+````mdx
+---
+title: Installation Guide
+description: Multiple installation methods
+publishedAt: 2024-01-15
+
+---
+
+# Installation Guide
+
+Choose the installation method that works best for your environment.
+
+<TabbedContent>
+  <TabPanel id="quick-start" label="Quick Start">
+    ### Quick Start
+    
+    Get up and running in minutes:
+    
+    \`\`\`bash
+    npx create-myapp@latest
+    cd myapp
+    npm run dev
+    \`\`\`
+    
+    <Callout type="success" title="Ready!">
+    Your application is now running at `http://localhost:3000`
+    </Callout>
+  </TabPanel>
+
+  <TabPanel id="docker" label="Docker">
+    ### Docker Installation
+    
+    Run with Docker:
+    
+    \`\`\`bash
+    docker pull myapp:latest
+    docker run -d -p 3000:3000 myapp:latest
+    \`\`\`
+    
+    ### Docker Compose
+    
+    For a complete setup:
+    
+    \`\`\`yaml
+    version: '3.8'
+    services:
+      app:
+        image: myapp:latest
+        ports:
+          - "3000:3000"
+        environment:
+          - NODE_ENV=production
+    \`\`\`
+  </TabPanel>
+
+  <TabPanel id="kubernetes" label="Kubernetes">
+    ### Kubernetes Installation
+    
+    Deploy to Kubernetes:
+    
+    \`\`\`yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: myapp
+    spec:
+      replicas: 3
+      selector:
+        matchLabels:
+          app: myapp
+      template:
+        metadata:
+          labels:
+            app: myapp
+        spec:
+          containers:
+          - name: app
+            image: myapp:latest
+            ports:
+            - containerPort: 3000
+    \`\`\`
+  </TabPanel>
+</TabbedContent>
+
+## Next Steps
+
+After installation, check out:
+- [Configuration Guide](/docs/guide/customization/overview)
+- [Getting Started](/docs/guide/getting-started/overview)
+````
+
+## Best Practices
+
+1. **Use descriptive labels**: Make tab labels clear and specific
+2. **Keep tabs focused**: Each tab should cover a single topic or method
+3. **Use unique IDs**: Each `TabPanel` must have a unique `id`
+4. **Include headings**: Use H2, H3 headings inside tabs (they appear in TOC)
+5. **Limit number of tabs**: Too many tabs can be overwhelming (3-5 is ideal)
+6. **First tab is default**: The first tab is selected by default
+
+## Table of Contents Integration
+
+Headings inside tabs are automatically included in the table of contents:
+
+- Headings in the **active tab** appear in the TOC
+- When you switch tabs, the TOC updates automatically
+- Headings in inactive tabs are hidden from the TOC
+
+## Notes
+
+- Each `<TabPanel>` must have a unique `id`
+- The `label` appears on the tab button
+- Content inside tabs can include any markdown/MDX
+- Headings inside tabs are automatically included in the TOC
+- The first tab is selected by default
+- Tabs are keyboard accessible (Tab to navigate, Enter to select)
+
+## Next Steps
+
+- [Code Blocks](/docs/guide/features/code-blocks) - Learn about syntax highlighting
+- [Images & Videos](/docs/guide/features/images-videos) - Learn about media components
+- [Callout Components](/docs/guide/features/callouts) - Learn about styled information boxes
+

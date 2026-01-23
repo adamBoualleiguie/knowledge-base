@@ -1,0 +1,298 @@
+---
+title: Callout Components
+description: Complete guide to using callout components with all types and examples
+publishedAt: 2024-01-01
+order: 2
+---
+
+# Callout Components
+
+Callout components are styled information boxes that help highlight important information, warnings, tips, and notes in your documentation.
+
+## Available Types
+
+There are 6 types of callouts available:
+
+1. **`info`** (default) - Blue background - General information
+2. **`success`** - Green background - Success messages, confirmations
+3. **`warning`** - Yellow background - Warnings, cautions
+4. **`error`** - Red background - Error messages, issues
+5. **`note`** - Purple background - Additional notes, tips
+6. **`danger`** - Red background - Critical warnings, dangerous operations
+
+## Basic Usage
+
+### Simple Callout
+
+**MDX Syntax:**
+```mdx
+<Callout type="info">
+This is an informational callout without a custom title.
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="info">
+This is an informational callout without a custom title.
+</Callout>
+
+**Note**: The title will be auto-generated as "Info"
+
+### Callout with Custom Title
+
+**MDX Syntax:**
+```mdx
+<Callout type="info" title="Did you know?">
+This is an informational callout with a custom title.
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="info" title="Did you know?">
+This is an informational callout with a custom title.
+</Callout>
+
+## All Callout Types
+
+### Info Callout
+
+**MDX Syntax:**
+```mdx
+<Callout type="info" title="Information">
+This is an informational callout. Use it for general information, tips, or helpful notes.
+
+You can include:
+- Lists
+- **Bold text**
+- `Inline code`
+- Links to [other pages](/docs/guide/overview)
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="info" title="Information">
+This is an informational callout. Use it for general information, tips, or helpful notes.
+
+You can include:
+- Lists
+- **Bold text**
+- `Inline code`
+- Links to [other pages](/docs/guide/overview)
+</Callout>
+
+### Success Callout
+
+**MDX Syntax:**
+```mdx
+<Callout type="success" title="Installation Complete">
+Your application has been successfully installed and is ready to use.
+
+You can now:
+1. Start the development server
+2. Open your browser
+3. Navigate to `http://localhost:3000`
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="success" title="Installation Complete">
+Your application has been successfully installed and is ready to use.
+
+You can now:
+1. Start the development server
+2. Open your browser
+3. Navigate to `http://localhost:3000`
+</Callout>
+
+### Warning Callout
+
+**MDX Syntax:**
+```mdx
+<Callout type="warning" title="Before You Begin">
+Make sure you have Node.js 20.19.4 or higher installed before proceeding.
+
+**Important**: This operation requires administrator privileges on Windows.
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="warning" title="Before You Begin">
+Make sure you have Node.js 20.19.4 or higher installed before proceeding.
+
+**Important**: This operation requires administrator privileges on Windows.
+</Callout>
+
+### Error Callout
+
+**MDX Syntax:**
+```mdx
+<Callout type="error" title="Error">
+Failed to connect to the database. Please check your connection settings.
+
+Common causes:
+- Incorrect database URL
+- Database server not running
+- Network connectivity issues
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="error" title="Error">
+Failed to connect to the database. Please check your connection settings.
+
+Common causes:
+- Incorrect database URL
+- Database server not running
+- Network connectivity issues
+</Callout>
+
+### Note Callout
+
+**MDX Syntax:**
+```mdx
+<Callout type="note" title="Note">
+This feature requires additional configuration. See the [Configuration Guide](/docs/guide/customization/overview) for details.
+
+You can reference files like `config.json` or directories like `src/components` and they will be highlighted as inline code.
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="note" title="Note">
+This feature requires additional configuration. See the [Configuration Guide](/docs/guide/customization/overview) for details.
+
+You can reference files like `config.json` or directories like `src/components` and they will be highlighted as inline code.
+</Callout>
+
+### Danger Callout
+
+**MDX Syntax:**
+```mdx
+<Callout type="danger" title="Danger">
+This operation will delete all data. This action cannot be undone.
+
+**Warning**: Make sure you have a backup before proceeding. All data will be permanently deleted.
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="danger" title="Danger">
+This operation will delete all data. This action cannot be undone.
+
+**Warning**: Make sure you have a backup before proceeding. All data will be permanently deleted.
+</Callout>
+
+## Complete Examples
+
+### Installation Guide with Callouts
+
+````mdx
+---
+title: Installation Guide
+description: Step-by-step installation instructions
+publishedAt: 2024-01-15
+---
+
+# Installation Guide
+
+<Callout type="info" title="Prerequisites">
+Before you begin, make sure you have:
+- Node.js 20.19.4 or higher
+- Yarn package manager
+- Git installed
+</Callout>
+
+## Step 1: Clone the Repository
+
+\`\`\`bash
+git clone https://github.com/yourusername/yourproject.git
+cd yourproject
+\`\`\`
+
+## Step 2: Install Dependencies
+
+\`\`\`bash
+yarn install
+\`\`\`
+
+<Callout type="warning" title="Common Issue">
+If you encounter permission errors, try using `sudo` on macOS/Linux or run as administrator on Windows.
+</Callout>
+
+## Step 3: Start Development Server
+
+\`\`\`bash
+yarn dev
+\`\`\`
+
+<Callout type="success" title="Installation Complete">
+Your application is now running! Open your browser and navigate to `http://localhost:3000`.
+</Callout>
+````
+
+### Troubleshooting with Callouts
+
+````mdx
+## Troubleshooting
+
+<Callout type="error" title="Build Fails">
+If the build fails, check:
+1. Node.js version (should be 20.19.4 or higher)
+2. All dependencies are installed
+3. No syntax errors in your code
+</Callout>
+
+<Callout type="warning" title="Port Already in Use">
+If port 3000 is already in use, you can change it:
+\`\`\`bash
+PORT=3001 yarn dev
+\`\`\`
+</Callout>
+
+<Callout type="note" title="Performance Tip">
+For better performance, use `yarn build` to create a production build instead of running in development mode.
+</Callout>
+````
+
+## Features
+
+- ✅ **Auto-generated Titles**: If you don't provide a title, it's auto-generated from the type
+- ✅ **Styled Icons**: Each type has a unique icon (Info, CheckCircle, AlertTriangle, etc.)
+- ✅ **Color-coded**: Different background and border colors for each type
+- ✅ **Excluded from TOC**: Callouts don't appear in the "ON THIS PAGE" table of contents
+- ✅ **Responsive**: Works perfectly on all screen sizes
+- ✅ **Markdown Support**: You can use markdown inside callouts (lists, bold, code, links)
+
+## Best Practices
+
+1. **Use appropriate types**: Choose the callout type that matches the message importance
+2. **Keep titles concise**: Short, descriptive titles work best
+3. **Use sparingly**: Don't overuse callouts - they should highlight important information
+4. **Combine with inline code**: You can reference files and directories inside callouts using backticks
+5. **Use for important information**: Callouts should draw attention to critical information
+
+## Styling
+
+Each callout type has its own color scheme:
+
+- **Info**: Blue background (`bg-blue-500/10`), blue border and text
+- **Success**: Green background (`bg-green-500/10`), green border and text
+- **Warning**: Yellow background (`bg-yellow-500/10`), yellow border and text
+- **Error**: Red background (`bg-red-500/10`), red border and text
+- **Note**: Purple background (`bg-purple-500/10`), purple border and text
+- **Danger**: Red background (`bg-red-500/10`), red border and text
+
+## Next Steps
+
+- [Excalidraw Diagrams](/docs/guide/features/excalidraw) - Learn about interactive diagrams
+- [Tabbed Content](/docs/guide/features/tabbed-content) - Learn about multi-tab sections
+- [Code Blocks](/docs/guide/features/code-blocks) - Learn about syntax highlighting
+

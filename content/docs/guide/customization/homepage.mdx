@@ -1,0 +1,80 @@
+---
+title: Homepage
+description: How to customize the homepage content and layout
+publishedAt: 2024-01-01
+order: 5
+
+---
+
+# Homepage
+
+Guide to customizing the homepage content, layout, and featured sections.
+
+## Homepage Component
+
+The homepage is defined in `app/page.tsx`.
+
+## Hero Section
+
+Update the hero section:
+
+```tsx
+<h1 className="...">
+  Welcome to My Portfolio  // Change title
+</h1>
+
+<p className="...">
+  Developer, Writer, and Problem Solver...  // Change description
+</p>
+```
+
+## Call-to-Action Buttons
+
+Update the CTA buttons:
+
+```tsx
+<Link href="/docs" className="...">
+  View Documentation  // Change text
+</Link>
+
+<a href="/assets/general/pdfs/cv.pdf" download className="...">
+  Download CV  // Change text
+</a>
+```
+
+## Latest Blog Posts
+
+Customize how many posts are shown:
+
+```tsx
+const latestBlogs = allBlogs
+  .sort((a, b) => compareDesc(new Date(a.publishedAt), new Date(b.publishedAt)))
+  .slice(0, 3)  // Change number to show more/fewer posts
+```
+
+## Quick Links Section
+
+Add or remove quick link sections:
+
+```tsx
+const quickLinks = [
+  {
+    title: 'Documentation',
+    description: 'Comprehensive guides and tutorials',
+    href: '/docs',
+  },
+  {
+    title: 'Blog',
+    description: 'Latest articles and insights',
+    href: '/blog',
+  },
+  // Add more sections
+]
+```
+
+## Next Steps
+
+- [Footer](/docs/guide/customization/footer) - Update footer
+- [Metadata](/docs/guide/customization/metadata) - Update site metadata
+
+
