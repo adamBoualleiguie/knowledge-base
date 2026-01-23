@@ -7,7 +7,7 @@ import { ReadingProgress } from '@/components/ReadingProgress'
 import { allDocs } from 'contentlayer/generated'
 
 export const metadata: Metadata = {
-  title: 'Portfolio - Your Name',
+  title: 'Knowledge Base - Adam',
   description: 'Personal portfolio, documentation, and blog',
 }
 

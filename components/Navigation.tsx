@@ -37,7 +37,7 @@ export function Navigation({ docs = [] }: NavigationProps) {
               href="/" 
               className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent hover:from-primary/80 hover:to-primary/40 transition-all"
             >
-              Portfolio
+              Knowledge Base
             </Link>
 
             {/* Desktop Navigation */}

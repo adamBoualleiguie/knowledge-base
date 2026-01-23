@@ -61,6 +61,17 @@ module.exports = {
         mono: ['ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
       },
       keyframes: {
+        wave: {
+          '0%': { rotate: '0deg' },
+          '15%': { rotate: '20deg' },
+          '30%': { rotate: '-10deg' },
+          '45%': { rotate: '20deg' },
+          '60%': { rotate: '0deg' },
+        },
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'translateY(10px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
         'accordion-down': {
           from: { height: 0 },
           to: { height: 'var(--radix-accordion-content-height)' },
@@ -75,6 +86,8 @@ module.exports = {
         },
       },
       animation: {
+        wave: 'wave 1.2s infinite',
+        'fade-in': 'fadeIn 0.8s ease forwards',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         shimmer: 'shimmer 2s infinite',

@@ -6,9 +6,9 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
           <div>
-            <h3 className="font-semibold mb-4 text-lg">Portfolio</h3>
+            <h3 className="font-semibold mb-4 text-lg">Knowledge Base</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Personal portfolio, documentation, and blog.
+            Personal hub showcasing DevOps & SysOps mastery.
             </p>
           </div>
           <div>
@@ -35,25 +35,20 @@ export function Footer() {
             <h3 className="font-semibold mb-4 text-lg">Connect</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                <a href="https://github.com/adamBoualleiguie" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
                   GitHub
                 </a>
               </li>
               <li>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                <a href="https://www.linkedin.com/in/boualleiguie-adam-isslem-98a1111b1/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
                   LinkedIn
-                </a>
-              </li>
-              <li>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                  Twitter
                 </a>
               </li>
             </ul>
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Your Name. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Adam Boualleiguie. All rights reserved.</p>
         </div>
       </div>
     </footer>
