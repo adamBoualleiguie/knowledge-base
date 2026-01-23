@@ -21,9 +21,10 @@ export interface DocsOrderConfig {
 
 export const docsOrderConfig: DocsOrderConfig = {
   // Top-level sections order
+  // Note: Use normalized names (spaces converted to hyphens) to match Contentlayer slugs
   sections: [
     'guide',
-    'knowledge-base',
+    'Knowledge-base',
   ],
   
   // Subsection order within each section
@@ -36,7 +37,7 @@ export const docsOrderConfig: DocsOrderConfig = {
       'customization',
       'deployment',
     ],
-    'knowledge-base': [
+    'Knowledge-base': [
       'overview',
       'foundations',
       'platforms',

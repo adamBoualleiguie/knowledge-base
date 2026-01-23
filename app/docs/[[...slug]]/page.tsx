@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { allDocs } from 'contentlayer/generated'
 import { Mdx } from '@/components/mdx-components'
 import { DocsSidebar } from '@/components/DocsSidebar'
+import { SidebarToggle } from '@/components/SidebarToggle'
 import { TableOfContents } from '@/components/TableOfContents'
 import { DocNavigation } from '@/components/DocNavigation'
 import { AnchorLinks } from '@/components/AnchorLinks'
@@ -117,7 +118,8 @@ export default async function DocPage({ params }: DocPageProps) {
   if (!params?.slug || params.slug.length === 0) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="flex gap-8 lg:gap-12">
+        <SidebarToggle />
+        <div className="flex gap-6 lg:gap-8 xl:gap-10">
           <DocsSidebar docs={allDocs} allDocs={allDocs} />
           <div className="flex-1 max-w-4xl">
             <div className="mb-10">
@@ -162,9 +164,10 @@ export default async function DocPage({ params }: DocPageProps) {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      <div className="flex gap-8 lg:gap-12">
+      <SidebarToggle />
+      <div className="flex gap-6 lg:gap-8 xl:gap-10 transition-all duration-300">
         <DocsSidebar docs={allDocs} allDocs={allDocs} />
-        <div className="flex-1 max-w-3xl min-w-0">
+        <div className="flex-1 max-w-4xl min-w-0 transition-all duration-300">
           <article>
             <div className="mb-8 pb-6 border-b border-border">
               <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-foreground">
@@ -174,7 +177,7 @@ export default async function DocPage({ params }: DocPageProps) {
                 <p className="text-base text-muted-foreground leading-relaxed">{doc.description}</p>
               )}
             </div>
-            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-20" id="doc-content">
+            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-lg" id="doc-content">
               <AnchorLinks />
               <Mdx code={doc.body.code} />
             </div>

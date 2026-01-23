@@ -58,11 +58,19 @@ export const Doc = defineDocumentType(() => ({
   computedFields: {
     url: {
       type: 'string',
-      resolve: (doc) => `/${doc._raw.flattenedPath}`,
+      resolve: (doc) => {
+        // Convert spaces to hyphens and normalize the path for URL safety
+        const normalizedPath = doc._raw.flattenedPath.replace(/\s+/g, '-')
+        return `/${normalizedPath}`
+      },
     },
     slug: {
       type: 'string',
-      resolve: (doc) => doc._raw.flattenedPath.replace('docs/', ''),
+      resolve: (doc) => {
+        // Convert spaces to hyphens and remove 'docs/' prefix
+        const normalizedPath = doc._raw.flattenedPath.replace(/\s+/g, '-')
+        return normalizedPath.replace('docs/', '')
+      },
     },
   },
 }))
@@ -112,11 +120,19 @@ export const Blog = defineDocumentType(() => ({
   computedFields: {
     url: {
       type: 'string',
-      resolve: (blog) => `/${blog._raw.flattenedPath}`,
+      resolve: (blog) => {
+        // Convert spaces to hyphens and normalize the path for URL safety
+        const normalizedPath = blog._raw.flattenedPath.replace(/\s+/g, '-')
+        return `/${normalizedPath}`
+      },
     },
     slug: {
       type: 'string',
-      resolve: (blog) => blog._raw.flattenedPath.replace('blog/', ''),
+      resolve: (blog) => {
+        // Convert spaces to hyphens and remove 'blog/' prefix
+        const normalizedPath = blog._raw.flattenedPath.replace(/\s+/g, '-')
+        return normalizedPath.replace('blog/', '')
+      },
     },
   },
 }))

@@ -30,89 +30,93 @@ export function Navigation({ docs = [] }: NavigationProps) {
   return (
     <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative flex h-16 items-center gap-6">
-          {/* Left side: Logo and Navigation */}
-          <div className="flex items-center gap-6 flex-shrink-0">
+        <div className="relative flex h-16 items-center gap-4">
+          {/* Left side: Logo - Always visible */}
+          <div className="flex items-center flex-shrink-0">
             <Link 
               href="/" 
-              className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent hover:from-primary/80 hover:to-primary/40 transition-all"
+              className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent hover:from-primary/80 hover:to-primary/40 transition-all whitespace-nowrap"
             >
               Knowledge Base
             </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`text-sm font-medium transition-all duration-200 relative ${
-                    pathname === item.href
-                      ? 'text-primary'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {item.label}
-                  {pathname === item.href && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
-                  )}
-                </Link>
-              ))}
-            </div>
           </div>
 
-          {/* Centered Search Bar */}
+          {/* Desktop Navigation - Hidden on smaller screens to prevent overlap with search */}
+          <div className="hidden xl:flex items-center gap-6 flex-shrink-0">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-sm font-medium transition-all duration-200 relative whitespace-nowrap ${
+                  pathname === item.href
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.label}
+                {pathname === item.href && (
+                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                )}
+              </Link>
+            ))}
+          </div>
+
+          {/* Centered Search Bar - Always visible, adjusts position and size based on screen */}
           {docs.length > 0 && (
-            <div className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2 w-full max-w-lg">
-              <DocsSearchBar docs={docs} />
-            </div>
+            <>
+              {/* Desktop/Tablet Search - Hidden on mobile */}
+              <div className="hidden sm:flex items-center justify-center flex-1 min-w-0 mx-4">
+                <div className="w-full max-w-md lg:max-w-lg xl:max-w-xl">
+                  <DocsSearchBar docs={docs} />
+                </div>
+              </div>
+              {/* Mobile Search - Visible only on mobile, in header */}
+              <div className="flex sm:hidden items-center flex-1 min-w-0 mx-2">
+                <DocsSearchBar docs={docs} />
+              </div>
+            </>
           )}
 
-          {/* Right side actions */}
-          <div className="hidden md:flex items-center gap-4 ml-auto flex-shrink-0">
+          {/* Right side actions - Responsive visibility */}
+          <div className="flex items-center gap-2 sm:gap-4 ml-auto flex-shrink-0">
+            {/* Download CV - Hidden on small screens, visible on lg+ */}
             <a
               href="/assets/general/pdfs/cv.pdf"
               download
-              className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="hidden lg:block px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
             >
               Download CV
             </a>
+            {/* Theme Toggle - Always visible */}
             <ThemeToggle />
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 flex-shrink-0"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            {/* Mobile Menu Button - Only on mobile */}
+            <button
+              className="sm:hidden p-2 flex-shrink-0"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? (
-                <path d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {mobileMenuOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation Menu - Only shows nav items and Download CV */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            {/* Mobile Search Bar */}
-            {docs.length > 0 && (
-              <div className="mb-4 px-2">
-                <DocsSearchBar docs={docs} />
-              </div>
-            )}
+          <div className="sm:hidden py-4 border-t border-border">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -135,9 +139,6 @@ export function Navigation({ docs = [] }: NavigationProps) {
             >
               Download CV
             </a>
-            <div className="mt-4 flex justify-center">
-              <ThemeToggle />
-            </div>
           </div>
         )}
       </div>

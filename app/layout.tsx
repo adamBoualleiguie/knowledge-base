@@ -3,6 +3,7 @@ import './globals.css'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { SidebarProvider } from '@/components/SidebarContext'
 import { ReadingProgress } from '@/components/ReadingProgress'
 import { allDocs } from 'contentlayer/generated'
 
@@ -33,10 +34,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navigation docs={docsForSearch} />
-          <ReadingProgress />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+          <SidebarProvider>
+            <Navigation docs={docsForSearch} />
+            <ReadingProgress />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>

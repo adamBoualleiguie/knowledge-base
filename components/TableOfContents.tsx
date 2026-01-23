@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 interface Heading {
   id: string
@@ -25,6 +25,8 @@ function slugify(text: string): string {
 export function TableOfContents({ content, onContentChange }: TableOfContentsProps) {
   const [headings, setHeadings] = useState<Heading[]>([])
   const [activeId, setActiveId] = useState<string>('')
+  const activeItemRef = useRef<HTMLLIElement | null>(null)
+  const navRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     // Extract headings from rendered DOM (most reliable method)
@@ -185,13 +187,55 @@ export function TableOfContents({ content, onContentChange }: TableOfContentsPro
     return () => window.removeEventListener('scroll', updateActiveHeading)
   }, [headings])
 
+  // Auto-scroll to active item when it changes
+  useEffect(() => {
+    if (activeId && activeItemRef.current && navRef.current) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(() => {
+        if (activeItemRef.current && navRef.current) {
+          const nav = navRef.current
+          const activeItem = activeItemRef.current
+          
+          // Get positions
+          const navRect = nav.getBoundingClientRect()
+          const itemRect = activeItem.getBoundingClientRect()
+          
+          // Calculate if item is outside visible area
+          const itemTop = itemRect.top - navRect.top + nav.scrollTop
+          const itemBottom = itemTop + itemRect.height
+          const navScrollTop = nav.scrollTop
+          const navHeight = nav.clientHeight
+          const navScrollBottom = navScrollTop + navHeight
+          
+          // Scroll to show active item if it's not fully visible
+          if (itemTop < navScrollTop) {
+            // Item is above visible area, scroll to show it at top
+            nav.scrollTo({
+              top: itemTop - 20, // Add some padding
+              behavior: 'smooth'
+            })
+          } else if (itemBottom > navScrollBottom) {
+            // Item is below visible area, scroll to show it at bottom
+            nav.scrollTo({
+              top: itemBottom - navHeight + 20, // Add some padding
+              behavior: 'smooth'
+            })
+          }
+        }
+      }, 100)
+    }
+  }, [activeId])
+
   if (headings.length === 0) {
     return null
   }
 
   return (
-    <aside className="hidden xl:block w-64 flex-shrink-0 pl-8">
-      <nav className="sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto hide-scrollbar pb-8 border-l border-border/40 pl-4">
+    <aside className="hidden xl:block w-56 flex-shrink-0 pl-6">
+      <nav 
+        ref={navRef}
+        className="sticky top-20 max-h-[calc(100vh-5rem)] overflow-y-auto hide-scrollbar pb-8 border-l border-border/40 pl-4"
+      >
         <h2 className="text-xs font-bold text-foreground mb-5 uppercase tracking-wider dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]">
           ON THIS PAGE
         </h2>
@@ -217,6 +261,7 @@ export function TableOfContents({ content, onContentChange }: TableOfContentsPro
             return (
               <li
                 key={`${heading.id}-${index}`}
+                ref={isActive ? activeItemRef : null}
                 className={`
                   relative
                   ${heading.level === 2 ? 'pl-0' : heading.level === 3 ? 'pl-4' : heading.level === 4 ? 'pl-8' : ''}
