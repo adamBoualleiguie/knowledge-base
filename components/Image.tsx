@@ -11,10 +11,33 @@ interface ImageProps {
   caption?: string
 }
 
+// Get basePath from Next.js config (for static export)
+const getBasePath = () => {
+  // In browser, check if we're in a subdirectory
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname
+    // If path starts with /knowledge-base, return it
+    if (path.startsWith('/knowledge-base')) {
+      return '/knowledge-base'
+    }
+  }
+  return ''
+}
+
 export function DocImage({ src, alt, width, height, caption }: ImageProps) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [imageDimensions, setImageDimensions] = useState({ width: width || 1200, height: height || 800 })
+  const [basePath, setBasePath] = useState('')
+
+  useEffect(() => {
+    setBasePath(getBasePath())
+  }, [])
+
+  // Normalize src to include basePath if needed
+  const normalizedSrc = src.startsWith('/') && basePath && !src.startsWith(basePath)
+    ? `${basePath}${src}`
+    : src
 
   useEffect(() => {
     // Load image to get natural dimensions if not provided
@@ -23,9 +46,9 @@ export function DocImage({ src, alt, width, height, caption }: ImageProps) {
       img.onload = () => {
         setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight })
       }
-      img.src = src.startsWith('/') ? src : src
+      img.src = normalizedSrc
     }
-  }, [src, width, height])
+  }, [normalizedSrc, width, height])
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -74,7 +97,7 @@ export function DocImage({ src, alt, width, height, caption }: ImageProps) {
             }}
           >
             <NextImage
-              src={src}
+              src={normalizedSrc}
               alt={alt}
               width={imageDimensions.width}
               height={imageDimensions.height}
@@ -85,7 +108,7 @@ export function DocImage({ src, alt, width, height, caption }: ImageProps) {
               style={{
                 objectFit: 'contain',
               }}
-              unoptimized={src.startsWith('/')}
+              unoptimized={normalizedSrc.startsWith('/')}
               priority={false}
             />
           </div>
@@ -144,12 +167,12 @@ export function DocImage({ src, alt, width, height, caption }: ImageProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <NextImage
-              src={src}
+              src={normalizedSrc}
               alt={alt}
               width={imageDimensions.width}
               height={imageDimensions.height}
               className="max-w-full max-h-full w-auto h-auto object-contain"
-              unoptimized={src.startsWith('/')}
+              unoptimized={normalizedSrc.startsWith('/')}
               priority
             />
           </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 interface VideoProps {
   src: string
@@ -10,6 +10,19 @@ interface VideoProps {
   controls?: boolean
   loop?: boolean
   muted?: boolean
+}
+
+// Get basePath from Next.js config (for static export)
+const getBasePath = () => {
+  // In browser, check if we're in a subdirectory
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname
+    // If path starts with /knowledge-base, return it
+    if (path.startsWith('/knowledge-base')) {
+      return '/knowledge-base'
+    }
+  }
+  return ''
 }
 
 export function DocVideo({
@@ -23,7 +36,20 @@ export function DocVideo({
 }: VideoProps) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [basePath, setBasePath] = useState('')
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    setBasePath(getBasePath())
+  }, [])
+
+  // Normalize src and poster to include basePath if needed
+  const normalizedSrc = src.startsWith('/') && basePath && !src.startsWith(basePath)
+    ? `${basePath}${src}`
+    : src
+  const normalizedPoster = poster && poster.startsWith('/') && basePath && !poster.startsWith(basePath)
+    ? `${basePath}${poster}`
+    : poster
 
   const handleFullscreen = () => {
     if (videoRef.current) {
@@ -50,8 +76,8 @@ export function DocVideo({
       <div className="relative overflow-hidden rounded-lg border border-border bg-muted/30">
         <video
           ref={videoRef}
-          src={src}
-          poster={poster}
+          src={normalizedSrc}
+          poster={normalizedPoster}
           controls={controls}
           autoPlay={autoplay}
           loop={loop}

@@ -2,9 +2,22 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ThemeToggle } from './ThemeToggle'
 import { DocsSearchBar } from './DocsSearchBar'
+
+// Get basePath from Next.js config (for static export)
+const getBasePath = () => {
+  // In browser, check if we're in a subdirectory
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname
+    // If path starts with /knowledge-base, return it
+    if (path.startsWith('/knowledge-base')) {
+      return '/knowledge-base'
+    }
+  }
+  return ''
+}
 
 interface Doc {
   title: string
@@ -20,6 +33,11 @@ interface NavigationProps {
 export function Navigation({ docs = [] }: NavigationProps) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [basePath, setBasePath] = useState('')
+
+  useEffect(() => {
+    setBasePath(getBasePath())
+  }, [])
 
   const navItems = [
     { href: '/', label: 'Home' },
@@ -132,7 +150,7 @@ export function Navigation({ docs = [] }: NavigationProps) {
               </Link>
             ))}
             <a
-              href="/assets/general/pdfs/cv.pdf"
+              href={`${basePath}/assets/general/pdfs/cv.pdf`}
               download
               className="block mt-4 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-center"
               onClick={() => setMobileMenuOpen(false)}
