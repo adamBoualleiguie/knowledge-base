@@ -3,7 +3,20 @@
 import { format } from 'date-fns'
 import { User, Clock, Calendar, Tag } from 'lucide-react'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+// Get basePath from Next.js config (for static export)
+const getBasePath = () => {
+  // In browser, check if we're in a subdirectory
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname
+    // If path starts with /knowledge-base, return it
+    if (path.startsWith('/knowledge-base')) {
+      return '/knowledge-base'
+    }
+  }
+  return ''
+}
 
 interface MetadataCardProps {
   author?: string
@@ -20,25 +33,33 @@ interface MetadataCardProps {
  * Otherwise, assume it's in /assets/authors/
  * Handles various formats: "author.jpg", "/assets/authors/author.jpg", "assets/authors/author.jpg"
  */
-function resolveAuthorPhoto(authorPhoto?: string | null): string | null {
+function resolveAuthorPhoto(authorPhoto?: string | null, basePath: string = ''): string | null {
   if (!authorPhoto || typeof authorPhoto !== 'string' || authorPhoto.trim() === '') {
     return null
   }
   
   const trimmed = authorPhoto.trim()
+  let resolvedPath: string
   
   // If it already starts with /, use as-is
   if (trimmed.startsWith('/')) {
-    return trimmed
+    resolvedPath = trimmed
   }
-  
   // If it starts with assets/, add leading slash
-  if (trimmed.startsWith('assets/')) {
-    return `/${trimmed}`
+  else if (trimmed.startsWith('assets/')) {
+    resolvedPath = `/${trimmed}`
+  }
+  // Otherwise, assume it's just the filename and add the path
+  else {
+    resolvedPath = `/assets/authors/${trimmed}`
   }
   
-  // Otherwise, assume it's just the filename and add the path
-  return `/assets/authors/${trimmed}`
+  // Add basePath prefix if needed and not already present
+  if (basePath && resolvedPath.startsWith('/') && !resolvedPath.startsWith(basePath)) {
+    return `${basePath}${resolvedPath}`
+  }
+  
+  return resolvedPath
 }
 
 export function MetadataCard({ 
@@ -50,8 +71,14 @@ export function MetadataCard({
   tags 
 }: MetadataCardProps) {
   const displayReadTime = readTime || 0
-  const photoPath = resolveAuthorPhoto(authorPhoto)
+  const [basePath, setBasePath] = useState('')
   const [imageError, setImageError] = useState(false)
+
+  useEffect(() => {
+    setBasePath(getBasePath())
+  }, [])
+
+  const photoPath = resolveAuthorPhoto(authorPhoto, basePath)
 
   return (
     <div className="w-64 p-6 border border-border rounded-lg bg-card shadow-sm">
