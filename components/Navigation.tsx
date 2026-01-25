@@ -99,7 +99,7 @@ export function Navigation({ docs = [] }: NavigationProps) {
           <div className="flex items-center gap-2 sm:gap-4 ml-auto flex-shrink-0">
             {/* Download CV - Hidden on small screens, visible on lg+ */}
             <a
-              href="/assets/general/pdfs/cv.pdf"
+              href={`${basePath}/assets/general/pdfs/cv.pdf`}
               download
               className="hidden lg:block px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
             >
