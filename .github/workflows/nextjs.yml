@@ -55,12 +55,7 @@ jobs:
           cache: ${{ steps.detect-package-manager.outputs.manager }}
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          # Automatically inject basePath in your Next.js configuration file and disable
-          # server side image optimization (https://nextjs.org/docs/api-reference/next/image#unoptimized).
-          #
-          # You may remove this line if you want to manage the configuration yourself.
-          static_site_generator: next
+        # Removed static_site_generator: next since we already have output: 'export' configured
       - name: Restore cache
         uses: actions/cache@v4
         with:
@@ -74,8 +69,7 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
-        # IMPORTANT: Use yarn build (or npm run build) to run contentlayer build first
-        # This ensures contentlayer processes MDX files before Next.js builds
+        # Use yarn build (or npm run build) to run contentlayer build first
         run: ${{ steps.detect-package-manager.outputs.runner }} build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
