@@ -10,6 +10,7 @@ import { ExcalidrawDiagram } from './ExcalidrawDiagram'
 import { Highlight } from './Highlight'
 import { Terminal } from './Terminal'
 import { MermaidDiagram } from './MermaidDiagram'
+import { YouTube } from './YouTube'
 
 const mdxComponents = {
   TabbedContent,
@@ -21,6 +22,7 @@ const mdxComponents = {
   ExcalidrawDiagram,
   Highlight,
   Terminal,
+  YouTube,
   pre: (props: any) => {
     // Handle code blocks - MDX wraps code in pre > code
     const child = props.children
