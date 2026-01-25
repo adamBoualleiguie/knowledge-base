@@ -140,6 +140,7 @@ export const Blog = defineDocumentType(() => ({
 export default makeSource({
   contentDirPath: './content',
   documentTypes: [Doc, Blog],
+  disableImportAliasWarning: true, // Suppress the baseUrl warning
   mdx: {
     remarkPlugins: [],
     rehypePlugins: [

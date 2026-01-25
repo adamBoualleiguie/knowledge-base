@@ -48,9 +48,13 @@ export function Terminal({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !isStartedRef.current) {
-            isStartedRef.current = true
-            setIsStarted(true)
-            startTyping()
+            // Additional check: ensure the element is actually visible (not just in viewport but hidden)
+            const rect = entry.target.getBoundingClientRect()
+            if (rect.width > 0 && rect.height > 0) {
+              isStartedRef.current = true
+              setIsStarted(true)
+              startTyping()
+            }
           }
         })
       },
@@ -65,27 +69,111 @@ export function Terminal({
     return () => {
       observer.disconnect()
     }
-  }, [autoStart])
+  }, [autoStart, commands]) // Add commands to dependencies to re-observe when commands change
 
   // Auto-start if autoStart is true and component mounts
   useEffect(() => {
     if (autoStart && !isStartedRef.current && terminalRef.current) {
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
+      const checkAndStart = () => {
         if (terminalRef.current && !isStartedRef.current) {
           const rect = terminalRef.current.getBoundingClientRect()
           const isInView = rect.top < window.innerHeight && rect.bottom > 0
-          if (isInView) {
+          const isVisible = rect.width > 0 && rect.height > 0 // Check if actually visible
+          if (isInView && isVisible) {
             isStartedRef.current = true
             setIsStarted(true)
             startTyping()
+            return true
           }
+        }
+        return false
+      }
+
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        if (!checkAndStart()) {
+          // If not visible yet (e.g., in hidden tab), try again after longer delay
+          const retryTimer = setTimeout(() => {
+            checkAndStart()
+          }, 1000)
+          timersRef.current.push(retryTimer)
         }
       }, 500)
       timersRef.current.push(timer)
       return () => clearTimeout(timer)
     }
-  }, [autoStart])
+  }, [autoStart, commands]) // Add commands to dependencies to re-check when commands change
+
+  // Listen for tab changes to restart terminal when tab becomes visible
+  useEffect(() => {
+    const handleContentChange = () => {
+      // When tab changes, reset and restart terminal if visible
+      if (autoStart && terminalRef.current) {
+        // Reset state first
+        clearAllTimers()
+        isStartedRef.current = false
+        currentCommandIndexRef.current = 0
+        setIsStarted(false)
+        setCurrentCommandIndex(0)
+        setCurrentCommandText('')
+        setCurrentOutput(null)
+        setCompletedCommands([])
+        setIsTyping(false)
+        
+        // Then check if visible and start
+        setTimeout(() => {
+          if (terminalRef.current && !isStartedRef.current) {
+            const rect = terminalRef.current.getBoundingClientRect()
+            const isInView = rect.top < window.innerHeight && rect.bottom > 0
+            const isVisible = rect.width > 0 && rect.height > 0
+            if (isInView && isVisible) {
+              isStartedRef.current = true
+              setIsStarted(true)
+              startTyping()
+            }
+          }
+        }, 300)
+      }
+    }
+
+    window.addEventListener('contentChange', handleContentChange)
+    return () => {
+      window.removeEventListener('contentChange', handleContentChange)
+    }
+  }, [autoStart, commands]) // Add commands to dependencies
+
+  // Reset state when commands prop changes (e.g., when switching tabs)
+  useEffect(() => {
+    clearAllTimers()
+    isStartedRef.current = false
+    currentCommandIndexRef.current = 0
+    setIsStarted(false)
+    setCurrentCommandIndex(0)
+    setCurrentCommandText('')
+    setCurrentOutput(null)
+    setCompletedCommands([])
+    setIsTyping(false)
+    
+    // If autoStart is enabled, check if terminal is visible and start typing after reset
+    if (autoStart && terminalRef.current) {
+      // Delay to ensure tab content is visible after switch
+      const timer = setTimeout(() => {
+        if (terminalRef.current && !isStartedRef.current) {
+          const rect = terminalRef.current.getBoundingClientRect()
+          const isInView = rect.top < window.innerHeight && rect.bottom > 0
+          // Check if element is actually visible (not display: none from hidden tab)
+          const isVisible = rect.width > 0 && rect.height > 0
+          if (isInView && isVisible) {
+            isStartedRef.current = true
+            setIsStarted(true)
+            startTyping()
+          }
+        }
+      }, 400) // Slightly longer delay to ensure tab switch animation completes
+      timersRef.current.push(timer)
+      return () => clearTimeout(timer)
+    }
+  }, [commands, autoStart])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -304,20 +392,23 @@ export function Terminal({
         {/* Terminal Body */}
         <div className="terminal-body p-4 font-mono text-sm">
           {/* Completed commands */}
-          {completedCommands.map((index) => {
-            const cmd = commands[index]
-            return (
-              <div key={index} className="mb-2">
-                <div className="flex items-start gap-2 mb-1">
-                  <span className="text-[#58a6ff] flex-shrink-0">{prompt}</span>
-                  <span className="text-[#c9d1d9]">{cmd.command}</span>
+          {completedCommands
+            .filter((index) => index >= 0 && index < commands.length && commands[index]) // Safety check
+            .map((index) => {
+              const cmd = commands[index]
+              if (!cmd) return null // Additional safety check
+              return (
+                <div key={index} className="mb-2">
+                  <div className="flex items-start gap-2 mb-1">
+                    <span className="text-[#58a6ff] flex-shrink-0">{prompt}</span>
+                    <span className="text-[#c9d1d9]">{cmd.command}</span>
+                  </div>
+                  {cmd.output && (
+                    <div className="text-[#8b949e] ml-6 whitespace-pre-wrap">{cmd.output}</div>
+                  )}
                 </div>
-                {cmd.output && (
-                  <div className="text-[#8b949e] ml-6 whitespace-pre-wrap">{cmd.output}</div>
-                )}
-              </div>
-            )
-          })}
+              )
+            })}
 
           {/* Current typing command - only show if not completed yet */}
           {isStarted && 
