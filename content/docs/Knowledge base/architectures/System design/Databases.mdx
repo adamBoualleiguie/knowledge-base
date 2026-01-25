@@ -1,0 +1,197 @@
+---
+title: Databases        
+description: Picking the right database in system design and understanding different types.
+publishedAt: 2025-05-04
+order: 5
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Databases
+
+Choosing the right database is one of the most important decisions when designing a system. The database you pick affects **performance, scalability, reliability, and overall system success**.  
+
+Here’s why it matters:
+
+- **Performance**: Different databases handle queries differently. Picking the wrong one can slow your system.  
+- **Scalability**: Your database should grow with your system. Some scale better for large data.  
+- **Data modeling**: A good database helps keep your data organized and consistent.  
+- **Data integrity & security**: Databases vary in enforcing rules and keeping your data safe.  
+- **Support & maintenance**: Popular databases have strong communities, better documentation, and easier troubleshooting.  
+
+<Callout type="info" title="Pro Tip">
+Think of the database as the foundation of a building: the stronger and more suitable it is, the smoother everything else runs.
+</Callout>
+
+# NoSQL & RDBMS
+
+Databases fall into two main categories: **NoSQL** and **RDBMS**.  
+
+<TabbedContent>
+
+  <TabPanel id="nosql" label="NoSQL">
+  <Callout type="info" title="What is NoSQL?">
+  NoSQL databases are **non-relational** databases designed for flexible data models and high scalability.  
+  They don’t require a fixed schema and are often used for **fast-changing or unstructured data**.
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="rdbms" label="RDBMS">
+  <Callout type="info" title="What is RDBMS?">
+  RDBMS (Relational Database Management Systems) store data in **tables with rows and columns**.  
+  They use SQL to query data and are ideal when **data consistency and relationships matter**.
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="nosql-vs-rdbms" label="NoSQL vs RDBMS">
+  <table>
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>NoSQL</th>
+        <th>RDBMS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Data model</td>
+        <td>Flexible, schema-less, documents, key-value, graphs</td>
+        <td>Structured, fixed schema, tables & relations</td>
+      </tr>
+      <tr>
+        <td>Scaling</td>
+        <td>Horizontal (add more servers)</td>
+        <td>Vertical (upgrade single server) or limited horizontal</td>
+      </tr>
+      <tr>
+        <td>Use case</td>
+        <td>Real-time analytics, social networks, caching</td>
+        <td>Financial apps, inventory, transactions, reporting</td>
+      </tr>
+      <tr>
+        <td>Consistency</td>
+        <td>Eventual consistency</td>
+        <td>Strong ACID consistency</td>
+      </tr>
+      <tr>
+        <td>Performance</td>
+        <td>Optimized for speed and large-scale writes</td>
+        <td>Optimized for complex queries and joins</td>
+      </tr>
+    </tbody>
+  </table>
+  </TabPanel>
+
+</TabbedContent>
+
+# NoSQL Database Types
+
+<TabbedContent>
+
+  <TabPanel id="key-value" label="Key-Value Store">
+  <Callout type="info" title="Key-Value Store">
+  Stores data as **key-value pairs**. Extremely fast reads and writes, often in memory or SSD.  
+
+  Use for:  
+  - Caching layers  
+  - Simple data models  
+  - Rapidly changing data  
+
+  Complexity shifts to the app if advanced queries are needed.
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="document" label="Document Store">
+  <Callout type="info" title="Document Store">
+  Stores data as **documents** (JSON, XML, binary). Each document contains all info for an object.  
+
+  Features:  
+  - Query inside document fields  
+  - Group documents by collections, tags, metadata  
+
+  Great for apps where different records may have different fields.
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="graph" label="Graph Store">
+  <Callout type="info" title="Graph Store">
+  Stores **nodes and relationships**. Optimized for **complex relationships**.  
+
+  Use cases:  
+  - Social networks  
+  - Recommendation engines  
+  - Fraud detection  
+
+  Less common, might require specialized tools and REST APIs.
+  </Callout>
+  </TabPanel>
+
+</TabbedContent>
+
+# RDBMS Features
+
+<TabbedContent>
+
+  <TabPanel id="replication" label="Replication">
+  <Callout type="info" title="Replication">
+  Copies data across databases to increase availability and scalability.  
+
+  Types:  
+  - **Master-Slave**: Master handles writes, slaves handle reads. Promote slave if master fails.  
+  - **Master-Master**: Both serve reads & writes, coordinate changes. Survives failure of one master.
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="sharding" label="Sharding">
+  <Callout type="info" title="Sharding">
+  Distributes data across multiple databases. Each shard handles a subset of the data.  
+
+  Benefits:  
+  - Less traffic per shard  
+  - More cache hits  
+  - Parallel writes  
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="federation" label="Federation">
+  <Callout type="info" title="Federation">
+  Splits databases by function. Example: separate DBs for **users**, **products**, and **forums**.  
+
+  Benefits:  
+  - Reduces replication lag  
+  - Improves cache locality  
+  - Enables parallel writes
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="denormalization" label="Denormalization">
+  <Callout type="info" title="Denormalization">
+  Improves read performance by storing redundant data in multiple tables to avoid expensive joins.  
+
+  Some RDBMS support **materialized views** to maintain consistency automatically.
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="sql-tuning" label="SQL Tuning">
+  <Callout type="info" title="SQL Tuning">
+  Optimizing SQL queries to meet performance goals.  
+
+  Steps:  
+  - **Benchmark**: Simulate high-load situations with tools like `ab`  
+  - **Profile**: Use slow query logs to find bottlenecks  
+
+  Optimizations can then be applied based on real workload insights.
+  </Callout>
+  </TabPanel>
+
+</TabbedContent>
+
+<Callout type="success" title="Key Takeaway">
+Choosing the right database is about **matching your app’s needs**:  
+
+- Use **NoSQL** for flexible, fast, large-scale, or unstructured data.  
+- Use **RDBMS** for structured, consistent, transactional data.  
+
+Combine features like **replication, sharding, federation, and denormalization** to get the performance, scalability, and availability you need.
+</Callout>

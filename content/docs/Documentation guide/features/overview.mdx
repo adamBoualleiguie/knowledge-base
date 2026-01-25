@@ -17,6 +17,8 @@ Your portfolio website includes many powerful features to enhance your documenta
 - **Callout Components** - Styled information boxes (info, success, warning, error, note, danger)
 - **Excalidraw Diagrams** - Interactive diagrams with zoom and fullscreen
 - **Tabbed Content** - Switch between different methods/interfaces
+- **Highlight Marker** - Interactive text highlighting that activates when sections are reached
+- **Terminal** - Interactive terminal simulation with auto-typing commands
 - **Code Blocks** - Syntax highlighting with copy functionality
 - **Images & Videos** - Enhanced media components with hover effects
 
@@ -42,6 +44,8 @@ Each feature has detailed documentation with examples:
 - [Callout Components](/docs/guide/features/callouts) - Styled information boxes
 - [Excalidraw Diagrams](/docs/guide/features/excalidraw) - Interactive diagrams
 - [Tabbed Content](/docs/guide/features/tabbed-content) - Multi-tab sections
+- [Highlight Marker](/docs/guide/features/highlight-marker) - Interactive text highlighting
+- [Terminal](/docs/guide/features/terminal) - Interactive terminal simulation
 - [Code Blocks](/docs/guide/features/code-blocks) - Syntax highlighting
 - [Images & Videos](/docs/guide/features/images-videos) - Media components
 - [Global Search](/docs/guide/features/search) - Search functionality
@@ -81,6 +85,22 @@ This is an informational callout.
 </TabbedContent>
 ```
 
+### Highlight Marker
+
+```mdx
+Follow these <Highlight color="orange">critical steps</Highlight> to ensure success.
+```
+
+### Terminal
+
+```mdx
+<Terminal
+  commands={[
+    { command: 'npm install', output: 'added 250 packages' }
+  ]}
+/>
+```
+
 ### Code Block
 
 ````mdx
@@ -98,6 +118,8 @@ Explore each feature in detail:
 - [Callout Components](/docs/guide/features/callouts)
 - [Excalidraw Diagrams](/docs/guide/features/excalidraw)
 - [Tabbed Content](/docs/guide/features/tabbed-content)
+- [Highlight Marker](/docs/guide/features/highlight-marker)
+- [Terminal](/docs/guide/features/terminal)
 - [Code Blocks](/docs/guide/features/code-blocks)
 - [Images & Videos](/docs/guide/features/images-videos)
 - [Metadata Card](/docs/guide/features/metadata-card)

@@ -10,6 +10,14 @@ import { allDocs } from 'contentlayer/generated'
 export const metadata: Metadata = {
   title: 'Knowledge Base - Adam',
   description: 'Personal portfolio, documentation, and blog',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' },
+    ],
+  },
 }
 
 export default function RootLayout({
@@ -23,6 +31,8 @@ export default function RootLayout({
     url: doc.url,
     slug: doc.slug,
     description: doc.description,
+    // Include raw MDX content so search can match inside document body
+    content: doc.body.raw || doc.body.code,
   }))
 
   return (

@@ -25,9 +25,10 @@ interface CollapsibleSectionProps {
   children: React.ReactNode
   defaultOpen?: boolean
   titleLink?: string | null
+  level?: number
 }
 
-function CollapsibleSection({ title, children, defaultOpen = false, titleLink = null, isSubsection = false }: CollapsibleSectionProps & { isSubsection?: boolean }) {
+function CollapsibleSection({ title, children, defaultOpen = false, titleLink = null, level = 0 }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const pathname = usePathname()
 
@@ -36,7 +37,22 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
     setIsOpen(!isOpen)
   }
 
-  // Main section styling (big sections)
+  // Calculate padding based on level for proper tabulation
+  // Level 0 (main sections): pl-3 (12px)
+  // Level 1 (subsections): pl-5 (20px)
+  // Level 2 (nested subsections): pl-8 (32px)
+  // Level 3+ (deeper nesting): use inline style
+  const getLevelPadding = (level: number) => {
+    if (level === 0) return { class: 'pl-3', style: undefined }
+    if (level === 1) return { class: 'pl-5', style: undefined }
+    if (level === 2) return { class: 'pl-8', style: undefined }
+    // For deeper levels, use inline style
+    return { class: '', style: { paddingLeft: `${12 + level * 8}px` } }
+  }
+  
+  const { class: paddingClass, style: paddingStyle } = getLevelPadding(level)
+
+  // Main section styling (level 0)
   const mainSectionClasses = titleLink
     ? `flex-1 text-left text-base font-semibold capitalize transition-all duration-200 ${
         pathname === titleLink
@@ -45,12 +61,25 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
       }`
     : `flex-1 text-left text-base font-semibold capitalize transition-all duration-200 text-foreground/90 dark:text-gray-300 dark:hover:text-white dark:hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.25)]`
 
-  // Subsection styling (smaller sections)
+  // Subsection styling (level 1+)
   const subsectionClasses = `flex-1 text-left text-sm font-medium capitalize transition-all duration-200 text-foreground/80 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]`
+
+  const isSubsection = level > 0
+
+  // Automatically open section when it becomes "active" due to navigation,
+  // but don't auto-close to respect manual user toggles.
+  useEffect(() => {
+    if (defaultOpen) {
+      setIsOpen(true)
+    }
+  }, [defaultOpen])
 
   return (
     <div className="mt-1">
-      <div className={`w-full flex items-center justify-between ${isSubsection ? 'pl-5 pr-3' : 'pl-3 pr-3'} py-2`}>
+      <div 
+        className={`w-full flex items-center justify-between ${paddingClass} pr-3 py-2`}
+        style={paddingStyle}
+      >
         {titleLink ? (
           <Link
             href={titleLink}
@@ -87,8 +116,221 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
 }
 
 // Helper function to get document order (defaults to 999 if not set)
+// Ensures the order is always a number, even if it comes as a string from frontmatter
 function getDocOrder(doc: Doc): number {
-  return doc.order ?? 999
+  if (doc.order === undefined || doc.order === null) return 999
+  // Ensure it's a number (in case contentlayer returns it as a string)
+  const order = typeof doc.order === 'string' ? parseInt(doc.order, 10) : doc.order
+  return isNaN(order) ? 999 : order
+}
+
+// Recursive component to render nested structure
+function NestedSection({
+  structure,
+  pathname,
+  allDocs,
+  level = 0,
+  parentPath = '',
+  category = '',
+}: {
+  structure: any
+  pathname: string
+  allDocs: Doc[]
+  level?: number
+  parentPath?: string
+  category?: string
+}) {
+  const entries = Object.entries(structure).filter(([key]) => key !== '_docs' && key !== '_root')
+  
+  // Get documents at this level
+  const docs = structure._docs || []
+  const rootDocs = structure._root || []
+
+  // Helper to determine if any doc in this structure (at any depth) matches the current pathname
+  const hasActiveDoc = (node: any): boolean => {
+    const nodeDocs: Doc[] = node._docs || []
+    const nodeRootDocs: Doc[] = node._root || []
+
+    if ([...nodeDocs, ...nodeRootDocs].some((doc) => pathname === doc.url)) {
+      return true
+    }
+
+    return Object.entries(node).some(([key, child]) => {
+      if (key === '_docs' || key === '_root') return false
+      return hasActiveDoc(child)
+    })
+  }
+  
+  // Sort entries (subsections) - use parentPath for nested subsections
+  const sortedEntries = entries.sort(([a], [b]) => {
+    // Extract parent path from parentPath
+    // Example: "Knowledge-base/foundations/foundations" -> "foundations.foundations"
+    // Example: "Knowledge-base/foundations" -> "foundations"
+    let parentSubsection: string | undefined = undefined
+    if (parentPath) {
+      const parts = parentPath.split('/')
+      if (parts.length > 1) {
+        // Remove the category (first part) and join the rest with dots
+        parentSubsection = parts.slice(1).join('.')
+      } else if (parts.length === 1 && parts[0] !== category) {
+        parentSubsection = parts[0]
+      }
+    }
+    
+    const orderA = getSubsectionOrder(category, a, parentSubsection)
+    const orderB = getSubsectionOrder(category, b, parentSubsection)
+    if (orderA !== orderB) return orderA - orderB
+    return a.localeCompare(b)
+  })
+  
+  // Helper to check if a document is an overview
+  const isOverview = (doc: Doc) => doc.slug.endsWith('/overview')
+  
+  // Sort documents - order field takes precedence, then overview status
+  const sortedDocs = [...docs].sort((a, b) => {
+    const orderA = getDocOrder(a)
+    const orderB = getDocOrder(b)
+    
+    // First, sort by order field (lower numbers come first)
+    if (orderA !== orderB) return orderA - orderB
+    
+    // If order is the same, prioritize overview documents
+    const aIsOverview = isOverview(a)
+    const bIsOverview = isOverview(b)
+    if (aIsOverview && !bIsOverview) return -1
+    if (!aIsOverview && bIsOverview) return 1
+    
+    // Finally, sort alphabetically
+    return a.title.localeCompare(b.title)
+  })
+  
+  const sortedRootDocs = [...rootDocs].sort((a, b) => {
+    const orderA = getDocOrder(a)
+    const orderB = getDocOrder(b)
+    
+    // First, sort by order field (lower numbers come first)
+    if (orderA !== orderB) return orderA - orderB
+    
+    // If order is the same, prioritize overview documents
+    const aIsOverview = isOverview(a)
+    const bIsOverview = isOverview(b)
+    if (aIsOverview && !bIsOverview) return -1
+    if (!aIsOverview && bIsOverview) return 1
+    
+    // Finally, sort alphabetically
+    return a.title.localeCompare(b.title)
+  })
+  
+  // Calculate padding for documents based on level for proper tabulation
+  // Documents should be indented more than their parent section/subsection
+  // Level 0 docs (directly in section): pl-5 (20px) - 8px more than section (pl-3)
+  // Level 1 docs (in subsection): pl-8 (32px) - 8px more than subsection (pl-5)
+  // Level 2 docs (in nested subsection): pl-11 (44px) - 8px more than nested subsection (pl-8)
+  // Level 3+ docs: use inline style
+  const getDocumentPadding = (level: number) => {
+    if (level === 0) return { class: 'pl-5', style: undefined }  // 20px
+    if (level === 1) return { class: 'pl-8', style: undefined }  // 32px
+    if (level === 2) return { class: 'pl-11', style: undefined } // 44px
+    // For deeper levels, use inline style
+    return { class: '', style: { paddingLeft: `${20 + level * 12}px` } }
+  }
+  
+  const { class: documentPaddingClass, style: documentPaddingStyle } = getDocumentPadding(level)
+  
+  return (
+    <>
+      {/* Root documents (documents directly in this section) */}
+      {sortedRootDocs.length > 0 && (
+        <div 
+          className={`space-y-0.5 text-left ${documentPaddingClass}`}
+          style={documentPaddingStyle}
+        >
+          {sortedRootDocs.map((doc) => (
+            <Link
+              key={doc._id}
+              href={doc.url}
+              className={`flex items-center gap-2 pl-3 pr-3 py-1.5 transition-all duration-200 ${
+                pathname === doc.url
+                  ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
+                  : 'text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_3px_rgba(255,255,255,0.15)]'
+              }`}
+            >
+              <svg
+                className="w-3.5 h-3.5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="truncate text-sm text-left">{doc.title}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+      
+      {/* Render subsections recursively */}
+      {sortedEntries.map(([subsectionName, subsectionStructure]) => {
+        const subsectionPath = parentPath ? `${parentPath}/${subsectionName}` : subsectionName
+        const subsectionIsActive = hasActiveDoc(subsectionStructure)
+        
+        // Check if overview page exists - look in _root first, then by slug
+        const subsectionRootDocs: Doc[] = (subsectionStructure as any)._root || []
+        const overviewInRoot = subsectionRootDocs.find((doc) => doc.slug.endsWith('/overview'))
+        const overviewDoc = overviewInRoot || allDocs.find((doc) => doc.slug === `${subsectionPath}/overview`)
+        const overviewUrl = overviewDoc?.url || null
+        
+        return (
+          <CollapsibleSection
+            key={subsectionName}
+            title={formatDisplayName(subsectionName)}
+            defaultOpen={subsectionIsActive}
+            titleLink={overviewUrl}
+            level={level + 1}
+          >
+            <NestedSection
+              structure={subsectionStructure}
+              pathname={pathname}
+              allDocs={allDocs}
+              level={level + 1}
+              parentPath={subsectionPath}
+              category={category}
+            />
+          </CollapsibleSection>
+        )
+      })}
+      
+      {/* Documents at this level (if any) */}
+      {sortedDocs.length > 0 && (
+        <div 
+          className={`space-y-0.5 text-left ${documentPaddingClass}`}
+          style={documentPaddingStyle}
+        >
+          {sortedDocs.map((doc) => (
+            <Link
+              key={doc._id}
+              href={doc.url}
+              className={`flex items-center gap-2 pl-3 pr-3 py-1.5 transition-all duration-200 ${
+                pathname === doc.url
+                  ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
+                  : 'text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_3px_rgba(255,255,255,0.15)]'
+              }`}
+            >
+              <svg
+                className="w-3.5 h-3.5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="truncate text-sm text-left">{doc.title}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </>
+  )
 }
 
 export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
@@ -197,33 +439,76 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
     }
   }, [isResizing, handleMouseMove, handleMouseUp])
 
-  // Group docs by category (based on first part of slug)
+  // Recursive function to build nested structure (strips category prefix)
+  const buildNestedStructure = (docs: Doc[], category: string): Record<string, any> => {
+    const structure: Record<string, any> = {}
+    
+    docs.forEach((doc) => {
+      const parts = doc.slug.split('/')
+      // Remove the category part (first element) since we're building within a category
+      const relativeParts = parts.slice(1)
+      
+      if (relativeParts.length === 0) {
+        // Document directly in section (e.g., section/overview.mdx)
+        if (!structure._root) {
+          structure._root = []
+        }
+        structure._root.push(doc)
+      } else {
+        // Document in a subsection - build nested structure
+        let current = structure
+        
+        // Build nested structure for all parts except the last (which is the document name)
+        for (let i = 0; i < relativeParts.length - 1; i++) {
+          const part = relativeParts[i]
+          if (!current[part]) {
+            current[part] = { _docs: [], _root: [] }
+          }
+          current = current[part]
+        }
+        
+        // Add document to the appropriate level
+        const lastPart = relativeParts[relativeParts.length - 1]
+        if (relativeParts.length === 1) {
+          // Document directly in first-level subsection
+          if (!current._docs) {
+            current._docs = []
+          }
+          current._docs.push(doc)
+        } else {
+          // Document in nested subsection
+          if (!current._docs) {
+            current._docs = []
+          }
+          current._docs.push(doc)
+        }
+      }
+    })
+    
+    return structure
+  }
+  
+  // Group docs by category (first level)
   const groupedDocs = docs.reduce((acc, doc) => {
     const parts = doc.slug.split('/')
     const category = parts[0] || 'general'
-    const subcategory = parts[1] || null
     
     if (!acc[category]) {
-      acc[category] = {}
+      acc[category] = []
     }
-    
-    if (subcategory) {
-      if (!acc[category][subcategory]) {
-        acc[category][subcategory] = []
-      }
-      acc[category][subcategory].push(doc)
-    } else {
-      if (!acc[category]._root) {
-        acc[category]._root = []
-      }
-      acc[category]._root.push(doc)
-    }
+    acc[category].push(doc)
     
     return acc
-  }, {} as Record<string, Record<string, Doc[]>>)
+  }, {} as Record<string, Doc[]>)
+  
+  // Build nested structure for each category (stripping category prefix)
+  const nestedStructures = Object.entries(groupedDocs).reduce((acc, [category, categoryDocs]) => {
+    acc[category] = buildNestedStructure(categoryDocs, category)
+    return acc
+  }, {} as Record<string, any>)
   
   // Sort categories using global config
-  const sortedCategories = Object.entries(groupedDocs).sort(([a], [b]) => {
+  const sortedCategories = Object.entries(nestedStructures).sort(([a], [b]) => {
     const orderA = getSectionOrder(a)
     const orderB = getSectionOrder(b)
     if (orderA !== orderB) return orderA - orderB
@@ -284,179 +569,38 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
           </svg>
           <span className="text-base text-left">Overview</span>
         </Link>
-        {sortedCategories.map(([category, subcategories]) => {
-          const hasSubcategories = Object.keys(subcategories).length > 1 || (Object.keys(subcategories).length === 1 && !subcategories._root)
-          const isCategoryActive = Object.values(subcategories)
-            .flat()
-            .some((doc) => pathname === doc.url)
-
-          if (hasSubcategories) {
-            // Check if overview page exists for this category
-            const overviewDoc = allDocs.find((doc) => doc.slug === `${category}/overview`)
-            const categoryUrl = overviewDoc?.url || null
-            
-            return (
-              <CollapsibleSection
-                key={category}
-                title={formatDisplayName(category)}
-                defaultOpen={isCategoryActive}
-                titleLink={categoryUrl}
-                isSubsection={false}
-              >
-                {Object.entries(subcategories)
-                  .sort(([a], [b]) => {
-                    // Always put _root (which contains overview) first
-                    if (a === '_root') return -1
-                    if (b === '_root') return 1
-                    
-                    // Use global subsection order
-                    const orderA = getSubsectionOrder(category, a)
-                    const orderB = getSubsectionOrder(category, b)
-                    if (orderA !== orderB) return orderA - orderB
-                    
-                    // Otherwise sort alphabetically
-                    return a.localeCompare(b)
-                  })
-                  .map(([subcategory, docs]) => {
-                  if (subcategory === '_root') {
-                    // Sort documents by order field
-                    const sortedDocs = [...docs].sort((a, b) => {
-                      const orderA = getDocOrder(a)
-                      const orderB = getDocOrder(b)
-                      if (orderA !== orderB) return orderA - orderB
-                      return a.title.localeCompare(b.title)
-                    })
-                    
-                    return (
-                      <div key={subcategory} className="pl-5 space-y-0.5 text-left">
-                        {sortedDocs.map((doc) => (
-                          <Link
-                            key={doc._id}
-                            href={doc.url}
-                            className={`flex items-center gap-2 pl-3 pr-3 py-1.5 transition-all duration-200 ${
-                              pathname === doc.url
-                                ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
-                                : 'text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_3px_rgba(255,255,255,0.15)]'
-                            }`}
-                          >
-                            <svg
-                              className="w-3.5 h-3.5 flex-shrink-0"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span className="truncate text-sm text-left">{doc.title}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    )
-                  }
-
-                  const isSubcategoryActive = docs.some((doc) => pathname === doc.url)
-
-                  // Sort documents by order field
-                  const sortedDocs = [...docs].sort((a, b) => {
-                    const orderA = getDocOrder(a)
-                    const orderB = getDocOrder(b)
-                    if (orderA !== orderB) return orderA - orderB
-                    return a.title.localeCompare(b.title)
-                  })
-                  
-                  return (
-                    <CollapsibleSection
-                      key={subcategory}
-                      title={formatDisplayName(subcategory)}
-                      defaultOpen={isSubcategoryActive}
-                      isSubsection={true}
-                    >
-                      <div className="pl-10 space-y-0.5 text-left">
-                        {sortedDocs.map((doc) => (
-                          <Link
-                            key={doc._id}
-                            href={doc.url}
-                            className={`flex items-center gap-2 pl-3 pr-3 py-1.5 transition-all duration-200 ${
-                              pathname === doc.url
-                                ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
-                                : 'text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_3px_rgba(255,255,255,0.15)]'
-                            }`}
-                          >
-                            <svg
-                              className="w-3.5 h-3.5 flex-shrink-0"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span className="truncate text-sm text-left">{doc.title}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </CollapsibleSection>
-                  )
-                })}
-              </CollapsibleSection>
-            )
-          }
-
-          // No subcategories, just show docs directly as a collapsible section
-          const hasDocs = Object.values(subcategories).flat().length > 0
-          if (hasDocs) {
-            const isCategoryActive = Object.values(subcategories)
-              .flat()
-              .some((doc) => pathname === doc.url)
-            
-            // Check if overview page exists for this category
-            const overviewDoc = allDocs.find((doc) => doc.slug === `${category}/overview`)
-            const categoryUrl = overviewDoc?.url || null
-            
-            // Sort documents by order field
-            const allCategoryDocs = Object.values(subcategories).flat()
-            const sortedCategoryDocs = [...allCategoryDocs].sort((a, b) => {
-              const orderA = getDocOrder(a)
-              const orderB = getDocOrder(b)
-              if (orderA !== orderB) return orderA - orderB
-              return a.title.localeCompare(b.title)
-            })
-            
-            return (
-              <CollapsibleSection
-                key={category}
-                title={formatDisplayName(category)}
-                defaultOpen={isCategoryActive}
-                titleLink={categoryUrl}
-                isSubsection={false}
-              >
-                <div className="pl-5 space-y-0.5 text-left">
-                  {sortedCategoryDocs.map((doc) => (
-                    <Link
-                      key={doc._id}
-                      href={doc.url}
-                      className={`flex items-center gap-2 pl-3 pr-3 py-1.5 transition-all duration-200 ${
-                        pathname === doc.url
-                          ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
-                          : 'text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_3px_rgba(255,255,255,0.15)]'
-                      }`}
-                    >
-                      <svg
-                        className="w-3.5 h-3.5 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span className="truncate text-sm">{doc.title}</span>
-                    </Link>
-                  ))}
-                </div>
-              </CollapsibleSection>
-            )
-          }
+        {sortedCategories.map(([category, structure]) => {
+          // Get all docs from this category to check if active
+          const allCategoryDocs = groupedDocs[category] || []
+          const isCategoryActive = allCategoryDocs.some((doc) => pathname === doc.url)
           
-          return null
+          // Check if category has any content
+          const hasContent = Object.keys(structure).length > 0
+          
+          if (!hasContent) return null
+          
+          // Check if overview page exists for this category
+          const overviewDoc = allDocs.find((doc) => doc.slug === `${category}/overview`)
+          const categoryUrl = overviewDoc?.url || null
+          
+          return (
+            <CollapsibleSection
+              key={category}
+              title={formatDisplayName(category)}
+              defaultOpen={isCategoryActive}
+              titleLink={categoryUrl}
+              level={0}
+            >
+              <NestedSection
+                structure={structure}
+                pathname={pathname}
+                allDocs={allDocs}
+                level={0}
+                parentPath={category}
+                category={category}
+              />
+            </CollapsibleSection>
+          )
         })}
       </nav>
     </aside>

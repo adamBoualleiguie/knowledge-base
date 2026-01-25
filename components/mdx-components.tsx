@@ -7,6 +7,8 @@ import { DocVideo } from './Video'
 import { CodeBlock } from './CodeBlock'
 import { Callout } from './Callout'
 import { ExcalidrawDiagram } from './ExcalidrawDiagram'
+import { Highlight } from './Highlight'
+import { Terminal } from './Terminal'
 
 const mdxComponents = {
   TabbedContent,
@@ -16,6 +18,8 @@ const mdxComponents = {
   CodeBlock,
   Callout,
   ExcalidrawDiagram,
+  Highlight,
+  Terminal,
   pre: (props: any) => {
     // Handle code blocks - MDX wraps code in pre > code
     const child = props.children

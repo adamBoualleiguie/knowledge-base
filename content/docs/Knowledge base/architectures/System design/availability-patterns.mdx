@@ -1,0 +1,153 @@
+---
+title: Availability Patterns
+description: Let's talk about availability patterns of system design.
+publishedAt: 2025-05-04
+order: 3
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Availability Patterns
+
+Availability patterns are established architectural approaches used to ensure a system remains operational and accessible to users, even in the face of failures or unexpected events. These patterns focus on minimizing downtime and maintaining a consistent level of service by incorporating redundancy, fault tolerance, and recovery mechanisms into the system's design. They provide a structured way to address potential points of failure and ensure business continuity.
+
+# Availability in Numbers
+
+<TabbedContent>
+  <TabPanel id="three-9s" label="99.9% Availability - Three 9s">
+<table>
+  <thead>
+    <tr>
+      <th>Duration</th>
+      <th>Acceptable downtime</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Downtime per year</td>
+      <td>8h 41min 38s</td>
+    </tr>
+    <tr>
+      <td>Downtime per month</td>
+      <td>43m 28s</td>
+    </tr>
+    <tr>
+      <td>Downtime per week</td>
+      <td>10m 4.8s</td>
+    </tr>
+    <tr>
+      <td>Downtime per day</td>
+      <td>1m 26s</td>
+    </tr>
+  </tbody>
+</table>
+
+  </TabPanel>
+
+  <TabPanel id="four-9s" label="99.99% Availability - Four 9s">
+<table>
+  <thead>
+    <tr>
+      <th>Duration</th>
+      <th>Acceptable downtime</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Downtime per year</td>
+      <td>52min 9.8s</td>
+    </tr>
+    <tr>
+      <td>Downtime per month</td>
+      <td>4m 21s</td>
+    </tr>
+    <tr>
+      <td>Downtime per week</td>
+      <td>1m 0.5s</td>
+    </tr>
+    <tr>
+      <td>Downtime per day</td>
+      <td>8.6s</td>
+    </tr>
+  </tbody>
+</table>
+
+  </TabPanel>
+</TabbedContent>
+
+## Availability in Parallel vs in Sequence
+
+<TabbedContent>
+  <TabPanel id="in-sequence" label="In Sequence">
+    Overall availability decreases when two components with availability &lt; 100% are in sequence:
+
+    ```bash
+    Availability (Total) = Availability (Foo) * Availability (Bar)
+    ```
+
+    Example: If both Foo and Bar each had 99.9% availability, their total availability in sequence would be 99.8%.
+  </TabPanel>
+
+  <TabPanel id="in-parallel" label="In Parallel">
+    Overall availability increases when two components with availability &lt; 100% are in parallel:
+
+    ```bash
+    Availability (Total) = 1 - (1 - Availability (Foo)) * (1 - Availability (Bar))
+    ```
+
+    Example: If both Foo and Bar each had 99.9% availability, their total availability in parallel would be 99.9999%.
+  </TabPanel>
+</TabbedContent>
+
+# Availability Patterns
+
+<TabbedContent>
+  <TabPanel id="replication" label="Replication">
+    ### Replication
+
+    Replication is an availability pattern that involves having multiple copies of the same data stored in different locations. In the event of a failure, the data can be retrieved from a different location. There are two main types of replication: Master-Master replication and Master-Slave replication.
+
+    **Master-Master replication:** Multiple servers are configured as "masters," each accepting read and write operations. Provides high availability, but requires conflict resolution.
+
+    **Master-Slave replication:** One server is the "master" handling writes, and multiple "slaves" handle reads. If the master fails, a slave is promoted. Simpler to maintain.
+  </TabPanel>
+
+  <TabPanel id="failover" label="Failover">
+    ### Failover
+
+    Failover ensures a system continues functioning if a component fails, using a backup component or system.
+
+    **Active-Passive:** Heartbeats are sent between active and passive servers. If the heartbeat fails, the passive server takes over. Only the active handles traffic. Also called master-slave failover.
+
+    **Active-Active:** Both servers manage traffic, balancing the load. DNS or application logic must handle multiple active IPs. Also called master-master failover.
+
+    **Disadvantages:** Adds hardware and complexity; potential data loss if active fails before replication.
+  </TabPanel>
+</TabbedContent>
+
+# SLI, SLO & SLA
+
+<Callout type="info" title="Understanding Availability Terms">
+SLI, SLO, and SLA are fundamental concepts to measure and manage service availability. They help define the performance indicators, objectives, and contractual agreements for maintaining availability and reliability.
+</Callout>
+
+<TabbedContent>
+  <TabPanel id="sli" label="SLI">
+    ### Service Level Indicator (SLI)
+
+    SLI is a quantitative metric that measures the performance of a service. It indicates how well a service is performing in terms of availability, latency, or error rate.
+  </TabPanel>
+
+  <TabPanel id="slo" label="SLO">
+    ### Service Level Objective (SLO)
+
+    SLO is a goal that a service aims to achieve based on SLIs. It defines the target performance and acceptable error thresholds over a defined period.
+  </TabPanel>
+
+  <TabPanel id="sla" label="SLA">
+    ### Service Level Agreement (SLA)
+
+    SLA is a formal contract between a service provider and consumer, outlining the performance expectations and penalties for failing to meet the agreed SLOs.
+  </TabPanel>
+</TabbedContent>

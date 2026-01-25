@@ -3,6 +3,7 @@
 import { format } from 'date-fns'
 import { User, Clock, Calendar, Tag } from 'lucide-react'
 import Image from 'next/image'
+import { useState } from 'react'
 
 interface MetadataCardProps {
   author?: string
@@ -17,11 +18,27 @@ interface MetadataCardProps {
  * Resolve author photo path
  * If it starts with /, use as-is
  * Otherwise, assume it's in /assets/authors/
+ * Handles various formats: "author.jpg", "/assets/authors/author.jpg", "assets/authors/author.jpg"
  */
-function resolveAuthorPhoto(authorPhoto?: string): string | null {
-  if (!authorPhoto) return null
-  if (authorPhoto.startsWith('/')) return authorPhoto
-  return `/assets/authors/${authorPhoto}`
+function resolveAuthorPhoto(authorPhoto?: string | null): string | null {
+  if (!authorPhoto || typeof authorPhoto !== 'string' || authorPhoto.trim() === '') {
+    return null
+  }
+  
+  const trimmed = authorPhoto.trim()
+  
+  // If it already starts with /, use as-is
+  if (trimmed.startsWith('/')) {
+    return trimmed
+  }
+  
+  // If it starts with assets/, add leading slash
+  if (trimmed.startsWith('assets/')) {
+    return `/${trimmed}`
+  }
+  
+  // Otherwise, assume it's just the filename and add the path
+  return `/assets/authors/${trimmed}`
 }
 
 export function MetadataCard({ 
@@ -34,13 +51,14 @@ export function MetadataCard({
 }: MetadataCardProps) {
   const displayReadTime = readTime || 0
   const photoPath = resolveAuthorPhoto(authorPhoto)
+  const [imageError, setImageError] = useState(false)
 
   return (
     <div className="w-64 p-6 border border-border rounded-lg bg-card shadow-sm">
       <div className="space-y-4">
         {author && (
           <div className="flex items-center gap-3">
-            {photoPath ? (
+            {photoPath && !imageError ? (
               <div className="flex-shrink-0">
                 <div className="relative w-12 h-12 rounded-full overflow-hidden bg-muted border border-border/50">
                   <Image
@@ -49,6 +67,8 @@ export function MetadataCard({
                     fill
                     className="object-cover"
                     sizes="48px"
+                    onError={() => setImageError(true)}
+                    unoptimized
                   />
                 </div>
               </div>

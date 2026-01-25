@@ -7,6 +7,8 @@ const nextConfig = {
   experimental: {
     mdxRs: false,
   },
+  // Enable standalone output for Docker
+  output: 'standalone',
   images: {
     remotePatterns: [
       {

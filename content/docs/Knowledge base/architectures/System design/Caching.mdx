@@ -1,0 +1,176 @@
+---
+title: Caching
+description: Understanding caching in system design and when to use it.
+publishedAt: 2025-05-04
+order: 6
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Caching
+
+Caching is simply about not doing the same expensive work twice. When data is requested often, it makes sense to store it closer to the consumer instead of repeatedly querying the original source. Done right, caching reduces latency, protects databases from overload, and makes systems feel fast and responsive.
+
+In practice, caching is never a single decision. It’s a mix of **strategies** (how data flows) and **layers** (where data lives).
+
+---
+
+## Caching strategies
+
+<TabbedContent>
+  <TabPanel id="refresh-ahead" label="Refresh Ahead">
+    Refresh-ahead is a proactive strategy. Instead of waiting for cached data to expire and cause a cache miss, the system refreshes popular entries *before* they expire.
+
+    This works well when access patterns are predictable. Frequently requested data stays warm in the cache, and users rarely experience slow reads.
+
+    <Callout type="note">
+      Refresh-ahead is most effective when traffic patterns are stable and easy to predict.
+    </Callout>
+
+    **Disadvantages**
+    - Wrong predictions waste resources.
+    - Refreshing unused data can hurt overall performance.
+
+    <DocImage
+      src="/assets/docs/images/knowledge-base/architectures/system-design/refresh-ahead.png"
+      alt="Refresh-ahead caching flow"
+      caption="Refreshing popular cache entries before expiration"
+    />
+  </TabPanel>
+
+  <TabPanel id="write-behind" label="Write-Behind">
+    Write-behind optimizes write performance. The application updates the cache first, and the cache persists the change to the database asynchronously.
+
+    **Flow**
+    - Update cache
+    - Return immediately
+    - Database update happens in the background
+
+    This removes database latency from the critical path of user requests.
+
+    **Disadvantages**
+    - Data loss is possible if the cache fails before flushing.
+    - More complex to implement and monitor.
+
+    <DocImage
+      src="/assets/docs/images/knowledge-base/architectures/system-design/write-behind.png"
+      alt="Write-behind caching flow"
+      caption="Asynchronous writes from cache to database"
+    />
+  </TabPanel>
+
+  <TabPanel id="write-through" label="Write-Through">
+    In write-through, the cache becomes the main entry point for writes. Every write is synchronously persisted to the database via the cache.
+
+    **Flow**
+    - Application writes to cache
+    - Cache writes to database
+    - Operation completes only after persistence
+
+    ```python
+    set_user(12345, {"foo": "bar"})
+    ```
+
+    ```python
+    def set_user(user_id, values):
+        user = db.query(
+            "UPDATE Users WHERE id = {0}", user_id, values
+        )
+        cache.set(user_id, user)
+    ```
+
+    Writes are slower, but reads immediately after are always fast and consistent. Users usually tolerate write latency more than read latency.
+
+    **Disadvantages**
+    - New cache nodes start cold after scaling or failure.
+    - Many written entries may never be read (TTL helps).
+
+    <DocImage
+      src="/assets/docs/images/knowledge-base/architectures/system-design/write-through.png"
+      alt="Write-through caching flow"
+      caption="Synchronous cache and database writes"
+    />
+  </TabPanel>
+
+  <TabPanel id="cache-aside" label="Cache Aside">
+    Cache-aside (also called lazy loading) puts full control in the application. The cache never talks to the database directly.
+
+    **Flow**
+    - Check cache
+    - On miss, query database
+    - Store result in cache
+    - Return data
+
+    ```python
+    def get_user(self, user_id):
+        user = cache.get(f"user.{user_id}")
+        if user is None:
+            user = db.query(
+                "SELECT * FROM users WHERE user_id = {0}", user_id
+            )
+            if user is not None:
+                cache.set(f"user.{user_id}", json.dumps(user))
+        return user
+    ```
+
+    <Callout type="note">
+      Memcached is commonly used with cache-aside. Only requested data is cached, which avoids filling memory with unused entries.
+    </Callout>
+
+    <DocImage
+      src="/assets/docs/images/knowledge-base/architectures/system-design/cache-aside.png"
+      alt="Cache-aside caching flow"
+      caption="Application-managed cache-aside pattern"
+    />
+  </TabPanel>
+</TabbedContent>
+
+---
+
+## Types of caching
+
+<TabbedContent>
+  <TabPanel id="client-caching" label="Client Caching">
+    Client-side caching stores data directly on the user’s device. Web browsers are the most common example, caching pages and static assets locally.
+
+    Applications can also cache API responses or computed data on the client.
+
+    **Pros**
+    - Reduced server load
+    - Faster load times
+    - Less network traffic
+
+    **Cons**
+    - Risk of stale data
+    - Uses client storage
+  </TabPanel>
+
+  <TabPanel id="cdn-caching" label="CDN Caching">
+    A CDN caches content on servers distributed around the world. Users are served from the nearest location instead of the origin server.
+
+    If content is cached at the edge, the backend is never hit. Otherwise, the CDN fetches it once and stores it for future requests.
+
+    This improves latency, availability, and resilience under traffic spikes.
+  </TabPanel>
+
+  <TabPanel id="database-caching" label="Database Caching">
+    Databases already cache data internally: indexes, query results, and frequently accessed pages are kept in memory.
+
+    It’s like keeping your most-used books on your desk instead of walking to the library every time.
+
+    Tuning database caches can bring major gains, but stale data and memory pressure must be managed carefully.
+  </TabPanel>
+
+  <TabPanel id="application-caching" label="Application Caching">
+    Application caches sit between your code and the database. Tools like Redis and Memcached store key-value data in RAM for extremely fast access.
+
+    Since RAM is limited, eviction strategies like LRU help keep only hot data.
+
+    Redis adds:
+    - Optional persistence
+    - Rich data structures (lists, sets, sorted sets)
+
+    File-based caching is usually avoided, as it complicates scaling and failover.
+  </TabPanel>
+</TabbedContent>

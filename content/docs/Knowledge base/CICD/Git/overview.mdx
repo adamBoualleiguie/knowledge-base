@@ -1,0 +1,144 @@
+---
+title: Git
+description: Let’s talk about Git and why version control really matters.
+publishedAt: 2025-05-01
+order: 1
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+## What is version control?
+
+Imagine writing a long document and saving it as `final.docx`, then `final-v2.docx`, then `final-really-final.docx`. Now imagine doing that with hundreds of files, with multiple people editing them at the same time. Things get messy very fast.
+
+Version control exists to solve <Highlight color="green">this exact problem</Highlight>.
+
+At its core, version control is a system that keeps track of <Highlight color="green">every change made to files over time</Highlight>. It remembers what changed, when it changed, and who made the change. Instead of guessing or relying on manual backups, you always have a clear and reliable history of your project.
+
+It allows you to:
+- Go back to <Highlight color="green">any previous version</Highlight> of a file
+- See <Highlight color="green">exactly what changed</Highlight> between two points in time
+- <Highlight color="green">Experiment freely</Highlight> without breaking the main project
+- Understand <Highlight color="green">how a project evolved</Highlight> over time
+
+You can think of version control as a <Highlight color="green">time machine for your code and documents</Highlight>.
+
+---
+
+## Why do we use version control?
+
+Version control is not just for large teams or big companies. It becomes useful the moment a project starts <Highlight color="green">growing beyond a single file or person</Highlight>.
+
+Here’s why it’s essential:
+
+- **Safe collaboration**  
+  <Highlight color="green">Multiple people can work at the same time</Highlight> without overwriting each other’s work.
+
+- **History and accountability**  
+  <Highlight color="green">Every change is recorded</Highlight>. If something breaks, you can see what changed and who did it.
+
+- **Easy rollback**  
+  If a bug is introduced, you can <Highlight color="green">quickly return to a known working state</Highlight>.
+
+- **Parallel work**  
+  Features, fixes, and experiments can be <Highlight color="green">developed independently</Highlight> and merged later.
+
+- **Confidence to experiment**  
+  You can try new ideas without fear, knowing you can always revert.  
+  <Highlight color="red">Without version control, experimentation is risky and stressful.</Highlight>
+
+In short, version control turns <Highlight color="green">chaos into structure</Highlight> and <Highlight color="green">guesswork into certainty</Highlight>.
+
+---
+
+## Git and Version Control Systems
+
+<TabbedContent>
+  <TabPanel id="vcs" label="Version Control System (VCS)">
+    A Version Control System (VCS) is the <Highlight color="green">general concept</Highlight> and tooling used to track changes in files over time.
+
+    There are many types of VCS:
+    - <Highlight color="green">Centralized systems</Highlight> (like SVN)
+    - <Highlight color="green">Distributed systems</Highlight> (like Git)
+
+    A VCS defines how history is stored, how collaboration works, and how changes are shared.  
+    Git is <Highlight color="green">one implementation</Highlight> of these ideas, <Highlight color="red">not the idea itself</Highlight>.
+  </TabPanel>
+
+  <TabPanel id="git" label="Git">
+    Git is a <Highlight color="green">distributed version control system</Highlight> created to handle projects of <Highlight color="green">any size</Highlight> efficiently.
+
+    What makes Git special is that <Highlight color="green">every developer has a full copy of the project history</Highlight> locally. This means:
+    - <Highlight color="green">You can work offline</Highlight>
+    - <Highlight color="green">Operations are extremely fast</Highlight>
+    - <Highlight color="green">There is no single point of failure</Highlight>
+
+    Git is now the <Highlight color="green">industry standard</Highlight> for version control and is used everywhere: open-source projects, startups, and large enterprises.
+  </TabPanel>
+
+  <TabPanel id="git-vs-vcs" label="Git vs VCS">
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Version Control System (VCS)</th>
+      <th>Git</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Scope</td>
+      <td>General concept</td>
+      <td><Highlight color="green">Specific tool</Highlight></td>
+    </tr>
+    <tr>
+      <td>Purpose</td>
+      <td>Track changes over time</td>
+      <td><Highlight color="green">Distributed change tracking</Highlight></td>
+    </tr>
+    <tr>
+      <td>Architecture</td>
+      <td>Centralized or distributed</td>
+      <td><Highlight color="green">Fully distributed</Highlight></td>
+    </tr>
+    <tr>
+      <td>Offline work</td>
+      <td>Depends on implementation</td>
+      <td><Highlight color="green">Always available</Highlight></td>
+    </tr>
+    <tr>
+      <td>Speed</td>
+      <td>Varies</td>
+      <td><Highlight color="green">Very fast local operations</Highlight></td>
+    </tr>
+    <tr>
+      <td>Popularity</td>
+      <td>Broad category</td>
+      <td><Highlight color="green">Most widely used today</Highlight></td>
+    </tr>
+    <tr>
+      <td>Typical use</td>
+      <td>Conceptual framework</td>
+      <td><Highlight color="green">Daily development tool</Highlight></td>
+    </tr>
+  </tbody>
+</table>
+
+    <Highlight color="green">Think “VCS”</Highlight> when discussing theory, architecture, or workflows.  
+    <Highlight color="green">Think “Git”</Highlight> when actually writing code and collaborating.
+  </TabPanel>
+</TabbedContent>
+
+---
+
+## Learning Git the right way
+
+Git can feel confusing at first, especially with concepts like branches, rebases, and merges.  
+<Highlight color="red">Reading alone is often not enough.</Highlight>
+
+If you want a fun and effective way to learn Git, this resource is highly recommended:
+
+👉 <Highlight color="green"><a href="https://learngitbranching.js.org/" target="_blank" rel="noopener noreferrer">Learn Git Branching (interactive)</a></Highlight>
+
+It teaches Git through <Highlight color="green">interactive visual exercises</Highlight>, helping you build real intuition instead of memorizing commands.

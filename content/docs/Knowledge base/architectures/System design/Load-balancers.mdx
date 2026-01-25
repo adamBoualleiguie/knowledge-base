@@ -1,0 +1,114 @@
+---
+title: Load Balancers        
+description: Understanding load balancers in system design and when to use them.
+publishedAt: 2025-05-04
+order: 5
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Load Balancers
+
+Load balancers are the traffic directors of your system. They take incoming requests from users and decide which server should handle them.  
+
+They help your system by:
+
+- Preventing traffic from reaching unhealthy servers  
+- Avoiding overload on any single server  
+- Eliminating single points of failure  
+
+<Callout type="success" title="Extra Perks">
+Modern load balancers can also handle:
+
+- **SSL termination**: Decrypt requests and encrypt responses so backend servers don’t have to  
+- **Session persistence**: Keep a user’s requests going to the same server if the app doesn’t track sessions  
+- **Simplified certificate management**: No need to install certificates on each server  
+</Callout>
+
+Load balancers can be **hardware-based** (expensive) or **software-based**, like HAProxy or Nginx.
+
+# Types of Load Balancers
+
+Load balancers can operate at different layers of the network stack. This determines how they inspect and distribute traffic.
+
+<TabbedContent>
+
+  <TabPanel id="layer-4" label="Layer 4 Load Balancer">
+  <Callout type="info" title="How Layer 4 Works">
+  Layer 4 load balancers work at the transport layer. They look at IP addresses and ports, but not the content of the requests.  
+  They forward packets to servers using NAT (Network Address Translation).  
+  </Callout>
+
+  <Callout type="note" title="When to Use Layer 4">
+  - High-performance, low-latency routing  
+  - Less CPU overhead  
+  - Works well when traffic doesn’t need content-aware routing
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="layer-7" label="Layer 7 Load Balancer">
+  <Callout type="info" title="How Layer 7 Works">
+  Layer 7 load balancers work at the application layer. They inspect headers, cookies, and request content before deciding which server to send the traffic to.  
+
+  Example:  
+  - Video traffic → video servers  
+  - Billing traffic → security-hardened servers  
+  </Callout>
+
+  <Callout type="note" title="Trade-offs">
+  - More flexible routing based on request data  
+  - Slightly higher CPU usage, but modern hardware handles it easily  
+  </Callout>
+  </TabPanel>
+
+</TabbedContent>
+
+# Examples: Layer 4 vs Layer 7
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Layer 4 LB</th>
+      <th>Layer 7 LB</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Inspection</td>
+      <td>IP & port only</td>
+      <td>Headers, cookies, body content</td>
+    </tr>
+    <tr>
+      <td>Use Case</td>
+      <td>Fast packet routing, low CPU overhead</td>
+      <td>Content-based routing, smarter decisions</td>
+    </tr>
+    <tr>
+      <td>Example</td>
+      <td>All traffic balanced equally to backend servers</td>
+      <td>Video requests → video servers, billing requests → secure servers</td>
+    </tr>
+    <tr>
+      <td>Performance</td>
+      <td>Very fast, minimal processing</td>
+      <td>Higher processing, but flexible</td>
+    </tr>
+  </tbody>
+</table>
+
+# Benefits of Using Load Balancers
+
+<Callout type="success" title="Horizontal Scaling">
+Load balancers make it easy to **scale horizontally** by adding more commodity servers. This is usually:
+
+- Cheaper than vertical scaling (upgrading a single server)  
+- More resilient, because failure of one server doesn’t take down the system  
+- Easier to manage with widely available hardware and talent
+</Callout>
+
+<Callout type="note" title="Summary">
+Load balancers improve **availability, performance, and reliability**.  
+Choosing between Layer 4 and Layer 7 depends on whether you need **speed** or **content-aware routing**.
+</Callout>

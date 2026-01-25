@@ -1,0 +1,626 @@
+---
+title: Terminal Component
+description: Interactive terminal simulation with auto-typing commands and outputs
+publishedAt: 2024-01-01
+order: 10
+---
+
+# Terminal Component
+
+The Terminal component creates an interactive, animated terminal simulation that automatically types commands and displays outputs when readers reach the section. Perfect for demonstrating command-line workflows, installation steps, and CLI tutorials.
+
+## Overview
+
+The Terminal component simulates a real terminal experience with:
+- **Auto-typing**: Commands type out character by character automatically
+- **Command Output**: Shows command responses after each command
+- **Section-Aware**: Starts typing when the reader scrolls to that section
+- **Beautiful UI**: GitHub-style terminal with macOS window controls
+- **Multiple Commands**: Supports sequences of commands with outputs
+
+## Features
+
+- ✅ **Auto-Start**: Begins typing when section comes into view
+- ✅ **Character-by-Character**: Realistic typing animation
+- ✅ **Command Output**: Shows responses after each command
+- ✅ **Multiple Commands**: Chain multiple commands in sequence
+- ✅ **Customizable Prompt**: Change the command prompt (default: `$`)
+- ✅ **Customizable Title**: Set a custom terminal window title
+- ✅ **Restart Button**: Readers can restart the animation
+- ✅ **Theme-Aware**: Beautiful dark theme matching GitHub's terminal style
+
+## Basic Usage
+
+### Simple Command
+
+**MDX Syntax:**
+```mdx
+<Terminal
+  commands={[
+    {
+      command: 'echo "Hello, World!"',
+      output: 'Hello, World!'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+<Terminal
+  commands={[
+    {
+      command: 'echo "Hello, World!"',
+      output: 'Hello, World!'
+    }
+  ]}
+/>
+
+### Multiple Commands
+
+**MDX Syntax:**
+```mdx
+<Terminal
+  commands={[
+    {
+      command: 'pwd',
+      output: '/home/user/project'
+    },
+    {
+      command: 'ls -la',
+      output: 'total 24\ndrwxr-xr-x  5 user user  160 Jan 15 10:30 .\ndrwxr-xr-x 10 user user  320 Jan 15 09:00 ..\n-rw-r--r--  1 user user 1234 Jan 15 10:30 README.md'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+<Terminal
+  commands={[
+    {
+      command: 'pwd',
+      output: '/home/user/project'
+    },
+    {
+      command: 'ls -la',
+      output: 'total 24\ndrwxr-xr-x  5 user user  160 Jan 15 10:30 .\ndrwxr-xr-x 10 user user  320 Jan 15 09:00 ..\n-rw-r--r--  1 user user 1234 Jan 15 10:30 README.md'
+    }
+  ]}
+/>
+
+## Component Props
+
+### Required Props
+
+- **`commands`** (array): Array of command objects
+  - Each command object has:
+    - `command` (string, required): The command to type
+    - `output` (string, optional): The output to display after the command
+    - `delay` (number, optional): Delay in milliseconds before showing output (default: 800ms)
+
+### Optional Props
+
+- **`prompt`** (string): Command prompt symbol (default: `$`)
+- **`title`** (string): Terminal window title (default: `"Terminal"`)
+- **`autoStart`** (boolean): Auto-start when section is reached (default: `true`)
+
+## Examples
+
+### Installation Workflow
+
+**MDX Syntax:**
+```mdx
+## Installation
+
+Follow these steps to install the project:
+
+<Terminal
+  title="Installation Terminal"
+  commands={[
+    {
+      command: 'git clone https://github.com/example/repo.git',
+      output: 'Cloning into \'repo\'...\nremote: Enumerating objects: 100, done.\nremote: Counting objects: 100% (100/100), done.\nremote: Compressing objects: 100% (80/80), done.\nremote: Total 100 (delta 20), reused 100 (delta 20)\nReceiving objects: 100% (100/100), 2.5 MiB | 5.2 MiB/s, done.'
+    },
+    {
+      command: 'cd repo',
+      output: ''
+    },
+    {
+      command: 'npm install',
+      output: 'added 250 packages in 15s'
+    },
+    {
+      command: 'npm run dev',
+      output: '> dev\n> next dev\n\n  ▲ Next.js 14.2.0\n  - Local:        http://localhost:3000\n\n✓ Ready in 2.3s'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+## Installation
+
+Follow these steps to install the project:
+
+<Terminal
+  title="Installation Terminal"
+  commands={[
+    {
+      command: 'git clone https://github.com/example/repo.git',
+      output: 'Cloning into \'repo\'...\nremote: Enumerating objects: 100, done.\nremote: Counting objects: 100% (100/100), done.\nremote: Compressing objects: 100% (80/80), done.\nremote: Total 100 (delta 20), reused 100 (delta 20)\nReceiving objects: 100% (100/100), 2.5 MiB | 5.2 MiB/s, done.'
+    },
+    {
+      command: 'cd repo',
+      output: ''
+    },
+    {
+      command: 'npm install',
+      output: 'added 250 packages in 15s'
+    },
+    {
+      command: 'npm run dev',
+      output: '> dev\n> next dev\n\n  ▲ Next.js 14.2.0\n  - Local:        http://localhost:3000\n\n✓ Ready in 2.3s'
+    }
+  ]}
+/>
+
+### Custom Prompt
+
+**MDX Syntax:**
+```mdx
+<Terminal
+  prompt="user@server:~$"
+  title="Remote Server"
+  commands={[
+    {
+      command: 'ssh user@example.com',
+      output: 'Welcome to Ubuntu 22.04 LTS\nLast login: Mon Jan 15 10:30:45 2024 from 192.168.1.100'
+    },
+    {
+      command: 'docker ps',
+      output: 'CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+<Terminal
+  prompt="user@server:~$"
+  title="Remote Server"
+  commands={[
+    {
+      command: 'ssh user@example.com',
+      output: 'Welcome to Ubuntu 22.04 LTS\nLast login: Mon Jan 15 10:30:45 2024 from 192.168.1.100'
+    },
+    {
+      command: 'docker ps',
+      output: 'CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES'
+    }
+  ]}
+/>
+
+### Commands Without Output
+
+**MDX Syntax:**
+```mdx
+<Terminal
+  commands={[
+    {
+      command: 'cd /var/www',
+      output: ''
+    },
+    {
+      command: 'ls',
+      output: 'index.html\nassets\nconfig.json'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+<Terminal
+  commands={[
+    {
+      command: 'cd /var/www',
+      output: ''
+    },
+    {
+      command: 'ls',
+      output: 'index.html\nassets\nconfig.json'
+    }
+  ]}
+/>
+
+### Custom Delays
+
+**MDX Syntax:**
+```mdx
+<Terminal
+  commands={[
+    {
+      command: 'npm run build',
+      output: 'Building...',
+      delay: 2000
+    },
+    {
+      command: 'echo "Build complete!"',
+      output: 'Build complete!'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+<Terminal
+  commands={[
+    {
+      command: 'npm run build',
+      output: 'Building...',
+      delay: 2000
+    },
+    {
+      command: 'echo "Build complete!"',
+      output: 'Build complete!'
+    }
+  ]}
+/>
+
+## Complete Examples
+
+### Docker Setup
+
+**MDX Syntax:**
+```mdx
+## Docker Setup
+
+<Terminal
+  title="Docker Terminal"
+  commands={[
+    {
+      command: 'docker pull nginx:latest',
+      output: 'latest: Pulling from library/nginx\nDigest: sha256:abc123...\nStatus: Downloaded newer image for nginx:latest'
+    },
+    {
+      command: 'docker run -d -p 8080:80 --name my-nginx nginx',
+      output: 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6'
+    },
+    {
+      command: 'docker ps',
+      output: 'CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS                  NAMES\na1b2c3d4e5f6   nginx     "/docker-entrypoint.…"   2 seconds ago   Up 1 second   0.0.0.0:8080->80/tcp   my-nginx'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+## Docker Setup
+
+<Terminal
+  title="Docker Terminal"
+  commands={[
+    {
+      command: 'docker pull nginx:latest',
+      output: 'latest: Pulling from library/nginx\nDigest: sha256:abc123...\nStatus: Downloaded newer image for nginx:latest'
+    },
+    {
+      command: 'docker run -d -p 8080:80 --name my-nginx nginx',
+      output: 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6'
+    },
+    {
+      command: 'docker ps',
+      output: 'CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS                  NAMES\na1b2c3d4e5f6   nginx     "/docker-entrypoint.…"   2 seconds ago   Up 1 second   0.0.0.0:8080->80/tcp   my-nginx'
+    }
+  ]}
+/>
+
+### Git Workflow
+
+**MDX Syntax:**
+```mdx
+## Git Workflow
+
+<Terminal
+  title="Git Terminal"
+  commands={[
+    {
+      command: 'git status',
+      output: 'On branch main\nYour branch is up to date with \'origin/main\'.\n\nChanges not staged for commit:\n  modified:   README.md'
+    },
+    {
+      command: 'git add README.md',
+      output: ''
+    },
+    {
+      command: 'git commit -m "Update README"',
+      output: '[main abc1234] Update README\n 1 file changed, 5 insertions(+), 2 deletions(-)'
+    },
+    {
+      command: 'git push',
+      output: 'Enumerating objects: 5, done.\nCounting objects: 100% (5/5), done.\nDelta compression using up to 8 threads\nCompressing objects: 100% (3/3), done.\nWriting objects: 100% (3/3), 312 bytes | 312.00 KiB/s, done.\nTo https://github.com/example/repo.git\n   def5678..abc1234  main -> main'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+## Git Workflow
+
+<Terminal
+  title="Git Terminal"
+  commands={[
+    {
+      command: 'git status',
+      output: 'On branch main\nYour branch is up to date with \'origin/main\'.\n\nChanges not staged for commit:\n  modified:   README.md'
+    },
+    {
+      command: 'git add README.md',
+      output: ''
+    },
+    {
+      command: 'git commit -m "Update README"',
+      output: '[main abc1234] Update README\n 1 file changed, 5 insertions(+), 2 deletions(-)'
+    },
+    {
+      command: 'git push',
+      output: 'Enumerating objects: 5, done.\nCounting objects: 100% (5/5), done.\nDelta compression using up to 8 threads\nCompressing objects: 100% (3/3), done.\nWriting objects: 100% (3/3), 312 bytes | 312.00 KiB/s, done.\nTo https://github.com/example/repo.git\n   def5678..abc1234  main -> main'
+    }
+  ]}
+/>
+
+### Node.js Setup
+
+**MDX Syntax:**
+```mdx
+## Node.js Project Setup
+
+<Terminal
+  title="Node.js Terminal"
+  commands={[
+    {
+      command: 'node --version',
+      output: 'v20.11.0'
+    },
+    {
+      command: 'npm --version',
+      output: '10.2.4'
+    },
+    {
+      command: 'npm init -y',
+      output: 'Wrote to package.json:\n\n{\n  "name": "my-project",\n  "version": "1.0.0",\n  ...\n}'
+    },
+    {
+      command: 'npm install express',
+      output: 'added 57 packages, and audited 58 packages in 3s\n\nfound 0 vulnerabilities'
+    }
+  ]}
+/>
+```
+
+**Rendered Result:**
+
+## Node.js Project Setup
+
+<Terminal
+  title="Node.js Terminal"
+  commands={[
+    {
+      command: 'node --version',
+      output: 'v20.11.0'
+    },
+    {
+      command: 'npm --version',
+      output: '10.2.4'
+    },
+    {
+      command: 'npm init -y',
+      output: 'Wrote to package.json:\n\n{\n  "name": "my-project",\n  "version": "1.0.0",\n  ...\n}'
+    },
+    {
+      command: 'npm install express',
+      output: 'added 57 packages, and audited 58 packages in 3s\n\nfound 0 vulnerabilities'
+    }
+  ]}
+/>
+
+## How It Works
+
+### Auto-Start Behavior
+
+The terminal automatically starts typing when:
+1. The reader scrolls to the section containing the terminal
+2. The terminal comes into the viewport (center 80% of screen)
+3. The component detects it's visible using Intersection Observer
+
+### Typing Animation
+
+- **Speed**: Commands type at ~30ms per character (realistic typing speed)
+- **Sequence**: Each command types completely before showing output
+- **Output Delay**: After command finishes, waits 500ms then shows output
+- **Next Command**: Waits for the specified delay (default 800ms) before starting next command
+
+### Command Structure
+
+Each command in the array can have:
+- **`command`**: The command text (required)
+- **`output`**: The output text (optional, can be empty string)
+- **`delay`**: Custom delay before next command (optional, default: 800ms)
+
+## Best Practices
+
+### 1. Keep Commands Realistic
+
+Use actual commands that readers would run:
+
+```mdx
+✅ Good:
+<Terminal
+  commands={[
+    { command: 'npm install', output: 'added 250 packages' }
+  ]}
+/>
+
+❌ Bad:
+<Terminal
+  commands={[
+    { command: 'do stuff', output: 'it worked' }
+  ]}
+/>
+```
+
+### 2. Use Meaningful Outputs
+
+Show realistic command outputs:
+
+```mdx
+✅ Good:
+{ command: 'git status', output: 'On branch main\nChanges not staged for commit:\n  modified:   file.txt' }
+
+❌ Bad:
+{ command: 'git status', output: 'ok' }
+```
+
+### 3. Chain Related Commands
+
+Group related commands together:
+
+```mdx
+<Terminal
+  commands={[
+    { command: 'cd project', output: '' },
+    { command: 'npm install', output: '...' },
+    { command: 'npm run dev', output: '...' }
+  ]}
+/>
+```
+
+### 4. Use Custom Delays for Long Operations
+
+For commands that take time, use longer delays:
+
+```mdx
+<Terminal
+  commands={[
+    { 
+      command: 'npm run build', 
+      output: 'Build complete!',
+      delay: 2000  // 2 seconds for "build time"
+    }
+  ]}
+/>
+```
+
+### 5. Set Descriptive Titles
+
+Use titles that describe what the terminal demonstrates:
+
+```mdx
+<Terminal
+  title="Docker Setup"
+  commands={[...]}
+/>
+```
+
+## Advanced Usage
+
+### Terminal in Tabbed Content
+
+You can use terminals inside tabbed content:
+
+**MDX Syntax:**
+```mdx
+<TabbedContent>
+  <TabPanel id="docker" label="Docker">
+    <Terminal
+      title="Docker Commands"
+      commands={[
+        { command: 'docker ps', output: '...' }
+      ]}
+    />
+  </TabPanel>
+  
+  <TabPanel id="kubernetes" label="Kubernetes">
+    <Terminal
+      title="Kubernetes Commands"
+      commands={[
+        { command: 'kubectl get pods', output: '...' }
+      ]}
+    />
+  </TabPanel>
+</TabbedContent>
+```
+
+### Terminal with Callouts
+
+Combine terminals with callouts for context:
+
+**MDX Syntax:**
+```mdx
+<Callout type="info" title="Before You Begin">
+Make sure Docker is installed and running.
+</Callout>
+
+<Terminal
+  commands={[
+    { command: 'docker --version', output: 'Docker version 24.0.0' }
+  ]}
+/>
+```
+
+## Styling
+
+The terminal uses a GitHub-style dark theme:
+- **Background**: Dark (#0d1117)
+- **Header**: Darker (#161b22) with macOS-style window controls
+- **Text**: Light gray (#c9d1d9)
+- **Prompt**: Blue (#58a6ff)
+- **Output**: Muted gray (#8b949e)
+- **Cursor**: Blinking blue cursor
+
+## Performance
+
+- Uses Intersection Observer for efficient scroll detection
+- Typing animation is optimized with proper cleanup
+- No performance impact on page load
+- Smooth animations even with many commands
+
+## Accessibility
+
+- Terminal is keyboard accessible
+- Restart button has proper ARIA labels
+- Text is readable with sufficient contrast
+- Monospace font ensures command readability
+
+## Troubleshooting
+
+### Terminal Not Starting
+
+- Check that `autoStart` is `true` (default)
+- Ensure the terminal is in the viewport
+- Verify commands array is not empty
+
+### Commands Not Typing
+
+- Check that commands array is properly formatted
+- Ensure each command has a `command` property
+- Verify there are no syntax errors in MDX
+
+### Output Not Showing
+
+- Check that `output` property exists (can be empty string)
+- Verify output text is properly formatted
+- Check for special characters that might need escaping
+
+## Next Steps
+
+- [Code Blocks](/docs/guide/features/code-blocks) - Learn about syntax highlighting
+- [Tabbed Content](/docs/guide/features/tabbed-content) - Learn about multi-tab sections
+- [Highlight Marker](/docs/guide/features/highlight-marker) - Learn about interactive text highlighting
+

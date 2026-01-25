@@ -1,0 +1,243 @@
+---
+title: Repository
+description: Let’s talk about what a Git repository really is, and how to work with it properly.
+publishedAt: 2025-05-01
+order: 2
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+## What is a Git repository?
+
+A Git repository (often called a *repo*) is the **core container of a project**.
+
+It stores:
+- Source code
+- Documentation
+- The full history of changes
+
+<Highlight color="green"> A repository gives your project memory. </Highlight>
+
+Without a repository, files are just files.  
+With a repository, every change is tracked, reversible, and explainable.
+
+---
+
+## Creating a repository
+
+Start with a simple folder:
+
+<Terminal
+  title="Project Directory"
+  commands={[
+    {
+      command: "ls",
+      output: "app.js  README.md"
+    }
+  ]}
+/>
+
+Initialize Git inside it:
+
+<Terminal
+  title="Initialize Git"
+  commands={[
+    {
+      command: "git init",
+      output: "Initialized empty Git repository in /home/work/my-first-repo/.git/"
+    }
+  ]}
+/>
+
+Git creates a hidden directory:
+
+<Terminal
+  commands={[
+    {
+      command: "ls -a",
+      output: ".  ..  .git  app.js  README.md"
+    }
+  ]}
+/>
+
+<Highlight color="green"> The .git directory is the repository itself. </Highlight>
+
+---
+
+## Configuring Git identity
+
+### Global configuration
+
+Applies to all repositories on your machine.
+
+<Terminal
+  title="Global Config"
+  commands={[
+    {
+      command: "git config --global user.name \"AdamBoualleiguie\"",
+      output: ""
+    },
+    {
+      command: "git config --global user.email \"boualleiguie.adam@protonmail.com\"",
+      output: ""
+    },
+    {
+      command: "git config --global --list",
+      output: "user.name=Adam Boualleiguie\nuser.email=boualleiguie.adam@protonmail.com"
+    }
+  ]}
+/>
+
+---
+
+### Local configuration
+
+Applies only to the current repository.
+
+<Terminal
+  title="Local Config"
+  commands={[
+    {
+      command: "git config --local user.name \"Work Identity\"",
+      output: ""
+    },
+    {
+      command: "git config --local user.email \"work@example.com\"",
+      output: ""
+    },
+    {
+      command: "git config --list",
+      output: "user.name=Work Identity\nuser.email=work@example.com"
+    }
+  ]}
+/>
+
+<Highlight color="green"> Local config overrides global config. </Highlight>
+
+---
+
+## Repository workflow
+
+A Git repository works with three areas.
+
+---
+
+### Working directory
+
+This is where files are edited.
+
+<Terminal
+  title="Working Directory"
+  commands={[
+    {
+      command: "echo \"console.log('Hello Git')\" > app.js",
+      output: ""
+    },
+    {
+      command: "git status",
+      output: "On branch main\n\nChanges not staged for commit:\n  modified:   app.js"
+    }
+  ]}
+/>
+
+---
+
+### Staging area
+
+The staging area prepares changes for history.
+
+<Terminal
+  title="Staging Changes"
+  commands={[
+    {
+      command: "git add app.js",
+      output: ""
+    },
+    {
+      command: "git status",
+      output: "On branch main\n\nChanges to be committed:\n  modified:   app.js"
+    }
+  ]}
+/>
+
+<Highlight color="green"> Staging lets you choose what becomes part of a commit. </Highlight>
+
+---
+
+### Commit history
+
+A commit records a snapshot of staged changes.
+
+<Terminal
+  title="Commit"
+  commands={[
+    {
+      command: "git commit -m \"Add initial console log\"",
+      output: "[main a1b2c3d] Add initial console log\n 1 file changed, 1 insertion(+)"
+    }
+  ]}
+/>
+
+---
+
+## The .gitignore file
+
+Some files should never be committed:
+- node_modules
+- environment files
+- logs
+- build outputs
+
+Example:
+
+node_modules/  
+.env  
+dist/  
+*.log  
+
+<Highlight color="red"> Ignored files are never tracked by Git. </Highlight>
+
+---
+
+## Viewing commit history
+
+<Terminal
+  title="Commit History"
+  commands={[
+    {
+      command: "git log --oneline --graph",
+      output: "* a1b2c3d Add initial console log"
+    }
+  ]}
+/>
+
+<Highlight color="green"> History explains how and why the project evolved. </Highlight>
+
+---
+
+## Visualizing history
+
+Text logs are powerful, but visuals help.
+
+### IDE tools
+- Git Graph (VS Code)
+- GitLens (VS Code)
+- Built-in IDE Git views
+
+### Libraries
+- gitgraph.js
+- gitgraph.ts
+
+These tools turn commit history into clear diagrams.
+
+---
+
+## Final thought
+
+A Git repository is:
+- A safety net
+- A shared memory
+- A collaboration engine
+
+Once you understand the repository, Git becomes predictable and calm instead of confusing.

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with rounded corners -->
+  <rect width="180" height="180" rx="40" fill="url(#grad)" />
+  
+  <!-- Letter K (scaled for 180x180) -->
+  <path d="M 54 45 L 54 135 M 54 90 L 90 54 M 54 90 L 90 126" 
+        stroke="white" 
+        stroke-width="10" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none" />
+  
+  <!-- Letter B (scaled for 180x180) -->
+  <path d="M 99 45 L 99 135 M 99 45 L 126 45 Q 135 45 135 63 Q 135 81 126 81 L 99 81 M 99 81 L 126 81 Q 135 81 135 99 Q 135 117 126 117 L 99 117" 
+        stroke="white" 
+        stroke-width="9" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none" />
+</svg>
+

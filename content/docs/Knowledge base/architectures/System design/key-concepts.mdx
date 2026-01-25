@@ -1,0 +1,257 @@
+---
+title: Key Concepts
+description: Let's talk about key concepts of system design.
+publishedAt: 2025-05-03
+order: 2
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Key Concepts in System Design
+
+Before diving into architectures and diagrams, it’s important to understand a few **core concepts** that appear in almost every system design discussion.  
+These concepts help you reason about trade-offs, explain decisions clearly, and avoid common misunderstandings.
+
+This document focuses on the most fundamental ones, explained in a **simple and human way**, with real intuition behind them.
+
+---
+
+## Performance & Scalability
+
+These two terms are often used together, but they describe **different problems**.
+
+<TabbedContent>
+  <TabPanel id="performance" label="Performance">
+    ## Performance
+
+    Performance describes **how fast a system is** for a given amount of work.
+
+    In practice, this means:
+    - How quickly a request is processed
+    - How responsive the system feels to a single user
+    - How long operations take to complete
+
+    If a system has a **performance problem**, it feels slow even when only one user is using it.
+
+    <Callout type="note" title="Simple intuition">
+    Performance is about speed *right now*, with the resources you already have.
+    </Callout>
+  </TabPanel>
+
+  <TabPanel id="scalability" label="Scalability">
+    ## Scalability
+
+    Scalability describes **how well a system handles growth**.
+
+    A system is considered scalable if:
+    - Adding resources (CPU, memory, servers) increases capacity proportionally
+    - The system continues to work well as traffic or data grows
+
+    Scalability is not about being fast for one user — it’s about staying reliable and responsive **under load**.
+
+    <Callout type="info" title="Key idea">
+    A scalable system can grow without being redesigned from scratch.
+    </Callout>
+  </TabPanel>
+
+  <TabPanel id="performance-vs-scalability" label="Performance vs Scalability">
+    ## Performance vs Scalability
+
+    A useful way to think about the difference:
+
+    - **Performance problem** → the system is slow for a single user
+    - **Scalability problem** → the system is fast for one user, but slow when many users arrive
+
+    A system can be:
+    - Fast but not scalable
+    - Scalable but poorly optimized
+    - Both fast *and* scalable (the ideal case)
+
+    Good system design aims to balance both.
+    <DocImage
+  src="/assets/docs/images/knowledge-base/architectures/system-design/performance-vs-scalability.png"
+  alt="Performance vs scalability comparison"
+  caption="Performance focuses on speed, scalability focuses on growth"
+    />
+  </TabPanel>
+</TabbedContent>
+
+
+
+---
+
+## Latency & Throughput
+
+Latency and throughput are two different ways of measuring how a system behaves under work.
+
+<TabbedContent>
+  <TabPanel id="latency" label="Latency">
+    ## Latency
+
+    Latency is **how long it takes to get a response**.
+
+    It answers questions like:
+    - How long does a request wait before completing?
+    - How fast does the user see a result?
+
+    Low latency systems feel responsive and smooth, which is critical for user-facing applications.
+
+    <Callout type="note" title="Think of latency as waiting time">
+    Latency is the delay between asking for something and getting it back.
+    </Callout>
+  </TabPanel>
+
+  <TabPanel id="throughput" label="Throughput">
+    ## Throughput
+
+    Throughput measures **how much work a system can handle** in a given period of time.
+
+    Examples:
+    - Requests per second
+    - Messages processed per minute
+    - Jobs completed per hour
+
+    High throughput systems are designed to handle **large volumes**, even if individual requests are not instant.
+
+    <Callout type="info" title="Key insight">
+    Throughput is about capacity, not speed.
+    </Callout>
+  </TabPanel>
+
+  <TabPanel id="latency-vs-throughput" label="Latency vs Throughput">
+    ## Latency vs Throughput
+
+    These two metrics are related, but improving one doesn’t always improve the other.
+
+    - You can increase throughput by batching requests, but that may increase latency
+    - You can reduce latency for individual requests, but total throughput might stay limited
+
+    In practice, system design aims for:
+    - **Maximum throughput**
+    - With **acceptable latency**
+
+    The right balance depends on the type of system and user expectations.
+<DocImage
+  src="/assets/docs/images/knowledge-base/architectures/system-design/latency-vs-throughput.png"
+  alt="Latency vs throughput comparison"
+  caption="Latency measures response time, throughput measures capacity"
+/>
+  </TabPanel>
+</TabbedContent>
+
+
+
+---
+
+## Availability & Consistency
+
+In distributed systems, data is often replicated across multiple machines.  
+This introduces an important trade-off between **availability** and **consistency**.
+
+<TabbedContent>
+  <TabPanel id="availability" label="Availability">
+    ## Availability
+
+    Availability means the system is **accessible and usable**, even when failures occur.
+
+    A highly available system:
+    - Responds to requests even if some nodes are down
+    - Minimizes downtime
+    - Is often measured as uptime percentage (e.g., 99.9%)
+
+    <Callout type="note" title="Availability in practice">
+    An available system always gives you a response — even if the data is not perfectly up to date.
+    </Callout>
+  </TabPanel>
+
+  <TabPanel id="consistency" label="Consistency">
+    ## Consistency
+
+    Consistency means **all users see the same data at the same time**.
+
+    When data is updated:
+    - Every read reflects the latest write
+    - No stale or conflicting values are visible
+
+    Consistency is critical for systems where correctness matters more than speed.
+
+    <Callout type="info" title="Consistency is about correctness">
+    If two users read the same data, they should see the same value.
+    </Callout>
+  </TabPanel>
+
+  <TabPanel id="availability-vs-consistency" label="Availability vs Consistency">
+    ## Availability vs Consistency
+
+    In distributed systems, it’s often impossible to guarantee both at the same time.
+
+    - Prioritizing **availability** may return outdated data
+    - Prioritizing **consistency** may reject requests during failures
+
+    Different systems choose different trade-offs based on their use cases.
+<DocImage
+  src="/assets/docs/images/knowledge-base/architectures/system-design/availability-vs-consistency.png"
+  alt="Availability vs consistency trade-off"
+  caption="Distributed systems must balance availability and consistency"
+/>
+  </TabPanel>
+</TabbedContent>
+
+
+
+---
+
+## Consistency Patterns
+
+Not all systems need the same level of consistency. Different **consistency patterns** exist to match different requirements.
+
+<TabbedContent>
+  <TabPanel id="strong-consistency" label="Strong Consistency">
+    ## Strong Consistency
+
+    After a write:
+    - All subsequent reads immediately reflect the update
+    - Data is replicated synchronously
+
+    This provides correctness but can reduce availability and increase latency.
+
+    **Common in:** banking systems, inventory management, financial transactions.
+  </TabPanel>
+
+  <TabPanel id="weak-consistency" label="Weak Consistency">
+    ## Weak Consistency
+
+    After a write:
+    - Reads may or may not reflect the latest value
+    - No guarantee on when data becomes visible
+
+    This improves availability and performance but sacrifices immediate correctness.
+  </TabPanel>
+
+  <TabPanel id="eventual-consistency" label="Eventual Consistency">
+    ## Eventual Consistency
+
+    Eventual consistency is a form of weak consistency.
+
+    - Updates propagate asynchronously
+    - All replicas will **eventually** converge to the same value
+    - Temporary inconsistencies are allowed
+
+    **Common in:** social networks, caches, DNS systems.
+
+    <Callout type="success" title="Practical balance">
+    Eventual consistency works well when perfect freshness is not required.
+    </Callout>
+  </TabPanel>
+</TabbedContent>
+
+---
+
+## Final Thoughts
+
+System design is mostly about **trade-offs**.  
+Understanding these concepts helps you explain *why* you made a decision — not just *what* you built.
+
+There is no single correct design.  
+There is only a design that fits the **context, constraints, and goals** of the system.

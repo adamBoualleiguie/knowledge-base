@@ -11,10 +11,9 @@ export function ReadingProgress() {
       const documentHeight = document.documentElement.scrollHeight
       const scrollTop = window.scrollY
       const scrollableHeight = documentHeight - windowHeight
-      const progressPercent = scrollableHeight > 0 
-        ? (scrollTop / scrollableHeight) * 100 
-        : 0
-      
+      const progressPercent =
+        scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0
+
       setProgress(Math.min(100, Math.max(0, progressPercent)))
     }
 

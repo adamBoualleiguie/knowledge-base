@@ -1,0 +1,86 @@
+---
+title: Content Delivery Networks        
+description: Understanding content delivery networks in system design and when to use them.
+publishedAt: 2025-05-04
+order: 4
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Content Delivery Networks
+
+A Content Delivery Network (CDN) is a network of servers spread around the world. Instead of serving content from your main server, users get it from the server closest to them. This makes your website faster and reduces load on your server.
+
+Typically, CDNs handle static content like:
+
+- Images and videos  
+- CSS and JavaScript files  
+- HTML pages  
+
+Some CDNs, like Amazon CloudFront, can even handle dynamic content.
+
+<Callout type="success" title="Why Use a CDN?">
+1. Users get content faster because it's served from nearby locations.  
+2. Your main server doesn’t get overloaded with requests the CDN can handle.  
+</Callout>
+
+# Types of CDNs
+
+<TabbedContent>
+
+  <TabPanel id="pull-cdn" label="Pull CDN">
+  <Callout type="info" title="Pull CDN Explained">
+  Pull CDNs fetch content from your origin server the first time someone requests it. After that, the CDN caches the content.
+  </Callout>
+
+  <Callout type="note" title="How It Works">
+  - You keep content on your main server  
+  - CDN rewrites URLs to serve cached content  
+  - TTL (Time-to-Live) controls how long content stays in the CDN  
+  - Good for high-traffic sites where content changes often
+  </Callout>
+  </TabPanel>
+
+  <TabPanel id="push-cdn" label="Push CDN">
+  <Callout type="info" title="Push CDN Explained">
+  Push CDNs require you to upload content directly to the CDN whenever it changes. The CDN then serves it to users.
+  </Callout>
+
+  <Callout type="note" title="How It Works">
+  - You upload content to the CDN manually or via automation  
+  - You control expiration and updates  
+  - Minimizes repeated traffic to the origin server  
+  - Ideal for smaller sites or content that changes infrequently
+  </Callout>
+  </TabPanel>
+
+</TabbedContent>
+
+# Examples and Decisions
+
+<Callout type="info" title="Example 1: News Website">
+A news website publishes articles several times a day and has heavy traffic.  
+- Content changes often  
+- Users are global  
+**Decision:** Pull CDN → automatically caches new articles when requested
+</Callout>
+
+<Callout type="info" title="Example 2: Marketing Site">
+A small company website with mostly static pages and low traffic.  
+- Content rarely changes  
+- Few updates per month  
+**Decision:** Push CDN → upload content once and serve reliably
+</Callout>
+
+<Callout type="info" title="Example 3: Video Streaming Platform">
+A streaming service hosts large video files. Users frequently watch the same content.  
+- High bandwidth usage  
+- Popular content reused by many  
+**Decision:** Pull CDN → cache popular videos while keeping storage efficient
+</Callout>
+
+<Callout type="success" title="Summary Decision">
+- **Use Pull CDN** for high-traffic or frequently updated sites.  
+- **Use Push CDN** for smaller, stable sites or content that rarely changes.
+</Callout>

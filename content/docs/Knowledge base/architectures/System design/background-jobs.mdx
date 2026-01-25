@@ -1,0 +1,61 @@
+---
+title: Background Jobs
+description: Understanding background jobs in system design and when to use them.
+publishedAt: 2025-05-04
+order: 4
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Background Jobs
+
+Background jobs are tasks that run **in the background**, independently of what the user is doing. They help your system handle work without making users wait.  
+
+<Callout type="info" title="Why use background jobs?">
+Background jobs are perfect for tasks that are **time-consuming, repetitive, or triggered by events**, without blocking the main application flow.
+</Callout>
+
+Common uses include:
+
+- **Maintenance tasks:** cleaning old data, generating reports, or backing up databases.  
+- **Data processing:** importing, exporting, transforming large datasets.  
+- **Notifications:** sending emails, push notifications, or system messages.  
+- **Long-running computations:** analytics, machine learning, or complex calculations.  
+
+# Types of Background Jobs
+
+<TabbedContent>
+
+<TabPanel id="event-driven" label="Event-Driven Jobs">
+Event-driven background jobs are triggered by **events** happening in the system.
+
+Examples:
+- A message is added to a queue (like a new order). The job reads it and processes it asynchronously.  
+- A database value changes. The job detects the change and runs automatically.  
+- A request hits an API endpoint. The job runs using the data from that request.  
+
+<Callout type="success" title="Tip">
+Event-driven jobs are **reactive**: they only run when triggered. Perfect for tasks tied to user actions or system events.
+</Callout>
+</TabPanel>
+
+<TabPanel id="schedule-driven" label="Schedule-Driven Jobs">
+Schedule-driven background jobs run **on a timer**, starting at specific intervals or times.
+
+Examples:
+- A timer inside your app triggers a task every hour or day.  
+- An external service like Azure Logic Apps hits an API at scheduled times.  
+- A separate process starts a timer that runs once after a delay or at a fixed time.  
+
+Common use cases:
+- Batch processing: updating product recommendations, syncing user data.  
+- Routine updates: recalculating indexes, generating daily reports.  
+- Cleanup and consistency checks: removing stale data, validating data integrity.  
+
+<Callout type="warning" title="Watch out">
+Schedule-driven jobs are **predictable**: they run whether or not users interact with the system. Make sure schedules don’t overlap and overload resources.
+</Callout>
+</TabPanel>
+
+</TabbedContent>

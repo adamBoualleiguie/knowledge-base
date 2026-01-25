@@ -1,0 +1,201 @@
+---
+title: Overview
+description: Let's talk about system design and how to approach it step by step.
+publishedAt: 2025-05-01
+order: 1
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# System Design Introduction
+
+System design is the phase where ideas start taking a concrete shape.  
+Before writing code or setting up infrastructure, we need a clear plan of **what we are building and how it will work**.
+
+At its core, system design is about translating requirements into a structured solution. It helps us think through architecture, data flow, responsibilities, and constraints early—when changes are still cheap and mistakes are easier to fix.
+
+The goal is simple: build systems that are **clear, scalable, maintainable, and reliable**, not just systems that “work”.
+
+---
+
+## System Design in the SDLC
+
+In the Software Development Life Cycle (SDLC), system design sits between requirements and implementation.  
+<Callout type="error" title="Careful">
+Skipping or rushing this phase often leads to fragile systems, technical debt, and constant rework.
+</Callout>
+System design:
+- Defines the backbone of the application
+- Clarifies business logic and technical boundaries
+- Prepares the system to handle edge cases and growth
+
+Without a solid design, implementation becomes guesswork, and testing turns into damage control.
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/architectures/system-design/sdlc.png"
+  alt="System design phase inside SDLC"
+  caption="System design connects requirements with implementation"
+/>
+
+System design is commonly divided into two complementary levels.
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/architectures/system-design/hld-lld.png"
+  alt="High level design vs low level design"
+  caption="Two levels of system design"
+/>
+
+---
+
+## HLD & LLD
+
+To design systems effectively, we usually think at two levels: **High-Level Design (HLD)** and **Low-Level Design (LLD)**.  
+They serve different purposes but work best together.
+
+<TabbedContent>
+  <TabPanel id="hld" label="High-Level Design (HLD)">
+    ## High-Level Design (HLD)
+
+    High-Level Design focuses on the **big picture**. It defines how the system is structured and how major components interact.
+<Callout type="note" title="Note">
+    HLD answers questions like:
+    - What services or modules exist?
+    - How do they communicate?
+    - How does data flow through the system?
+</Callout>
+
+    It is usually created by architects, senior engineers, and stakeholders who have experience with large systems.
+
+    **Prerequisites and knowledge areas:**
+    - Solid understanding of functional and non-functional requirements
+    - Basic data structures and algorithms
+    - Databases (SQL, NoSQL), caches, APIs
+    - Networking fundamentals (DNS, HTTP, TCP/UDP)
+    - Security basics (auth, TLS, rate limiting)
+    - Architectural patterns (monolith vs microservices)
+    - Load balancing, fault tolerance, scalability
+    - Observability tools and monitoring concepts
+
+    **What HLD typically includes:**
+    - Overall system architecture
+    - Major components and responsibilities
+    - Data flow between services
+    - Technology and infrastructure choices
+    - Trade-offs related to performance, cost, and scalability
+    - Architecture and deployment diagrams
+
+    **Real-world examples:**
+    - Netflix migrating from monolith to microservices
+    - Uber’s event-driven architecture
+    - Twitter’s caching and load-balanced timelines
+  </TabPanel>
+
+  <TabPanel id="lld" label="Low-Level Design (LLD)">
+    ## Low-Level Design (LLD)
+
+    Low-Level Design zooms in on **how each component is implemented internally**.  
+    It provides developers with a clear and actionable blueprint for building the system.
+
+    LLD is created after HLD and is typically owned by senior developers and designers.
+
+    **What you should know first:**
+    - Data structures and algorithms
+    - Object-oriented programming concepts
+    - Clean code principles
+
+    **What LLD focuses on:**
+    - Class and module responsibilities
+    - Method definitions and interactions
+    - Database schemas, tables, indexes, and relationships
+    - API request/response structures
+    - Error handling and validation logic
+    - Design patterns and SOLID principles
+    - UML diagrams, sequence diagrams, and pseudocode
+
+    LLD reduces ambiguity and helps teams implement features consistently and safely.
+  </TabPanel>
+</TabbedContent>
+
+
+---
+
+## Steps to Get Started with System Design
+
+Designing systems can feel overwhelming at first, but following a clear process helps a lot.
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/architectures/system-design/sd-steps.png"
+  alt="Steps of system design"
+  caption="A simple path to start system design"
+/>
+
+1. **Understand Requirements**  
+   Talk to stakeholders, read documentation, and clarify expectations.
+
+2. **Define the Architecture**  
+   Identify main components, services, and how they interact.
+
+3. **Choose the Tech Stack**  
+   Select tools, languages, and databases that fit the problem—not trends.
+
+4. **Design Modules**  
+   Break the system into clear modules with well-defined responsibilities.
+
+5. **Plan for Scalability**  
+   Think about growth, load, and bottlenecks early.
+
+6. **Ensure Security & Privacy**  
+   Address authentication, authorization, encryption, and data protection.
+
+7. **Test & Validate**  
+   Validate assumptions and simulate real-world usage.
+
+System design improves with practice. Each system you design sharpens your intuition for the next one.
+
+---
+
+## 💡 Tips for Solving System Design Problems
+
+When faced with a system design problem—especially in interviews—it’s normal to feel lost at first. There is rarely a single “correct” solution.
+
+### 1. Break Down the Problem
+Split the system into smaller services or features.  
+You are not expected to design everything—focus on the core.
+
+Ask questions. Clarify scope. Confirm assumptions.
+
+### 2. Communicate Your Thinking
+Talk through your decisions.
+Explain trade-offs.
+Use diagrams and flows to make ideas clear.
+
+Good communication matters as much as the design itself.
+
+### 3. Make Reasonable Assumptions
+You may need to assume:
+- Traffic volume
+- Data size
+- Request rates
+
+Keep assumptions realistic and explain why they make sense.
+
+---
+
+## Key Principles to Keep in Mind
+
+- **Scalability** – Can the system grow smoothly?
+- **Performance** – Is latency acceptable?
+- **Reliability** – Can it handle failures?
+- **Security** – Is data protected?
+- **Maintainability** – Is it easy to evolve?
+- **Interoperability** – Does it integrate cleanly?
+- **Usability** – Is it intuitive for users?
+- **Cost-effectiveness** – Does it balance cost and value?
+
+System design is not about perfection.  
+It’s about making thoughtful decisions, understanding trade-offs, and building systems that stand the test of time.
+
+## References
+
+- [Getting Started with System Design – GeeksforGeeks](https://www.geeksforgeeks.org/system-design/getting-started-with-system-design/)

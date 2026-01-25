@@ -10,6 +10,7 @@ interface SearchResult {
   url: string
   slug: string
   description?: string
+  snippet?: string
 }
 
 interface Doc {
@@ -17,6 +18,7 @@ interface Doc {
   url: string
   slug: string
   description?: string
+  content?: string
 }
 
 interface DocsSearchBarProps {
@@ -46,38 +48,61 @@ export function DocsSearchBar({ docs }: DocsSearchBarProps) {
     }
 
     const lowerQuery = searchQuery.toLowerCase()
-    const searchResults: SearchResult[] = []
+    const scoredResults: Array<SearchResult & { score: number }> = []
 
     docs.forEach((doc) => {
-      const titleMatch = doc.title.toLowerCase().includes(lowerQuery)
-      const descMatch = doc.description?.toLowerCase().includes(lowerQuery)
-      const slugMatch = doc.slug.toLowerCase().includes(lowerQuery)
+      const title = doc.title.toLowerCase()
+      const description = doc.description?.toLowerCase() || ''
+      const slug = doc.slug.toLowerCase()
+      const content = doc.content?.toLowerCase() || ''
 
-      if (titleMatch || descMatch || slugMatch) {
-        searchResults.push({
+      let score = 0
+
+      // Strong weight for title matches
+      if (title === lowerQuery) score += 120
+      else if (title.startsWith(lowerQuery)) score += 80
+      else if (title.includes(lowerQuery)) score += 60
+
+      // Medium weight for description and slug
+      if (description.includes(lowerQuery)) score += 25
+      if (slug.includes(lowerQuery)) score += 20
+
+      // Lower, but still meaningful, weight for body content matches
+      let snippet: string | undefined
+      const contentIndex = content.indexOf(lowerQuery)
+      if (contentIndex !== -1) {
+        score += 30
+
+        // Build a human-readable snippet around the first match
+        const originalContent = doc.content || ''
+        const start = Math.max(0, contentIndex - 60)
+        const end = Math.min(originalContent.length, contentIndex + lowerQuery.length + 80)
+        let rawSnippet = originalContent.slice(start, end).replace(/\s+/g, ' ')
+
+        if (start > 0) rawSnippet = '… ' + rawSnippet
+        if (end < originalContent.length) rawSnippet = rawSnippet + ' …'
+        snippet = rawSnippet
+      }
+
+      if (score > 0) {
+        scoredResults.push({
           title: doc.title,
           url: doc.url,
           slug: doc.slug,
           description: doc.description,
+          snippet,
+          score,
         })
       }
     })
 
-    // Sort by relevance (title matches first, then description, then slug)
-    searchResults.sort((a, b) => {
-      const aTitleMatch = a.title.toLowerCase().includes(lowerQuery)
-      const bTitleMatch = b.title.toLowerCase().includes(lowerQuery)
-      const aDescMatch = a.description?.toLowerCase().includes(lowerQuery)
-      const bDescMatch = b.description?.toLowerCase().includes(lowerQuery)
+    // Sort by descending score (higher score = more relevant)
+    scoredResults.sort((a, b) => b.score - a.score)
 
-      if (aTitleMatch && !bTitleMatch) return -1
-      if (!aTitleMatch && bTitleMatch) return 1
-      if (aDescMatch && !bDescMatch) return -1
-      if (!aDescMatch && bDescMatch) return 1
-      return 0
-    })
+    // Strip score before putting into state
+    const finalResults: SearchResult[] = scoredResults.slice(0, 10).map(({ score, ...rest }) => rest)
 
-    setResults(searchResults.slice(0, 10)) // Limit to 10 results
+    setResults(finalResults) // Limit to 10 results
     setSelectedIndex(0)
   }, [])
 
@@ -278,6 +303,11 @@ export function DocsSearchBar({ docs }: DocsSearchBarProps) {
                       <div className="text-xs text-muted-foreground">
                         {formatBreadcrumb(result.slug)}
                       </div>
+                      {result.snippet && (
+                        <div className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                          {result.snippet}
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>

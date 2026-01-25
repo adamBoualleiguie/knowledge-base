@@ -1,0 +1,382 @@
+---
+title: Highlight Marker
+description: Interactive text highlighting that activates when readers reach specific sections
+publishedAt: 2024-01-01
+order: 9
+---
+
+# Highlight Marker
+
+The Highlight Marker feature allows you to mark important phrases, words, or text in your documentation. When a reader scrolls and reaches the section containing your marked text, those highlights automatically animate and draw attention to key information.
+
+## Overview
+
+Think of Highlight Marker as a digital highlighter pen. You can mark important text in your MDX files, and when readers scroll to that section, the marked text comes to life with a beautiful animated highlight effect that matches your website's theme.
+
+## Features
+
+- ✅ **Automatic Activation**: Highlights animate when readers reach the containing section
+- ✅ **Multiple Colors**: Choose from 5 color options (yellow, orange, blue, green, purple)
+- ✅ **Smooth Animations**: Beautiful pulse effect draws attention without being distracting
+- ✅ **Theme-Aware**: Automatically adapts to light and dark modes
+- ✅ **Section-Aware**: Activates based on scroll position and active headings
+- ✅ **Non-Intrusive**: Subtle when inactive, prominent when active
+
+## Basic Usage
+
+### Simple Highlight
+
+Wrap any text with the `<Highlight>` component:
+
+**MDX Syntax:**
+```mdx
+## Installation Steps
+
+Follow these <Highlight>critical steps</Highlight> to ensure a successful installation.
+```
+
+**Rendered Result:**
+
+## Installation Steps
+
+Follow these <Highlight>critical steps</Highlight> to ensure a successful installation.
+
+### Highlight with Custom Color
+
+You can specify a color for your highlight:
+
+**MDX Syntax:**
+```mdx
+## Important Notice
+
+<Highlight color="orange">This feature requires administrator privileges</Highlight> to function correctly.
+```
+
+**Rendered Result:**
+
+## Important Notice
+
+<Highlight color="orange">This feature requires administrator privileges</Highlight> to function correctly.
+
+## Available Colors
+
+The Highlight Marker supports 5 color options:
+
+1. **`yellow`** (default) - Classic yellow highlighter
+2. **`orange`** - Warm orange highlight (matches primary theme)
+3. **`blue`** - Cool blue highlight
+4. **`green`** - Fresh green highlight
+5. **`purple`** - Rich purple highlight
+
+### Color Examples
+
+**MDX Syntax:**
+```mdx
+## Color Examples
+
+- <Highlight color="yellow">Yellow highlight</Highlight> - Default, classic highlighter
+- <Highlight color="orange">Orange highlight</Highlight> - Matches primary theme
+- <Highlight color="blue">Blue highlight</Highlight> - Cool and professional
+- <Highlight color="green">Green highlight</Highlight> - Fresh and positive
+- <Highlight color="purple">Purple highlight</Highlight> - Rich and distinctive
+```
+
+**Rendered Result:**
+
+## Color Examples
+
+- <Highlight color="yellow">Yellow highlight</Highlight> - Default, classic highlighter
+- <Highlight color="orange">Orange highlight</Highlight> - Matches primary theme
+- <Highlight color="blue">Blue highlight</Highlight> - Cool and professional
+- <Highlight color="green">Green highlight</Highlight> - Fresh and positive
+- <Highlight color="purple">Purple highlight</Highlight> - Rich and distinctive
+
+## How It Works
+
+The Highlight Marker is **section-aware**. It automatically detects which heading (H2, H3, or H4) contains the marked text, and activates the highlight animation when:
+
+1. The reader scrolls to that section
+2. The section's heading becomes active in the "ON THIS PAGE" table of contents
+3. The marked text comes into view
+
+### Activation Behavior
+
+- **Inactive State**: Marked text has a subtle background color (15-20% opacity)
+- **Active State**: When the section is reached, the highlight:
+  - Increases opacity to 50%
+  - Adds a glowing border effect
+  - Pulses gently to draw attention
+  - Smoothly transitions back when scrolling away
+
+## Complete Examples
+
+### Example 1: Installation Guide
+
+**MDX Syntax:**
+```mdx
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- <Highlight color="orange">Node.js 20.19.4 or higher</Highlight> installed
+- <Highlight color="orange">Yarn package manager</Highlight> configured
+- <Highlight>Administrator privileges</Highlight> on your system
+
+## Installation Steps
+
+### Step 1: Clone Repository
+
+<Highlight color="blue">Clone the repository</Highlight> to your local machine:
+
+\`\`\`bash
+git clone https://github.com/example/repo.git
+\`\`\`
+
+### Step 2: Install Dependencies
+
+Run <Highlight color="green">yarn install</Highlight> to install all required packages.
+```
+
+**Rendered Result:**
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- <Highlight color="orange">Node.js 20.19.4 or higher</Highlight> installed
+- <Highlight color="orange">Yarn package manager</Highlight> configured
+- <Highlight>Administrator privileges</Highlight> on your system
+
+## Installation Steps
+
+### Step 1: Clone Repository
+
+<Highlight color="blue">Clone the repository</Highlight> to your local machine:
+
+```bash
+git clone https://github.com/example/repo.git
+```
+
+### Step 2: Install Dependencies
+
+Run <Highlight color="green">yarn install</Highlight> to install all required packages.
+
+### Example 2: API Documentation
+
+**MDX Syntax:**
+```mdx
+## Authentication
+
+All API requests require <Highlight color="orange">authentication tokens</Highlight> in the Authorization header.
+
+## Endpoints
+
+### Create User
+
+<Highlight color="blue">POST /api/v1/users</Highlight> - Creates a new user account.
+
+**Request Body:**
+- <Highlight>name</Highlight> (required) - User's full name
+- <Highlight>email</Highlight> (required) - Valid email address
+- <Highlight color="purple">password</Highlight> (required) - Minimum 8 characters
+```
+
+**Rendered Result:**
+
+## Authentication
+
+All API requests require <Highlight color="orange">authentication tokens</Highlight> in the Authorization header.
+
+## Endpoints
+
+### Create User
+
+<Highlight color="blue">POST /api/v1/users</Highlight> - Creates a new user account.
+
+**Request Body:**
+- <Highlight>name</Highlight> (required) - User's full name
+- <Highlight>email</Highlight> (required) - Valid email address
+- <Highlight color="purple">password</Highlight> (required) - Minimum 8 characters
+
+### Example 3: Key Concepts
+
+**MDX Syntax:**
+```mdx
+## System Architecture
+
+The system follows a <Highlight color="blue">microservices architecture</Highlight> pattern.
+
+### Core Components
+
+1. **API Gateway**: <Highlight>Routes all incoming requests</Highlight> to appropriate services
+2. **Authentication Service**: <Highlight color="orange">Handles user authentication</Highlight> and authorization
+3. **Database Layer**: <Highlight color="green">Manages data persistence</Highlight> and retrieval
+
+### Important Notes
+
+<Highlight color="purple">All services communicate asynchronously</Highlight> using message queues.
+```
+
+**Rendered Result:**
+
+## System Architecture
+
+The system follows a <Highlight color="blue">microservices architecture</Highlight> pattern.
+
+### Core Components
+
+1. **API Gateway**: <Highlight>Routes all incoming requests</Highlight> to appropriate services
+2. **Authentication Service**: <Highlight color="orange">Handles user authentication</Highlight> and authorization
+3. **Database Layer**: <Highlight color="green">Manages data persistence</Highlight> and retrieval
+
+### Important Notes
+
+<Highlight color="purple">All services communicate asynchronously</Highlight> using message queues.
+
+## Best Practices
+
+### When to Use Highlights
+
+1. **Key Terms**: Highlight important technical terms or concepts
+   ```mdx
+   The <Highlight>API endpoint</Highlight> requires authentication.
+   ```
+
+2. **Critical Information**: Mark information that readers must not miss
+   ```mdx
+   <Highlight color="orange">Warning: This action cannot be undone.</Highlight>
+   ```
+
+3. **Step-by-Step Instructions**: Highlight specific steps or commands
+   ```mdx
+   Run <Highlight color="green">yarn install</Highlight> to begin.
+   ```
+
+4. **Important Values**: Mark specific values, versions, or configurations
+   ```mdx
+   Requires <Highlight color="blue">Node.js 20.19.4</Highlight> or higher.
+   ```
+
+### When NOT to Use Highlights
+
+1. **Don't overuse**: Too many highlights can be distracting
+2. **Don't highlight entire paragraphs**: Keep highlights focused on key phrases
+3. **Don't use for emphasis**: Use **bold** or *italic* for general emphasis
+4. **Don't highlight code**: Code blocks already have syntax highlighting
+
+### Color Selection Tips
+
+- **Yellow (default)**: Use for general important information
+- **Orange**: Use for warnings, critical steps, or theme-matching highlights
+- **Blue**: Use for technical terms, API endpoints, or professional concepts
+- **Green**: Use for success messages, positive actions, or completed steps
+- **Purple**: Use for special notes, unique features, or distinctive information
+
+## Advanced Usage
+
+### Multiple Highlights in One Section
+
+You can use multiple highlights in the same section:
+
+**MDX Syntax:**
+```mdx
+## Configuration
+
+Set the <Highlight color="blue">API_URL</Highlight> environment variable to point to your server.
+The <Highlight color="green">PORT</Highlight> defaults to 3000, but can be customized.
+Make sure <Highlight color="orange">authentication is enabled</Highlight> in production.
+```
+
+**Rendered Result:**
+
+## Configuration
+
+Set the <Highlight color="blue">API_URL</Highlight> environment variable to point to your server.
+The <Highlight color="green">PORT</Highlight> defaults to 3000, but can be customized.
+Make sure <Highlight color="orange">authentication is enabled</Highlight> in production.
+
+### Highlights in Lists
+
+Highlights work perfectly in lists:
+
+**MDX Syntax:**
+```mdx
+## Requirements
+
+- <Highlight color="orange">Node.js 20.19.4+</Highlight>
+- <Highlight color="orange">Yarn 1.22+</Highlight>
+- <Highlight>Git</Highlight> for version control
+- <Highlight color="blue">Docker</Highlight> (optional, for containerization)
+```
+
+**Rendered Result:**
+
+## Requirements
+
+- <Highlight color="orange">Node.js 20.19.4+</Highlight>
+- <Highlight color="orange">Yarn 1.22+</Highlight>
+- <Highlight>Git</Highlight> for version control
+- <Highlight color="blue">Docker</Highlight> (optional, for containerization)
+
+### Highlights in Callouts
+
+You can combine highlights with callouts for extra emphasis:
+
+**MDX Syntax:**
+```mdx
+<Callout type="warning" title="Important">
+Before proceeding, ensure <Highlight color="orange">all prerequisites are met</Highlight> and 
+<Highlight color="orange">backup your data</Highlight>. This process cannot be reversed.
+</Callout>
+```
+
+**Rendered Result:**
+
+<Callout type="warning" title="Important">
+Before proceeding, ensure <Highlight color="orange">all prerequisites are met</Highlight> and 
+<Highlight color="orange">backup your data</Highlight>. This process cannot be reversed.
+</Callout>
+
+## Technical Details
+
+### Component Props
+
+- **`children`** (required): The text content to highlight
+- **`color`** (optional): Highlight color - `'yellow' | 'orange' | 'blue' | 'green' | 'purple'` (default: `'yellow'`)
+
+### How Activation Works
+
+1. The component finds the nearest parent heading (H2, H3, or H4)
+2. It monitors scroll position relative to that heading
+3. When the heading section is in view (within 200px before and 400px after), highlights activate
+4. The highlight smoothly animates in and pulses to draw attention
+5. When scrolling away, highlights smoothly fade back to inactive state
+
+### Performance
+
+- Highlights use efficient scroll listeners with passive event handling
+- Animations are GPU-accelerated for smooth performance
+- No impact on page load time or initial render
+
+## Styling
+
+The highlight effect includes:
+
+- **Background color**: Semi-transparent color that intensifies when active
+- **Border glow**: Subtle glowing border that appears when active
+- **Pulse animation**: Gentle pulsing effect (2s cycle) when active
+- **Smooth transitions**: All state changes are smoothly animated (400ms)
+
+## Theme Support
+
+Highlights automatically adapt to your theme:
+
+- **Light Mode**: Slightly more vibrant colors for better visibility
+- **Dark Mode**: Adjusted opacity and glow effects for optimal contrast
+
+## Next Steps
+
+- [Callout Components](/docs/guide/features/callouts) - Learn about styled information boxes
+- [Tabbed Content](/docs/guide/features/tabbed-content) - Learn about multi-tab sections
+- [Code Blocks](/docs/guide/features/code-blocks) - Learn about syntax highlighting
+
