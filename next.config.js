@@ -9,6 +9,10 @@ const nextConfig = {
   },
   // Enable static export for GitHub Pages / static hosting
   output: 'export',
+  // IMPORTANT: Set basePath to match your repository name for GitHub Pages
+  basePath: '/knowledge-base',
+  // Enable trailing slashes for better GitHub Pages compatibility
+  trailingSlash: true,
   images: {
     remotePatterns: [
       {
@@ -19,8 +23,6 @@ const nextConfig = {
     // Disable image optimization for static export
     unoptimized: true,
   },
-  // Optional: Enable trailing slashes for better compatibility
-  // trailingSlash: true,
 }
 
 module.exports = withContentlayer(nextConfig)
