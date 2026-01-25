@@ -9,6 +9,8 @@ import { Callout } from './Callout'
 import { ExcalidrawDiagram } from './ExcalidrawDiagram'
 import { Highlight } from './Highlight'
 import { Terminal } from './Terminal'
+import { MermaidDiagram } from './MermaidDiagram'
+import { YouTube } from './YouTube'
 
 const mdxComponents = {
   TabbedContent,
@@ -20,6 +22,7 @@ const mdxComponents = {
   ExcalidrawDiagram,
   Highlight,
   Terminal,
+  YouTube,
   pre: (props: any) => {
     // Handle code blocks - MDX wraps code in pre > code
     const child = props.children
@@ -48,6 +51,11 @@ const mdxComponents = {
       // Extract filename from className if present (format: language:filename)
       const filenameMatch = className.match(/language-\w+:([^\s]+)/)
       const filename = filenameMatch ? filenameMatch[1] : undefined
+
+      // Handle mermaid code blocks - render them with MermaidDiagram component (with click-to-expand)
+      if (language === 'mermaid') {
+        return <MermaidDiagram chart={code.trim()} />
+      }
 
       if (code || language !== 'text') {
         return (

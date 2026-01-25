@@ -1,0 +1,186 @@
+---
+title: Branching
+description: Let’s talk about what Git branching really is, and how to work with it properly.
+publishedAt: 2025-05-01
+order: 3
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+showMetadata: true
+---
+
+# Branching in terms of collaboration
+
+In Git, a branch is **not a copy** of your code.  
+It is a lightweight pointer to a specific commit.
+
+Branching allows teams to work in parallel without stepping on each other’s work:
+- One developer builds a feature
+- Another fixes a bug
+- The main branch stays stable and production-ready
+
+<Callout type="info">
+Branches enable <Highlight color="green">safe and structured collaboration</Highlight> by isolating changes until they are reviewed and merged.
+</Callout>
+
+In real-world collaboration:
+- Repositories are cloned using `git clone`
+- Work happens on dedicated feature branches
+- Changes are shared through pull or merge requests
+- Conflicts are resolved explicitly, not silently
+
+This model is what makes Git powerful for both small teams and large open-source projects.
+
+---
+
+# Branch management
+
+Below are the core branch operations you will use daily.  
+Each action is separated into tabs and demonstrated with terminal commands and their outputs.
+
+<TabbedContent>
+
+<TabPanel id="create" label="Create a branch">
+
+Creating a branch starts a new line of development from the current commit.
+
+<Terminal
+  commands={[
+    {
+      command: "git branch feature/login",
+      output: ""
+    },
+    {
+      command: "git branch",
+      output: "  main\n* develop\n  feature/login"
+    }
+  ]}
+/>
+
+The `*` symbol shows the currently active branch.  
+No files are duplicated — Git only creates a new reference.
+
+</TabPanel>
+
+<TabPanel id="rename" label="Rename a branch">
+
+Renaming a branch changes its name while keeping the full history intact.
+
+<Terminal
+  commands={[
+    {
+      command: "git branch -m feature/login feature/auth-login",
+      output: ""
+    },
+    {
+      command: "git branch",
+      output: "  main\n* develop\n  feature/auth-login"
+    }
+  ]}
+/>
+
+<Callout type="info">
+Renaming a branch is safe: commits and history are preserved.
+</Callout>
+
+</TabPanel>
+
+<TabPanel id="delete" label="Delete a branch">
+
+Deleting a branch removes an unused line of development.
+
+<Terminal
+  commands={[
+    {
+      command: "git branch -d feature/auth-login",
+      output: "Deleted branch feature/auth-login (was a3f5c21)."
+    }
+  ]}
+/>
+
+Force deletion (when Git refuses):
+
+<Terminal
+  commands={[
+    {
+      command: "git branch -D feature/auth-login",
+      output: "Deleted branch feature/auth-login (was a3f5c21)."
+    }
+  ]}
+/>
+
+<Callout type="warning">
+Use <Highlight color="red">-D</Highlight> only when you are absolutely sure the branch is no longer needed.
+</Callout>
+
+</TabPanel>
+
+<TabPanel id="checkout" label="Checkout a branch">
+
+Checking out a branch switches your working directory to it.
+
+<Terminal
+  commands={[
+    {
+      command: "git checkout feature/login",
+      output: "Switched to branch 'feature/login'"
+    }
+  ]}
+/>
+
+Modern alternative:
+
+<Terminal
+  commands={[
+    {
+      command: "git switch feature/login",
+      output: "Switched to branch 'feature/login'"
+    }
+  ]}
+/>
+
+Both commands achieve the same result.
+
+</TabPanel>
+
+<TabPanel id="merge" label="Merging basics">
+
+A merge combines changes from one branch into another.
+
+<Terminal
+  commands={[
+    {
+      command: "git checkout main",
+      output: "Switched to branch 'main'"
+    },
+    {
+      command: "git merge feature/login",
+      output: "Updating 1a2b3c4..5d6e7f8\nFast-forward\n login.js | 24 ++++++++++++++++++++++++\n 1 file changed, 24 insertions(+)"
+    }
+  ]}
+/>
+
+Conflict example output:
+```
+CONFLICT (content): Merge conflict in login.js
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+Conflicts must be resolved manually, then committed.
+
+<Callout type="info">
+A merge creates a new commit that represents the combined history of both branches.
+</Callout>
+
+</TabPanel>
+
+</TabbedContent>
+
+---
+
+## Final thought
+
+If commits are the history of your project,  
+branches are its parallel paths.
+
+Master branching, and Git becomes predictable, safe, and scalable.
+

@@ -108,9 +108,16 @@ function getPrevNextDocs(currentSlug: string) {
 }
 
 export async function generateStaticParams() {
-  return allDocs.map((doc) => ({
+  // Generate params for all docs
+  const docParams = allDocs.map((doc) => ({
     slug: doc.slug.split('/'),
   }))
+  
+  // Also generate the root /docs route (empty slug)
+  return [
+    { slug: [] },
+    ...docParams,
+  ]
 }
 
 export default async function DocPage({ params }: DocPageProps) {

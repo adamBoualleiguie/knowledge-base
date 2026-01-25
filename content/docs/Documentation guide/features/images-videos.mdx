@@ -170,6 +170,150 @@ Follow the installation wizard:
   caption="Check that installation was successful"
 />
 
+## YouTube Videos
+
+### Basic Usage
+
+Embed YouTube videos using the `<YouTube>` component:
+
+```mdx
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  caption="Optional caption text"
+/>
+```
+
+### Component Props
+
+- **`url`** (required): YouTube video URL (supports multiple formats)
+- **`caption`** (optional): Caption text displayed below the video
+- **`autoplay`** (optional): Auto-play video (default: `false`)
+- **`muted`** (optional): Mute video (default: `false`)
+- **`controls`** (optional): Show video controls (default: `true`)
+- **`loop`** (optional): Loop video (default: `false`)
+- **`start`** (optional): Start time in seconds
+- **`end`** (optional): End time in seconds
+
+### Supported URL Formats
+
+The component supports various YouTube URL formats:
+
+- `https://youtu.be/VIDEO_ID`
+- `https://www.youtube.com/watch?v=VIDEO_ID`
+- `https://www.youtube.com/embed/VIDEO_ID`
+- `https://youtube.com/watch?v=VIDEO_ID&t=123s`
+- `https://www.youtube.com/shorts/VIDEO_ID`
+
+### Features
+
+- ✅ **Responsive**: Maintains 16:9 aspect ratio
+- ✅ **Privacy Enhanced**: Uses YouTube's privacy-enhanced mode
+- ✅ **Lazy Loading**: Videos load only when needed
+- ✅ **Caption Support**: Optional caption below the video
+- ✅ **Custom Start/End**: Set specific start and end times
+- ✅ **Autoplay Support**: Optional autoplay (with mute for browser compatibility)
+
+### Examples
+
+#### Basic YouTube Video
+
+**MDX Syntax:**
+```mdx
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+/>
+```
+
+**Rendered Result:**
+
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+/>
+
+#### YouTube Video with Caption
+
+**MDX Syntax:**
+```mdx
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  caption="Tutorial on setting up the development environment"
+/>
+```
+
+**Rendered Result:**
+
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  caption="Tutorial on setting up the development environment"
+/>
+
+#### YouTube Video with Start Time
+
+**MDX Syntax:**
+```mdx
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  start={30}
+  caption="Starting from 30 seconds"
+/>
+```
+
+**Rendered Result:**
+
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  start={30}
+  caption="Starting from 30 seconds"
+/>
+
+#### YouTube Video with Custom Settings
+
+**MDX Syntax:**
+```mdx
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  autoplay
+  muted
+  loop
+  controls={false}
+  caption="Autoplay, muted, looping video"
+/>
+```
+
+**Rendered Result:**
+
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  autoplay
+  muted
+  loop
+  controls={false}
+  caption="Autoplay, muted, looping video"
+/>
+
+### Complete Example
+
+```mdx
+## Video Tutorial
+
+Watch this YouTube tutorial to learn the basics:
+
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  caption="Complete tutorial on getting started"
+/>
+
+## Quick Demo
+
+Here's a quick demo starting from the 2-minute mark:
+
+<YouTube
+  url="https://youtu.be/a_FLqX3vGR4"
+  start={120}
+  caption="Demo starting at 2 minutes"
+/>
+```
+
 ## Videos
 
 ### Basic Usage
@@ -346,6 +490,15 @@ public/assets/
 4. **Duration**: Keep tutorial videos concise (2-5 minutes recommended)
 5. **Poster**: Include a poster image for better UX
 6. **Naming**: Use descriptive names matching the content (e.g., `installation-tutorial.mp4`)
+
+### YouTube Videos
+
+1. **URL Format**: Use the short `youtu.be` format for cleaner URLs
+2. **Captions**: Always provide descriptive captions for accessibility
+3. **Start/End Times**: Use `start` and `end` props to highlight specific sections
+4. **Autoplay**: Only use autoplay with `muted` for better user experience
+5. **Privacy**: The component uses privacy-enhanced mode by default
+6. **Performance**: Videos are lazy-loaded for better page performance
 
 ## Complete Example
 

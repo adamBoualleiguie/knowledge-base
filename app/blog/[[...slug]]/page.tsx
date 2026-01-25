@@ -24,9 +24,16 @@ async function getBlogFromParams(params: BlogPageProps['params']) {
 }
 
 export async function generateStaticParams() {
-  return allBlogs.map((blog) => ({
+  // Generate params for all blogs
+  const blogParams = allBlogs.map((blog) => ({
     slug: blog.slug.split('/'),
   }))
+  
+  // Also generate the root /blog route (empty slug)
+  return [
+    { slug: [] },
+    ...blogParams,
+  ]
 }
 
 export default async function BlogPage({ params }: BlogPageProps) {

@@ -7,8 +7,8 @@ const nextConfig = {
   experimental: {
     mdxRs: false,
   },
-  // Enable standalone output for Docker
-  output: 'standalone',
+  // Enable static export for GitHub Pages / static hosting
+  output: 'export',
   images: {
     remotePatterns: [
       {
@@ -16,8 +16,11 @@ const nextConfig = {
         hostname: '**',
       },
     ],
-    unoptimized: false,
+    // Disable image optimization for static export
+    unoptimized: true,
   },
+  // Optional: Enable trailing slashes for better compatibility
+  // trailingSlash: true,
 }
 
 module.exports = withContentlayer(nextConfig)
