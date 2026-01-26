@@ -552,9 +552,9 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
       
       <nav className="sticky top-20 space-y-0 max-h-[calc(100vh-5rem)] overflow-y-auto hide-scrollbar pb-8 text-sm pr-6 text-left">
         <Link
-          href="/docs"
+          href={pathname.startsWith('/knowledge-base') ? '/knowledge-base/docs' : '/docs'}
           className={`flex items-center gap-2 px-3 py-2 transition-all duration-200 ${
-            pathname === '/docs'
+            pathname === (pathname.startsWith('/knowledge-base') ? '/knowledge-base/docs' : '/docs')
               ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]'
               : 'text-muted-foreground hover:text-foreground dark:hover:text-white dark:hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]'
           }`}

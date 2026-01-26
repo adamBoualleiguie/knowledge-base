@@ -1,6 +1,14 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export function Footer() {
+  const pathname = usePathname()
+  
+  // Determine basePath dynamically
+  const basePath = pathname.startsWith('/knowledge-base') ? '/knowledge-base' : ''
+
   return (
     <footer className="border-t border-border/40 mt-auto bg-muted/20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
@@ -15,17 +23,17 @@ export function Footer() {
             <h3 className="font-semibold mb-4 text-lg">Links</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href={`${basePath}/`} className="text-muted-foreground hover:text-foreground transition-colors">
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href={`${basePath}/docs`} className="text-muted-foreground hover:text-foreground transition-colors">
                   Documentation
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href={`${basePath}/blog`} className="text-muted-foreground hover:text-foreground transition-colors">
                   Blog
                 </Link>
               </li>

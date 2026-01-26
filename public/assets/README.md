@@ -146,3 +146,5 @@ For assets used across multiple pages (like CV):
 7. ✅ Include alt text and captions for accessibility
 
 
+
+

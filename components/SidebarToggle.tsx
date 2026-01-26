@@ -15,7 +15,9 @@ export function SidebarToggle() {
   }, [])
   
   // Only show on docs pages and after mount
-  if (!mounted || !pathname?.startsWith('/docs')) {
+  // Check for both /docs and /knowledge-base/docs
+  const isDocsPage = pathname?.startsWith('/docs') || pathname?.startsWith('/knowledge-base/docs')
+  if (!mounted || !isDocsPage) {
     return null
   }
 

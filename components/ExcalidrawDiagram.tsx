@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTheme } from 'next-themes'
 import { Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { usePathname } from 'next/navigation'
 
 // Dynamically import Excalidraw to avoid SSR issues
 const Excalidraw = dynamic(
@@ -28,6 +29,10 @@ export function ExcalidrawDiagram({ src, alt, caption, initialZoom = 1 }: Excali
   const containerRef = useRef<HTMLDivElement>(null)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const pathname = usePathname()
+
+  // Determine basePath dynamically
+  const basePath = pathname.startsWith('/knowledge-base') ? '/knowledge-base' : ''
 
   // Ensure component is mounted (for theme)
   useEffect(() => {
@@ -41,7 +46,10 @@ export function ExcalidrawDiagram({ src, alt, caption, initialZoom = 1 }: Excali
         setIsLoading(true)
         setError(null)
         
-        const response = await fetch(src)
+        // Add basePath prefix to src if it's a relative path
+        const finalSrc = src.startsWith('/') && !src.startsWith(basePath) ? `${basePath}${src}` : src
+        
+        const response = await fetch(finalSrc)
         if (!response.ok) {
           throw new Error(`Failed to load Excalidraw file: ${response.statusText}`)
         }
@@ -74,7 +82,7 @@ export function ExcalidrawDiagram({ src, alt, caption, initialZoom = 1 }: Excali
     if (src) {
       loadExcalidrawFile()
     }
-  }, [src])
+  }, [src, basePath])
 
   // Handle fullscreen
   const toggleFullscreen = () => {
