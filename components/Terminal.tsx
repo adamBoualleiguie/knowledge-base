@@ -201,7 +201,18 @@ export function Terminal({
     }
 
     const cmd = commands[commandIndex]
-    if (!cmd) return
+    if (!cmd || !cmd.command) {
+      // Skip invalid commands and move to next
+      const nextIndex = commandIndex + 1
+      if (nextIndex < commands.length) {
+        currentCommandIndexRef.current = nextIndex
+        setCurrentCommandIndex(nextIndex)
+        typeCommand(nextIndex)
+      } else {
+        setIsTyping(false)
+      }
+      return
+    }
     
     let charIndex = 0
 
@@ -276,7 +287,8 @@ export function Terminal({
     // Collect all commands in order (without prompt)
     // Each command on a new line
     const commandsText = commands
-      .map(cmd => cmd.command.trim()) // Remove any extra whitespace
+      .map(cmd => cmd?.command?.trim() || '') // Remove any extra whitespace, handle undefined
+      .filter(cmd => cmd.length > 0) // Filter out empty commands
       .filter(cmd => cmd.length > 0) // Remove empty commands
       .join('\n') // Join with newline - each command on its own line
     
@@ -396,7 +408,7 @@ export function Terminal({
             .filter((index) => index >= 0 && index < commands.length && commands[index]) // Safety check
             .map((index) => {
               const cmd = commands[index]
-              if (!cmd) return null // Additional safety check
+              if (!cmd || !cmd.command) return null // Additional safety check
               return (
                 <div key={index} className="mb-2">
                   <div className="flex items-start gap-2 mb-1">

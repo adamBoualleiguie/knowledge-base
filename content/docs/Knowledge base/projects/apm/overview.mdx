@@ -1,0 +1,245 @@
+---
+title: Initial APM setup with SigNoz
+description: Bootstrapping a test Kubernetes cluster and deploying SigNoz for APM and infrastructure observability.
+publishedAt: 2024-01-01
+order: 1
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+---
+
+## Preparing the test cluster
+
+To keep things simple and reproducible, the APM stack is deployed on a **single-node k3s cluster** created with **k3smp**.  
+This setup is intentionally minimal: one control-plane node, no workers, just enough resources to run SigNoz comfortably.
+
+### Cluster configuration
+
+Below is the environment file passed to the `k3smp` script during cluster creation:
+
+```text
+CLUSTER_MODE="single"
+CLUSTER_NAME="signoz-cluster"
+CP_NODE_COUNT=1
+CP_NODE_PREFIX="signoz-master"
+CP_CPU=6
+CP_MEM=8192
+CP_DISK="50G"
+CP_OS_IMAGE="22.04"
+WORKER_NODE_COUNT=0
+WORKER_NODE_PREFIX="worker"
+WORKER_CPU=4
+WORKER_MEM=8192
+WORKER_DISK="50G"
+WORKER_OS_IMAGE="22.04"
+K3S_VERSION="v1.35.0+k3s1"
+DISABLE_TRAEFIK="false"
+DISABLE_SERVICELB="false"
+CLUSTER_CIDR="10.42.0.0/16"
+SERVICE_CIDR="10.43.0.0/16"
+INSTALL_METRICS_SERVER="true"
+INSTALL_DASHBOARD="false"
+INSTALL_LONGHORN="false"
+INSTALL_CERT_MANAGER="false"
+INSTALL_MONITORING_STACK="false"
+````
+
+### Cluster creation
+
+The cluster is created using the following command:
+
+<Terminal
+title="Create k3s cluster"
+commands={[
+{
+command: "./k3smp.sh create --config signoz.env",
+delay: 300
+}
+]}
+/>
+
+Once the cluster is up, we can validate access using `k9s` with the generated kubeconfig:
+
+<Terminal
+title="Access cluster with k9s"
+commands={[
+{
+command: "k9s --kubeconfig kubeconfigs/k3s-signoz-cluster.yaml",
+delay: 300
+}
+]}
+/>
+
+### Cluster overview
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/k3s-signoz-cluster.png"
+alt="k3s single-node cluster overview"
+/>
+
+---
+
+## Installing SigNoz
+
+SigNoz is installed by following the official Kubernetes installation guide. For local testing on k3s, a few Helm values are adjusted to better fit the environment.
+
+### Helm values
+
+Key points of this configuration:
+
+* Use the default `local-path` storage class provided by k3s.
+* Expose SigNoz via `NodePort` to access it from the Multipass VM.
+
+```yaml
+global:
+  storageClass: local-path
+
+clickhouse:
+  installCustomStorageClass: true
+
+signoz:
+  service:
+    type: NodePort
+```
+
+### Helm installation
+
+<Terminal
+title="Install SigNoz via Helm"
+commands={[
+{
+command: "helm repo add signoz https://charts.signoz.io",
+output: "\"signoz\" has been added to your repositories",
+delay: 300
+},
+{
+command: "helm repo update",
+output: "Hang tight while we grab the latest from your chart repositories...\n...Successfully got an update from the \"signoz\" chart repository\n...Successfully got an update from the \"open-telemetry\" chart repository\nUpdate Complete. ⎈Happy Helming!⎈",
+delay: 300
+},
+{
+command: "helm install signoz signoz/signoz --namespace signoz --create-namespace --wait --timeout 1h -f values.yaml --kubeconfig k3s-signoz-cluster.yaml",
+output: "NAME: signoz\nLAST DEPLOYED: Mon Jan 26 19:37:03 2026\nNAMESPACE: signoz\nSTATUS: deployed\nREVISION: 1",
+delay: 300
+}
+]}
+/>
+
+### Verifying deployment
+
+Once deployed, all SigNoz components should be running in the `signoz` namespace:
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/signoz-pods.png"
+alt="SigNoz pods running in Kubernetes"
+/>
+
+---
+
+## Testing SigNoz UI
+
+The SigNoz UI is exposed using a `NodePort`. Accessing it confirms that the backend and ClickHouse are correctly wired.
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/signoz-ui.png"
+alt="SigNoz UI homepage"
+/>
+
+During the first visit, the onboarding screen is displayed:
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/signoz-ui-onboarding.png"
+alt="SigNoz onboarding screen"
+/>
+
+---
+
+## Monitoring the k3s cluster with SigNoz
+
+SigNoz provides a dedicated **K8s Infra** chart that installs pre-configured OpenTelemetry collectors across the cluster.
+This enables out-of-the-box visibility into:
+
+* Node and host metrics
+* Kubernetes API metrics
+* Pod, namespace, and workload-level signals
+* Logs, traces, and cluster events
+
+<Callout type="info" title="Why K8s Infra?">
+The K8s Infra chart deploys OpenTelemetry collectors as agents and gateways, ensuring full coverage of both node-level and cluster-level telemetry.
+</Callout>
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/signoz-k8s-infra.png"
+alt="SigNoz Kubernetes Infra architecture"
+/>
+
+---
+
+## K8s Infra installation
+
+### Values file
+
+The following values are used to install the K8s Infra chart into the existing `signoz` namespace:
+
+```yaml
+global:
+  cloud: others
+  clusterName: k3s-test-cluster
+  deploymentEnvironment: test-infra
+
+otelCollectorEndpoint: signoz-otel-collector:4317
+otelInsecure: true
+
+presets:
+  otlpExporter:
+    enabled: true
+  loggingExporter:
+    enabled: false
+```
+
+### Helm install
+
+<Terminal
+title="Install SigNoz K8s Infra"
+commands={[
+{
+command: "helm install signoz-k8s-infra signoz/k8s-infra -f k8s-infra-values.yml -n signoz --kubeconfig k3s-signoz-cluster.yaml",
+delay: 300
+}
+]}
+/>
+
+---
+
+## Infrastructure visibility
+
+After installation, the **Infrastructure** section in the SigNoz UI starts populating automatically.
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/signoz-k8s-infra-demo1.png"
+alt="SigNoz infrastructure overview"
+/>
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/signoz-k8s-infra-demo2.png"
+alt="Host-level metrics in SigNoz"
+/>
+
+In the Kubernetes section, detailed metrics are available for namespaces, pods, and workloads:
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/signoz-k8s-infra-demo3.png"
+alt="Kubernetes metrics in SigNoz"
+/>
+
+---
+
+## Next steps
+
+With the base APM and infrastructure monitoring in place, the next step is to explore:
+
+* Application-level instrumentation
+* Distributed tracing
+* Logs correlation
+* Alerts and SLOs
+
+This foundation already provides strong visibility into the health and behavior of the k3s cluster.
