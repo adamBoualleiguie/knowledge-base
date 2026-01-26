@@ -6,12 +6,32 @@ import { compareDesc } from 'date-fns'
 import { Typewriter } from 'react-simple-typewriter'
 import { useState, useEffect } from 'react'
 
+// Get basePath from Next.js config (for static export)
+const getBasePath = () => {
+  // In browser, check if we're in a subdirectory
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname
+    // If path starts with /knowledge-base, return it
+    if (path.startsWith('/knowledge-base')) {
+      return '/knowledge-base'
+    }
+  }
+  return ''
+}
+
 export default function Home() {
   const latestBlogs = allBlogs
     .sort((a, b) =>
       compareDesc(new Date(a.publishedAt), new Date(b.publishedAt))
     )
     .slice(0, 3)
+
+  const [basePath, setBasePath] = useState('')
+
+  // Determine basePath dynamically (same approach as Navigation.tsx)
+  useEffect(() => {
+    setBasePath(getBasePath())
+  }, [])
 
   // State sequence: Hi → Name → About Me
   const [showHi, setShowHi] = useState(true)
@@ -90,7 +110,7 @@ export default function Home() {
             </Link>
 
             <a
-              href="/assets/general/pdfs/cv.pdf"
+              href={`${basePath}/assets/general/pdfs/AdamBoualleiguie.pdf`}
               download
               className="px-8 py-3.5 border-2 border-border rounded-lg
                        hover:bg-accent transition-all duration-200 font-medium

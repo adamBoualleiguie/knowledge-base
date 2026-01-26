@@ -95,6 +95,9 @@ export const docsOrderConfig: DocsOrderConfig = {
       'Git',
       'Github',
     ],
+    'Knowledge-base.toolbox': [
+      'Lab-tools',
+    ],
   },
 }
 

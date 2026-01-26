@@ -1,0 +1,311 @@
+---
+title: k3smp
+description: Provision production-like K3s clusters locally using real virtual machines with Multipass.
+publishedAt: 2026-01-26
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+order: 2
+tags: [kubernetes, k3s, multipass, devops, local-cluster]
+showMetadata: true
+---
+
+# k3smp
+
+**k3smp** is a local Kubernetes cluster provisioning tool that creates **real K3s clusters inside real virtual machines**, fully automated using **Multipass**.
+
+If you ever felt that running Kubernetes nodes inside Docker containers hides too many real-world details — this tool is for you.
+
+<Callout type="info" title="In one sentence">
+k3smp is like **k3d**, but with **real VMs**, **real node isolation**, and a **real Kubernetes topology**.
+</Callout>
+
+## Why k3smp exists
+
+There is an excellent tool called [k3d](https://k3d.io/stable/) that spins up K3s clusters inside Docker containers. It is fast, clean, and perfect for disposable clusters.
+
+However, for some use cases, running Kubernetes **inside containers** is not ideal:
+
+- Networking behaves differently
+- Node isolation is artificial
+- HA control plane behavior is abstracted
+- Kubernetes internals are hidden
+
+So the idea behind **k3smp** is simple:
+
+> Provision **virtual machines** locally using Multipass, then install **K3s directly on those VMs** — automatically.
+
+k3smp turns that idea into a fast, repeatable, and safe workflow.
+
+## What k3smp does (simple terms)
+
+### 1. Analyze your host machine
+
+- Detects OS (Linux / macOS / WSL)
+- Checks available CPU, RAM, and disk
+- Calculates safe limits to avoid overloading your system
+
+<Callout type="note">
+k3smp refuses to create clusters that would starve your host machine.
+</Callout>
+
+### 2. Provision real virtual machines
+
+- Uses **Multipass**, not Docker
+- Each Kubernetes node runs in its own VM
+- Control planes and workers are fully isolated
+
+### 3. Install and bootstrap K3s
+
+- First control plane initializes the cluster (`--cluster-init`)
+- Additional control planes join using the shared server token
+- Worker nodes join as agents
+- Optional components handled automatically:
+  - Traefik
+  - metrics-server
+  - Kubernetes dashboard
+
+### 4. Generate kubeconfig
+
+- Fetches kubeconfig from the first control plane
+- Replaces `localhost` with the VM IP
+- Saves it locally for immediate `kubectl` access
+
+## Architecture overview
+
+### Example: High availability cluster
+
+```
+
+┌────────────────────────────────────────────┐
+│                Host Machine                │
+│                                            │
+│  ┌───────────┐  ┌───────────┐  ┌──────────┐│
+│  │   cp1     │  │   cp2     │  │   cp3    ││
+│  │ control   │  │ control   │  │ control  ││
+│  └───────────┘  └───────────┘  └──────────┘│
+│          │            │            │       │
+│          └────────────┴────────────┘       │
+│                 etcd quorum                │
+│                                            │
+│  ┌───────────┐  ┌───────────┐              │
+│  │ worker1   │  │ worker2   │              │
+│  │ workloads │  │ workloads │              │
+│  └───────────┘  └───────────┘              │
+│                                            │
+└────────────────────────────────────────────┘
+
+```
+
+Each box represents **one Multipass VM**  
+Each VM represents **one Kubernetes node**
+
+## Requirements
+
+### Mandatory
+
+- Linux or macOS
+- Virtualization enabled in BIOS
+- Internet access
+- sudo privileges
+
+### Automatically handled
+
+- Multipass installation
+- kubectl installation
+- K3s installation
+
+<Callout type="success" title="Good news">
+You don’t need to preinstall anything except a supported OS.
+</Callout>
+
+## Installation
+
+### Clone the repository
+
+<Terminal
+  title="Clone k3smp repository"
+  commands={[
+    {
+      command: 'git clone https://github.com/adamBoualleiguie/k3smp.git',
+      output: "Cloning into 'k3smp'...\nremote: Enumerating objects: 15, done.\nremote: Counting objects: 100% (15/15), done.\nremote: Compressing objects: 100% (9/9), done.\nremote: Total 15 (delta 4), reused 12 (delta 4), pack-reused 0 (from 0)\nReceiving objects: 100% (15/15), 15.15 KiB | 517.00 KiB/s, done.\nResolving deltas: 100% (4/4), done."
+    },
+    {
+      command: 'cd k3smp',
+      output: ''
+    }
+  ]}
+/>
+
+### Make the script executable
+
+<Terminal
+  title="Prepare script"
+  commands={[
+    {
+      command: 'chmod +x k3smp.sh',
+      output: ''
+    }
+  ]}
+/>
+
+## Quick start
+
+### Interactive wizard (recommended)
+
+<Terminal
+  title="k3smp interactive wizard"
+  commands={[
+    {
+      command: './k3smp.sh create',
+      output: "╔═══════════════════════════════════════════════════════════╗\n║                                                           ║\n║     ██╗  ██╗██████╗ ███████╗    ██████╗ ██████╗          ║\n║     ██║ ██╔╝╚════██╗██╔════╝   ██╔════╝██╔═══██╗         ║\n║     █████╔╝  █████╔╝███████╗   ██║     ██║   ██║         ║\n║     ██╔═██╗  ╚═══██╗╚════██║   ██║     ██║   ██║         ║\n║     ██║  ██╗██████╔╝███████║██╗╚██████╗╚██████╔╝██╗      ║\n║     ╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═════╝ ╚═╝      ║\n║                                                           ║\n║                Multipass K3s Cluster Manager              ║\n║                     v1.0.0 - OP Edition                   ║\n║                                                           ║\n╚═══════════════════════════════════════════════════════════╝\n[2026-01-26 18:35:11] Detecting system resources...\n✓ System detection complete\n\n══════════════════════════════════════════════════════════════\n                    SYSTEM RESOURCE ANALYSIS                    \n══════════════════════════════════════════════════════════════\nOperating System         : linux\nTotal RAM                : 15 GB\nAvailable RAM            : 2 GB\nCPU Cores                : 8 cores\nFree Disk Space          : 305 GB\n══════════════════════════════════════════════════════════════\nRecommended Max CPU      : 5 cores\nRecommended Max RAM      : 1 GB\n══════════════════════════════════════════════════════════════\n\n[2026-01-26 18:35:11] Checking Multipass installation...\n✓ Multipass found: multipass 1.16.1\n[2026-01-26 18:35:12] Loading configuration from: cluster-config.env\n✓ Configuration loaded successfully\n\n══════════════════════════════════════════════════════════════\n                  CLUSTER CONFIGURATION SUMMARY                \n══════════════════════════════════════════════════════════════\nCluster Name                  : my-k3s-cluster\nCluster Mode                  : ha\nK3s Version                   : stable\nControl Planes                : 3 nodes\nWorker Nodes                  : 2 nodes\nTotal Cluster CPU             : 14 cores\nTotal Cluster RAM             : 28672 MB\nNetwork CIDR                  : 10.42.0.0/16\nService CIDR                  : 10.43.0.0/16\n══════════════════════════════════════════════════════════════\nUse this configuration? [Y/n]:"
+    }
+  ]}
+/>
+
+This mode:
+
+- Asks configuration questions step by step
+- Validates host resources
+- Saves the configuration automatically
+- Creates the cluster safely
+
+<Callout type="info">
+This is the best entry point if you are new to Kubernetes or HA clusters.
+</Callout>
+
+## Using a configuration file
+
+### Create a config file
+
+<Terminal
+  title="Create cluster config"
+  commands={[
+    {
+      command: 'cp cluster-config.env mycluster.env',
+      output: ''
+    }
+  ]}
+/>
+
+### Create the cluster
+
+<Terminal
+  title="Create cluster from config"
+  commands={[
+    {
+      command: './k3smp.sh create --config mycluster.env',
+      output: ''
+    }
+  ]}
+/>
+
+### Use the cluster
+
+<Terminal
+  title="Access cluster"
+  commands={[
+    {
+      command: 'export KUBECONFIG=./kubeconfigs/k3s-my-k3s-cluster.yaml',
+      output: ''
+    },
+    {
+      command: 'kubectl get nodes',
+      output: 'NAME        STATUS   ROLES           AGE\ncp1         Ready    control-plane   2m\ncp2         Ready    control-plane   2m\ncp3         Ready    control-plane   2m\nworker1     Ready    <none>           90s\nworker2     Ready    <none>           90s'
+    }
+  ]}
+/>
+
+## Cluster lifecycle commands
+
+<Terminal
+  title="Cluster lifecycle"
+  commands={[
+    { command: './k3smp.sh create', output: '' },
+    { command: './k3smp.sh destroy --config mycluster.env', output: '' },
+    { command: './k3smp.sh status --config mycluster.env', output: '' },
+    { command: './k3smp.sh list', output: '' }
+  ]}
+/>
+
+## Configuration file explained
+
+The configuration file defines **what kind of cluster you want**.
+
+You can control:
+
+- Cluster topology (single / HA / custom)
+- Number of control planes and workers
+- CPU, RAM, and disk per node
+- K3s version
+- Networking configuration
+- Optional addons
+
+<Callout type="warning" title="Validation first">
+k3smp validates requested resources before creating anything and will warn or stop if limits are exceeded.
+</Callout>
+
+## k3smp vs k3d
+<table>
+  <thead>
+    <tr>
+      <th>Use case</th>
+      <th>k3d</th>
+      <th>k3smp</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Fast disposable clusters</td>
+      <td>✅</td>
+      <td>❌</td>
+    </tr>
+    <tr>
+      <td>Real node isolation</td>
+      <td>❌</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>High availability control planes</td>
+      <td>⚠️</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>Learning Kubernetes internals</td>
+      <td>❌</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>Production-like local testing</td>
+      <td>❌</td>
+      <td>✅</td>
+    </tr>
+  </tbody>
+</table>
+
+
+## Troubleshooting
+
+### VM creation issues
+
+<Terminal
+  title="Multipass diagnostics"
+  commands={[
+    { command: 'multipass info', output: '' },
+    { command: 'multipass find', output: '' }
+  ]}
+/>
+
+<Callout type="danger">
+Network overlap can prevent pods and services from communicating correctly.
+</Callout>
+
+## When should you use k3smp?
+
+Use k3smp if you want:
+
+- A realistic Kubernetes lab
+- To learn HA control plane behavior
+- To test production-like setups locally
+- To understand Kubernetes beyond containers
+
+If you only need fast disposable clusters, **k3d** remains the better choice.
