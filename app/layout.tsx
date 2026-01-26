@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import './globals.css'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
@@ -38,6 +39,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className="font-sans antialiased">
+        {/* Cloudflare Web Analytics */}
+        <Script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "9c1ec2f6b17d48b482ca36c68dbb0fe1"}'
+          strategy="afterInteractive"
+        />
+        {/* End Cloudflare Web Analytics */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
