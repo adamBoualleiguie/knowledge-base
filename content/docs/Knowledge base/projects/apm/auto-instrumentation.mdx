@@ -1,0 +1,375 @@
+---
+title: Auto-instrumentation with SigNoz
+description: Instrumenting applications with SigNoz using OpenTelemetry auto-instrumentation on Kubernetes.
+publishedAt: 2026-01-27
+order: 2
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+metaDescription: Instrumenting applications with SigNoz for APM and infrastructure observability.
+showMetadata: true
+---
+
+# Auto-instrumentation with SigNoz
+
+Modern observability is no longer optional. As systems grow in complexity, manually adding tracing and metrics to every service quickly becomes unmanageable. This is where **application instrumentation** and **OpenTelemetry auto-instrumentation** step in.
+
+In this guide, we’ll walk through how to enable **application-level observability at scale** using **SigNoz**, the **OpenTelemetry Operator**, and **Kubernetes auto-instrumentation** — with minimal code changes and maximum consistency.
+
+---
+
+## What is application instrumentation?
+
+Application instrumentation is the process of adding hooks into your application so it can emit **telemetry data**:
+- **Traces** → how requests flow across services
+- **Metrics** → latency, throughput, errors
+- **Logs** → structured, correlated runtime events
+
+Traditionally, this meant modifying application code, importing SDKs, and manually wiring exporters. That approach works — but it doesn’t scale well in large platforms or shared clusters.
+
+### Enter OpenTelemetry
+
+**OpenTelemetry (OTel)** is an open standard and set of tools that define *how telemetry is generated, processed, and exported*. It provides:
+- Language SDKs (Java, Go, Python, Node.js, etc.)
+- A vendor-neutral data model
+- The **OpenTelemetry Collector** for processing and exporting telemetry
+
+SigNoz is built on top of OpenTelemetry, which means anything you emit using OTel can be visualized and analyzed directly in SigNoz.
+
+---
+
+## From manual instrumentation to auto-instrumentation
+
+### The classic approach (manual)
+
+In a manual setup, developers typically:
+1. Add OpenTelemetry SDKs to the application
+2. Configure exporters and resource attributes
+3. Wrap handlers, HTTP clients, database calls, etc.
+
+This gives full control — but it also means:
+- Code changes per service
+- Inconsistent setups across teams
+- Slow adoption at scale
+
+### Auto-instrumentation: the shift
+
+OpenTelemetry supports **auto-instrumentation**, where the SDK is injected **at runtime**, without touching application code.
+
+This is especially powerful in Kubernetes environments:
+- Platform teams manage observability
+- Developers keep focusing on business logic
+- Instrumentation becomes **declarative**
+
+The upstream OpenTelemetry documentation explains this concept well:
+👉 https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
+
+As an SRE or platform engineer, this is exactly what you want:
+> “I want to enable tracing for hundreds of workloads using annotations — not pull requests.”
+
+---
+
+## Auto-instrumentation with the OpenTelemetry Operator
+
+### What is the OpenTelemetry Operator?
+
+The **OpenTelemetry Operator** is a Kubernetes Operator that manages:
+- OpenTelemetry Collectors
+- Auto-instrumentation lifecycle
+- Configuration through Kubernetes CRDs
+
+It provides a Kubernetes-native way to deploy and operate OpenTelemetry at scale.
+
+### Why use the Operator?
+
+**Key benefits:**
+- **Simplified deployment** of collectors
+- **Centralized configuration** using CRDs
+- **Automated lifecycle management**
+- **Auto-instrumentation** for supported runtimes
+
+### Architecture overview
+
+At a high level, the Operator works like this:
+- You declare telemetry intent using Custom Resources
+- The Operator reconciles desired vs actual state
+- Collectors and instrumentation are injected automatically
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/otel-operator-architecture.png"
+  alt="OpenTelemetry Operator architecture"
+  caption="High-level architecture of the OpenTelemetry Operator"
+/>
+
+---
+
+## OpenTelemetry Collector deployment modes
+
+The Operator supports multiple collector deployment strategies:
+
+### Sidecar
+A collector runs alongside each application pod. This keeps telemetry local but increases pod complexity.
+
+### DaemonSet
+A collector runs on **every node**. Ideal for:
+- Host metrics
+- Container logs
+- Kubelet metrics
+
+### Deployment (default)
+A centralized collector deployment that’s easy to scale and manage.
+
+### StatefulSet
+Useful when you need stable identities or persistent storage.
+
+In this guide, we’ll use the **DaemonSet mode**, as it’s well-suited for Kubernetes infrastructure telemetry and works perfectly with SigNoz.
+
+---
+
+## k8s-infra vs OpenTelemetry Operator
+
+Before going further, it’s important to understand when to use what.
+
+### When to use SigNoz k8s-infra
+
+- Fast, one-command setup
+- SigNoz-ready dashboards and alerts
+- Minimal configuration overhead
+
+Use **k8s-infra** when you want a quick, production-ready Kubernetes observability setup.
+
+### When to use the OpenTelemetry Operator
+
+- You need **application auto-instrumentation**
+- You want Kubernetes-native CRD management
+- You need fine-grained control
+
+### Recommended approach
+
+Start with **k8s-infra** for cluster visibility.  
+Add the **OpenTelemetry Operator** when you need auto-instrumentation for specific workloads.
+
+---
+
+## Installing the OpenTelemetry Operator
+
+### Step 1: Install cert-manager
+
+The OpenTelemetry Operator relies on **admission webhooks**, which must be secured using TLS.  
+**cert-manager** is used to automatically generate and rotate certificates for these webhooks.
+
+<Callout type="note" title="Why cert-manager is required">
+The Operator uses validating and mutating webhooks to inject instrumentation into pods. Kubernetes requires these webhooks to be secured with TLS certificates — cert-manager handles this automatically.
+</Callout>
+
+<Terminal
+  title="Install cert-manager"
+  commands={[
+    {
+      command: 'kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.2/cert-manager.yaml --kubeconfig k3s-signoz-cluster.yaml',
+      output: 'namespace/cert-manager created\ncustomresourcedefinition.apiextensions.k8s.io/certificates.cert-manager.io created\n...'
+    }
+  ]}
+/>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/cert-manager-pods.png"
+  alt="cert-manager pods running"
+  caption="cert-manager components running successfully"
+/>
+
+---
+
+### Step 2: Install the OpenTelemetry Operator (Helm)
+
+We’ll use Helm to simplify upgrades and lifecycle management.
+
+<Terminal
+  title="Install OpenTelemetry Operator"
+  commands={[
+    { command: 'helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts', output: '' },
+    {
+      command: 'helm install opentelemetry-operator open-telemetry/opentelemetry-operator --create-namespace --namespace opentelemetry-operator-system --kubeconfig k3s-signoz-cluster.yaml',
+      output: 'STATUS: deployed\nREVISION: 1'
+    }
+  ]}
+/>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/otel-operator-pods.png"
+  alt="OpenTelemetry Operator pods"
+  caption="OpenTelemetry Operator running in the cluster"
+/>
+
+---
+
+## Configuring the OpenTelemetry Collector (DaemonSet)
+
+We’ll deploy a **DaemonSet collector** to:
+- Collect logs from `/var/log/pods`
+- Collect host metrics
+- Receive OTLP data from instrumented apps
+- Export everything to SigNoz
+
+### RBAC configuration
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: signoz-collector-daemonset-collector-role
+rules:
+  - apiGroups: ['']
+    resources: [pods, namespaces, nodes]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: signoz-collector-daemonset-collector-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: signoz-collector-daemonset-collector-role
+subjects:
+  - kind: ServiceAccount
+    name: signoz-collector-daemonset-collector
+    namespace: opentelemetry-operator-system
+````
+
+### Collector Custom Resource
+
+> This collector receives telemetry and forwards it to SigNoz via OTLP.
+
+```yaml
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-collector-daemonset
+  namespace: opentelemetry-operator-system
+spec:
+  mode: daemonset
+  image: otel/opentelemetry-collector-contrib:0.139.0
+  env:
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: signoz-otel-collector.signoz.svc.cluster.local:4317
+    - name: OTEL_EXPORTER_OTLP_INSECURE
+      value: "true"
+  config:
+    exporters:
+      otlp:
+        endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
+        tls:
+          insecure: true
+    receivers:
+      otlp:
+        protocols:
+          grpc: {}
+          http: {}
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [otlp]
+        metrics:
+          receivers: [otlp]
+          exporters: [otlp]
+        logs:
+          receivers: [otlp]
+          exporters: [otlp]
+```
+
+---
+
+## Testing auto-instrumentation with a real app
+
+To validate everything end-to-end, we’ll deploy a **Java application** and auto-instrument it.
+
+### Deploy Nexus Repository Manager
+
+<Terminal
+title="Deploy Nexus test application"
+commands={[
+{ command: 'kubectl create ns app --kubeconfig k3s-signoz-cluster.yaml', output: 'namespace/app created' },
+{
+command: 'helm install nexus-repo sonatype/nexus-repository-manager -n app --kubeconfig k3s-signoz-cluster.yaml',
+output: 'STATUS: deployed'
+}
+]}
+/>
+
+---
+
+## Enabling Java auto-instrumentation
+
+Since Nexus is a Java application, we define an **Instrumentation CR**:
+
+```yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: java-instrumentation
+  namespace: app
+spec:
+  exporter:
+    endpoint: http://signoz-collector-daemonset-collector.opentelemetry-operator-system.svc.cluster.local:4318
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+  java:
+    env:
+      - name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+```
+
+### Annotate the workload
+
+Add the following annotation to the pod template:
+
+```yaml
+instrumentation.opentelemetry.io/inject-java: "true"
+```
+
+Once applied, the Operator injects the OpenTelemetry Java agent automatically.
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/otel-java-sidecar.png"
+alt="Java auto-instrumentation sidecar"
+caption="OpenTelemetry Java agent injected into the Nexus pod"
+/>
+
+<Callout type="note" title="Namespace-level auto-instrumentation">
+Instead of annotating each workload, you can annotate the namespace.  
+All workloads in that namespace will be instrumented automatically — ideal when using one namespace per application.
+</Callout>
+
+---
+
+## Observing traces in SigNoz
+
+Finally, generate some traffic:
+
+* Log into Nexus
+* Upload artifacts
+* Create repositories
+
+Within seconds, traces appear in SigNoz — fully correlated and enriched with Kubernetes metadata.
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/signoz-apm-trace1.png"
+alt="SigNoz APM traces"
+caption="End-to-end traces from the Nexus application in SigNoz"
+/>
+
+---
+
+## Final thoughts
+
+Auto-instrumentation completely changes how observability is adopted:
+
+* No code changes
+* Platform-driven
+* Consistent across teams
+
+Combined with SigNoz and the OpenTelemetry Operator, it provides a clean, scalable, and future-proof observability stack.
+
+If you’re running Kubernetes at scale — this is the way forward.
