@@ -1,0 +1,294 @@
+---
+title: Opentelemetry demo app with SigNoz integration
+description: Learning SigNoz APM features by deploying a fully instrumented microservice application (OpenTelemetry demo app).
+publishedAt: 2026-01-28
+order: 3
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+metaDescription: Learn SigNoz APM features by running the OpenTelemetry demo application with a bring-your-own collector setup.
+showMetadata: true
+---
+
+# Context
+
+In a previous setup, I focused on **self-hosting SigNoz** and enabling **auto-instrumentation** using the OpenTelemetry Operator.  
+While this works well for basic visibility, I quickly ran into practical limitations.
+
+For example, when relying only on auto-instrumentation:
+- Traces were often **flat or poorly scaffolded**
+- Service relationships were not always clear
+- Complex applications (like Nexus or Elasticsearch) introduced friction during setup
+
+In short, I could *see data*, but I wasn’t really **learning APM deeply**.
+
+<Callout type="note" title="Key realization">
+To truly understand an APM platform, you need an application that is <Highlight>designed to be observed</Highlight>, not just auto-instrumented as an afterthought.
+</Callout>
+
+That led me to a simple question:
+
+> *How do the creators of OpenTelemetry and SigNoz themselves test and showcase APM features?*
+
+---
+
+## Discovering the OpenTelemetry demo app
+
+The answer already existed.
+
+I stumbled upon the **OpenTelemetry Demo Application**, also known as **Astronomy Shop**:
+- Repository: https://github.com/open-telemetry/opentelemetry-demo
+
+And honestly — this thing is **huge** (in a good way).
+
+It’s a realistic microservices-based system, built specifically to:
+- Generate traces, metrics, and logs
+- Exercise multiple languages and protocols
+- Showcase observability patterns end-to-end
+
+Even better, the project provides a **well-documented Helm chart** for Kubernetes deployments:
+- https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-demo
+
+---
+
+## SigNoz-specific adaptation
+
+After digging further, I noticed that the **SigNoz team already forked and adapted** this demo:
+- Mainly by adjusting `values.yaml` so telemetry is sent to a SigNoz collector
+
+That was the missing piece.
+
+From there, I:
+- Improved the configuration
+- Removed unnecessary components
+- Disabled heavy services
+- Optimized the setup to run **locally** on limited resources
+
+The final environment looks like this:
+
+<Highlight color="blue">Multipass → k3s (master + worker) → SigNoz stack → OpenTelemetry Operator → Otel Demo App</Highlight>
+
+---
+
+# About the demo stack
+
+The OpenTelemetry demo app intentionally covers a **wide technical surface**:
+
+- Multiple languages: Java, Go, Node.js
+- Message streaming with Kafka
+- gRPC-heavy service-to-service communication
+- Background load generation
+- Realistic failure and latency patterns
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/otel-demo-arch.png"
+  alt="OpenTelemetry demo architecture overview"
+  caption="High-level architecture of the OpenTelemetry demo (Astronomy Shop)"
+/>
+
+### Core capabilities
+
+- **Kubernetes-native**: runs locally or in cloud environments  
+- **Docker support**: can also be executed without Kubernetes  
+- **gRPC-first communication** between services  
+- **Full OpenTelemetry instrumentation** across all services  
+- **Synthetic traffic generation** using Locust  
+
+Originally, the demo also includes:
+- Jaeger
+- Prometheus
+- Grafana
+- OpenSearch
+- A bundled OpenTelemetry Collector
+
+But in our case, that’s unnecessary.
+
+---
+
+## Bring your own collector (SigNoz)
+
+Since we already have a **self-managed SigNoz stack**, we use it as the **central telemetry backend**.
+
+<Callout type="info" title="Important">
+This setup follows the official <Highlight color="orange">Bring Your Own Observability</Highlight> model recommended by the OpenTelemetry Helm charts.
+</Callout>
+
+That means:
+- SigNoz acts as the collector and backend
+- The demo app only emits telemetry
+- No duplicate observability stack is deployed
+
+---
+
+# Optimized local deployment
+
+## Helm repository setup
+
+<Terminal
+  commands={[
+    {
+        command: 'helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts',
+    },
+    {
+        command: 'helm repo update',
+    }
+  ]}
+/>
+
+---
+
+## Custom `values.yaml`
+
+This file does two important things:
+1. Redirects all telemetry to the SigNoz collector
+2. Disables unnecessary components to reduce resource usage
+
+```yaml
+default:
+  env:
+    - name: OTEL_SERVICE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: "metadata.labels['app.kubernetes.io/component']"
+    - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+      value: cumulative
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: service.name=$(OTEL_SERVICE_NAME),service.namespace=opentelemetry-demo
+    - name: OTEL_COLLECTOR_NAME
+      value: signoz-collector-daemonset-collector.opentelemetry-operator-system.svc.cluster.local
+
+components:
+  ad:
+    enabled: false
+  checkout:
+    enabled: true
+  cart:
+    enabled: false
+  shipping:
+    enabled: false
+  currency:
+    enabled: false
+  email:
+    enabled: false
+  payment:
+    enabled: false
+  recommendation:
+    enabled: false
+  quote:
+    enabled: false
+
+jaeger:
+  enabled: false
+prometheus:
+  enabled: false
+grafana:
+  enabled: false
+opensearch:
+  enabled: false
+opentelemetry-collector:
+  enabled: false
+```
+
+<Callout type="warning" title="Why so many components disabled?">
+The goal here is <Highlight>learning APM behavior</Highlight>, not benchmarking cluster capacity.
+Reducing noise makes the signals much clearer.
+</Callout>
+
+---
+
+## Installation
+
+<Terminal
+  commands={[
+    {
+      command: 'kubectl create namespace app --kubeconfig k3s-signoz-cluster.yaml',
+    },
+    {
+      command: 'helm upgrade --install otel-demo open-telemetry/opentelemetry-demo -n app -f otel-demo.yml --kubeconfig k3s-signoz-cluster.yaml',
+      output: 'Release "otel-demo" has been upgraded. Happy Helming!\nNAME: otel-demo\nLAST DEPLOYED: Wed Jan 28 00:56:17 2026\nNAMESPACE: app\nSTATUS: deployed\nREVISION: 3\nTEST SUITE: None\nNOTES:\n=======================================================================================\n\n\n ██████╗ ████████╗███████╗██╗         ██████╗ ███████╗███╗   ███╗ ██████╗\n██╔═══██╗╚══██╔══╝██╔════╝██║         ██╔══██╗██╔════╝████╗ ████║██╔═══██╗\n██║   ██║   ██║   █████╗  ██║         ██║  ██║█████╗  ██╔████╔██║██║   ██║\n██║   ██║   ██║   ██╔══╝  ██║         ██║  ██║██╔══╝  ██║╚██╔╝██║██║   ██║\n╚██████╔╝   ██║   ███████╗███████╗    ██████╔╝███████╗██║ ╚═╝ ██║╚██████╔╝\n ╚═════╝    ╚═╝   ╚══════╝╚══════╝    ╚═════╝ ╚══════╝╚═╝     ╚═╝ ╚═════╝\n\n- All services are available via the Frontend proxy: http://localhost:8080\n  by running these commands:\n     kubectl --namespace app port-forward svc/frontend-proxy 8080:8080\n\n  The following services are available at these paths after the frontend-proxy service is exposed with port forwarding:\n  Webstore             http://localhost:8080/\n  Jaeger UI            http://localhost:8080/jaeger/ui/\n  Grafana              http://localhost:8080/grafana/\n  Load Generator UI    http://localhost:8080/loadgen/\n  Feature Flags UI     http://localhost:8080/feature/'
+    } 
+  ]}
+/>
+
+
+Once deployed, the frontend is accessible via port-forwarding:
+
+<Terminal
+  commands={[
+    {
+      command: 'kubectl --namespace app port-forward svc/frontend-proxy 8080:8080',
+    }
+  ]}
+/>
+
+---
+
+## Running workloads
+
+After deployment, the cluster runs a clean and focused set of pods:
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/otel-demo-pods.png"
+alt="OpenTelemetry demo running pods"
+caption="Running OpenTelemetry demo workloads after optimization"
+/>
+
+---
+
+# Observability in SigNoz
+
+This is where things get interesting.
+
+### Service discovery
+
+SigNoz immediately detects all emitting services:
+
+<DocImage
+src="/assets/docs/images/knowledge-base/projects/apm/otel-demo-service-list.png"
+alt="SigNoz service list"
+caption="Automatically discovered services in SigNoz"
+/>
+
+### Real-time service map
+
+You can visually explore **live interactions** between services:
+
+<DocVideo
+src="/assets/docs/images/knowledge-base/projects/apm/otel-demo-service-map.webm"
+caption="Real-time service map generated from OpenTelemetry traces"
+/>
+
+### APM deep dive
+
+And finally, a full APM overview with latency, errors, and dependencies:
+
+<DocVideo
+src="/assets/docs/images/knowledge-base/projects/apm/otel-demo-apm-overview.webm"
+caption="APM overview view inside SigNoz"
+/>
+
+<Callout type="success" title="Why this matters">
+This setup gives you <Highlight color="green">clean, correlated signals</Highlight>:
+metrics, traces, and logs — all tied back to Kubernetes workloads.
+</Callout>
+
+---
+
+# Conclusion
+
+With this setup, we now have:
+
+* A realistic, fully instrumented microservice system
+* A clean SigNoz backend
+* High-quality telemetry that actually teaches APM concepts
+
+This becomes a **foundation environment** for learning SigNoz properly — not just installing it.
+
+In upcoming documents, we’ll build on this by focusing on:
+
+* Metrics and query syntax
+* Custom dashboards for operations teams
+* Alerting strategies
+* Query languages and correlations
+
+<Highlight color="purple">From here on, the learning happens in the SigNoz UI.</Highlight>
