@@ -6,10 +6,6 @@ interface SidebarContextType {
   isSidebarOpen: boolean
   toggleSidebar: () => void
   setSidebarOpen: (open: boolean) => void
-  isResizing: boolean
-  setResizing: (resizing: boolean) => void
-  resizeCooldown: boolean
-  setResizeCooldown: (cooldown: boolean) => void
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
@@ -17,8 +13,6 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
 export function SidebarProvider({ children }: { children: ReactNode }) {
   // Start with default to avoid hydration mismatch
   const [isSidebarOpen, setIsSidebarOpen] = useState(true) // Default: open
-  const [isResizing, setIsResizing] = useState(false)
-  const [resizeCooldown, setResizeCooldown] = useState(false)
   const [mounted, setMounted] = useState(false)
   
   // Load from localStorage after mount (client-side only)
@@ -50,11 +44,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     <SidebarContext.Provider value={{ 
       isSidebarOpen, 
       toggleSidebar, 
-      setSidebarOpen,
-      isResizing,
-      setResizing: setIsResizing,
-      resizeCooldown,
-      setResizeCooldown
+      setSidebarOpen
     }}>
       {children}
     </SidebarContext.Provider>

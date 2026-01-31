@@ -29,12 +29,51 @@ interface CollapsibleSectionProps {
 }
 
 function CollapsibleSection({ title, children, defaultOpen = false, titleLink = null, level = 0 }: CollapsibleSectionProps) {
+  // Always sync state with defaultOpen prop - this ensures sections open when they should
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const pathname = usePathname()
+
+  const triggerWidthRecalc = () => {
+    // Trigger width recalculation after state update
+    // Use a longer delay to ensure React has updated the DOM and animations have started
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('sidebar-content-change'))
+    }, 150)
+  }
+  
+  // CRITICAL: Sync isOpen with defaultOpen whenever it changes
+  // This ensures sections open when they contain the active document
+  useEffect(() => {
+    if (defaultOpen) {
+      setIsOpen(true)
+    }
+  }, [defaultOpen]) // This will run whenever defaultOpen changes
+  
+  // Listen for sidebar reopen event to ensure active sections are expanded
+  useEffect(() => {
+    const handleSidebarReopen = () => {
+      // If this section should be open, ensure it is
+      if (defaultOpen) {
+        setIsOpen(true)
+      }
+    }
+    
+    window.addEventListener('sidebar-reopened', handleSidebarReopen as EventListener)
+    
+    return () => {
+      window.removeEventListener('sidebar-reopened', handleSidebarReopen as EventListener)
+    }
+  }, [defaultOpen])
 
   const handleToggleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     setIsOpen(!isOpen)
+    triggerWidthRecalc()
+  }
+  
+  const handleButtonToggle = () => {
+    setIsOpen(!isOpen)
+    triggerWidthRecalc()
   }
 
   // Calculate padding based on level for proper tabulation
@@ -52,32 +91,26 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
   
   const { class: paddingClass, style: paddingStyle } = getLevelPadding(level)
 
-  // Main section styling (level 0)
+  // Main section styling (level 0) - slightly smaller for better proportions
   const mainSectionClasses = titleLink
-    ? `flex-1 text-left text-base font-semibold capitalize transition-all duration-200 ${
+    ? `flex-1 text-left text-sm font-semibold capitalize transition-all duration-200 ${
         pathname === titleLink
           ? 'text-foreground dark:text-white dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]'
           : 'text-foreground/90 dark:text-gray-300 dark:hover:text-white dark:hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.25)]'
       }`
-    : `flex-1 text-left text-base font-semibold capitalize transition-all duration-200 text-foreground/90 dark:text-gray-300 dark:hover:text-white dark:hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.25)]`
+    : `flex-1 text-left text-sm font-semibold capitalize transition-all duration-200 text-foreground/90 dark:text-gray-300 dark:hover:text-white dark:hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.25)]`
 
-  // Subsection styling (level 1+)
-  const subsectionClasses = `flex-1 text-left text-sm font-medium capitalize transition-all duration-200 text-foreground/80 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]`
+  // Subsection styling (level 1+) - slightly smaller
+  const subsectionClasses = `flex-1 text-left text-xs font-medium capitalize transition-all duration-200 text-foreground/80 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]`
 
   const isSubsection = level > 0
 
-  // Automatically open section when it becomes "active" due to navigation,
-  // but don't auto-close to respect manual user toggles.
-  useEffect(() => {
-    if (defaultOpen) {
-      setIsOpen(true)
-    }
-  }, [defaultOpen])
+ // Run once on mount
 
   return (
     <div className="mt-1">
       <div 
-        className={`w-full flex items-center justify-between ${paddingClass} pr-3 py-2`}
+        className={`w-full flex items-center justify-between ${paddingClass} pr-2 py-1.5`}
         style={paddingStyle}
       >
         {titleLink ? (
@@ -89,7 +122,7 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
           </Link>
         ) : (
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={handleButtonToggle}
             className={isSubsection ? subsectionClasses : mainSectionClasses}
           >
             <span className="text-left block">{title}</span>
@@ -151,10 +184,19 @@ function NestedSection({
     const nodeDocs: Doc[] = node._docs || []
     const nodeRootDocs: Doc[] = node._root || []
 
-    if ([...nodeDocs, ...nodeRootDocs].some((doc) => pathname === doc.url)) {
+    // Check if any document at this level matches the current pathname
+    const hasMatch = [...nodeDocs, ...nodeRootDocs].some((doc) => {
+      // Normalize both URLs for comparison (handle trailing slashes)
+      const docUrl = doc.url?.replace(/\/$/, '') || ''
+      const currentPath = pathname?.replace(/\/$/, '') || ''
+      return docUrl === currentPath
+    })
+
+    if (hasMatch) {
       return true
     }
 
+    // Recursively check child nodes
     return Object.entries(node).some(([key, child]) => {
       if (key === '_docs' || key === '_root') return false
       return hasActiveDoc(child)
@@ -249,21 +291,21 @@ function NestedSection({
             <Link
               key={doc._id}
               href={doc.url}
-              className={`flex items-center gap-2 pl-3 pr-3 py-1.5 transition-all duration-200 ${
+              className={`flex items-center gap-1.5 pl-2.5 pr-2 py-1 transition-all duration-200 ${
                 pathname === doc.url
                   ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
                   : 'text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_3px_rgba(255,255,255,0.15)]'
               }`}
             >
               <svg
-                className="w-3.5 h-3.5 flex-shrink-0"
+                className="w-3 h-3 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span className="truncate text-sm text-left">{doc.title}</span>
+              <span className="truncate text-xs text-left">{doc.title}</span>
             </Link>
           ))}
         </div>
@@ -310,21 +352,21 @@ function NestedSection({
             <Link
               key={doc._id}
               href={doc.url}
-              className={`flex items-center gap-2 pl-3 pr-3 py-1.5 transition-all duration-200 ${
+              className={`flex items-center gap-1.5 pl-2.5 pr-2 py-1 transition-all duration-200 ${
                 pathname === doc.url
                   ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
                   : 'text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_3px_rgba(255,255,255,0.15)]'
               }`}
             >
               <svg
-                className="w-3.5 h-3.5 flex-shrink-0"
+                className="w-3 h-3 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span className="truncate text-sm text-left">{doc.title}</span>
+              <span className="truncate text-xs text-left">{doc.title}</span>
             </Link>
           ))}
         </div>
@@ -337,107 +379,176 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
   // Use allDocs prop if provided, otherwise fall back to docs
   const allDocs = allDocsProp || docs
   const pathname = usePathname()
-  const { isSidebarOpen, setResizing, setResizeCooldown: setResizeCooldownContext } = useSidebar()
+  const { isSidebarOpen } = useSidebar()
+  const prevSidebarOpenRef = useRef(isSidebarOpen)
   
-  // Resizable sidebar state - start with default to avoid hydration mismatch
-  const [sidebarWidth, setSidebarWidth] = useState(220) // Default: 220px for better proportions
-  const [isResizing, setIsResizing] = useState(false)
+  // Dynamic sidebar width based on content
+  const [sidebarWidth, setSidebarWidth] = useState(200) // Default: 200px
   const [mounted, setMounted] = useState(false)
-  const [resizeCooldown, setResizeCooldown] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
+  const navRef = useRef<HTMLElement>(null)
   
-  // Sync resize state with context
+  // When sidebar reopens (transitions from closed to open), ensure active document's parent sections are expanded
   useEffect(() => {
-    setResizing(isResizing)
-  }, [isResizing, setResizing])
+    // Only trigger when sidebar transitions from closed to open (not on initial mount)
+    if (mounted && !prevSidebarOpenRef.current && isSidebarOpen) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        // Trigger a custom event that CollapsibleSection can listen to
+        window.dispatchEvent(new CustomEvent('sidebar-reopened', { detail: { pathname } }))
+        
+        // Scroll active document into view
+        if (navRef.current) {
+          const activeLink = navRef.current.querySelector(`a[href="${pathname}"]`)
+          if (activeLink) {
+            activeLink.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }
+      }, 300) // Delay to ensure all sections are expanded
+    }
+    prevSidebarOpenRef.current = isSidebarOpen
+  }, [isSidebarOpen, pathname, mounted])
   
-  useEffect(() => {
-    setResizeCooldownContext(resizeCooldown)
-  }, [resizeCooldown, setResizeCooldownContext])
-  
-  // Load width from localStorage after mount (client-side only)
-  useEffect(() => {
-    setMounted(true)
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('docs-sidebar-width')
-      if (saved) {
-        const parsedWidth = parseInt(saved, 10)
-        if (!isNaN(parsedWidth) && parsedWidth >= 180 && parsedWidth <= 400) {
-          setSidebarWidth(parsedWidth)
+  // Calculate optimal width based on content - only when content is actually truncated
+  const calculateOptimalWidth = useCallback(() => {
+    if (!navRef.current || !mounted || !isSidebarOpen) return
+    
+    // Find all visible links and buttons (the actual clickable items)
+    const allLinks = navRef.current.querySelectorAll('a, button')
+    let maxWidth = sidebarWidth // Start with current width
+    let hasTruncatedContent = false
+    
+    // First, check all links for truncation
+    allLinks.forEach((link) => {
+      const rect = link.getBoundingClientRect()
+      if (rect.width === 0 || rect.height === 0) return
+      
+      // Find the text span inside
+      const textSpan = link.querySelector('span')
+      if (!textSpan) return
+      
+      // Check if the text span is truncated
+      const spanRect = textSpan.getBoundingClientRect()
+      if (spanRect.width === 0 || spanRect.height === 0) return
+      
+      // Check if text is being truncated
+      const isTruncated = textSpan.scrollWidth > textSpan.clientWidth
+      
+      if (isTruncated) {
+        hasTruncatedContent = true
+        
+        const linkStyles = window.getComputedStyle(link)
+        const linkPaddingLeft = parseFloat(linkStyles.paddingLeft) || 0
+        const linkPaddingRight = parseFloat(linkStyles.paddingRight) || 0
+        
+        // Get all siblings (like icons) to account for their width
+        let siblingsWidth = 0
+        Array.from(link.children).forEach((child) => {
+          if (child !== textSpan && child instanceof HTMLElement) {
+            siblingsWidth += child.offsetWidth
+          }
+        })
+        
+        // Calculate total width needed including all padding and gaps
+        const parent = link.parentElement
+        const parentPaddingLeft = parent ? parseFloat(window.getComputedStyle(parent).paddingLeft) || 0 : 0
+        
+        // Use scrollWidth to get the full text width (what the text actually needs)
+        const textWidth = textSpan.scrollWidth
+        const gap = 6 // Gap between icon and text (gap-1.5 = 6px)
+        const totalWidth = textWidth + linkPaddingLeft + linkPaddingRight + parentPaddingLeft + siblingsWidth + gap + 25 // Extra buffer
+        
+        if (totalWidth > maxWidth) {
+          maxWidth = Math.min(totalWidth, 320) // Cap at 320px max
         }
       }
+    })
+    
+    // Only update width if we found truncated content that needs more space
+    if (hasTruncatedContent && maxWidth > sidebarWidth) {
+      const optimalWidth = Math.max(180, Math.min(maxWidth, 320))
+      setSidebarWidth(optimalWidth)
+    } else if (!hasTruncatedContent) {
+      // If nothing is truncated, we can potentially shrink
+      // Find the minimum width needed for all visible content
+      let minNeededWidth = 180
+      
+      allLinks.forEach((link) => {
+        const rect = link.getBoundingClientRect()
+        if (rect.width === 0 || rect.height === 0) return
+        
+        const textSpan = link.querySelector('span')
+        if (!textSpan) return
+        
+        const linkStyles = window.getComputedStyle(link)
+        const linkPaddingLeft = parseFloat(linkStyles.paddingLeft) || 0
+        const linkPaddingRight = parseFloat(linkStyles.paddingRight) || 0
+        
+        let siblingsWidth = 0
+        Array.from(link.children).forEach((child) => {
+          if (child !== textSpan && child instanceof HTMLElement) {
+            siblingsWidth += child.offsetWidth
+          }
+        })
+        
+        const parent = link.parentElement
+        const parentPaddingLeft = parent ? parseFloat(window.getComputedStyle(parent).paddingLeft) || 0 : 0
+        const textWidth = textSpan.scrollWidth
+        const gap = 6
+        const totalWidth = textWidth + linkPaddingLeft + linkPaddingRight + parentPaddingLeft + siblingsWidth + gap + 25
+        
+        if (totalWidth > minNeededWidth) {
+          minNeededWidth = Math.min(totalWidth, 320)
+        }
+      })
+      
+      // Only shrink if we can safely reduce width
+      if (minNeededWidth < sidebarWidth) {
+        const optimalWidth = Math.max(180, minNeededWidth)
+        setSidebarWidth(optimalWidth)
+      }
     }
-  }, [])
+  }, [mounted, isSidebarOpen, sidebarWidth])
   
-  // Save width to localStorage
+  // Initialize mounted state and ensure active sections are expanded on initial load
   useEffect(() => {
-    if (mounted && typeof window !== 'undefined') {
-      localStorage.setItem('docs-sidebar-width', sidebarWidth.toString())
+    setMounted(true)
+    
+    // On initial mount, if sidebar is open, ensure active document's sections are expanded
+    if (isSidebarOpen) {
+      setTimeout(() => {
+        // Trigger a custom event that CollapsibleSection can listen to
+        window.dispatchEvent(new CustomEvent('sidebar-reopened', { detail: { pathname } }))
+        
+        // Scroll active document into view
+        if (navRef.current) {
+          const activeLink = navRef.current.querySelector(`a[href="${pathname}"]`)
+          if (activeLink) {
+            activeLink.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }
+      }, 300) // Delay to ensure DOM is ready
     }
-  }, [sidebarWidth, mounted])
+  }, []) // Run once on mount
   
-  // Handle mouse move for resizing
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing) return
-    
-    e.preventDefault()
-    e.stopPropagation()
-    
-    const newWidth = e.clientX
-    // Constrain width between 180px and 400px for better proportions
-    const constrainedWidth = Math.min(Math.max(180, newWidth), 400)
-    setSidebarWidth(constrainedWidth)
-  }, [isResizing])
-  
-  // Handle mouse up to stop resizing
-  const handleMouseUp = useCallback((e: MouseEvent) => {
-    if (!isResizing) return
-    
-    e.preventDefault()
-    e.stopPropagation()
-    setIsResizing(false)
-    
-    // Add cooldown period to prevent accidental toggles
-    setResizeCooldown(true)
-    setTimeout(() => {
-      setResizeCooldown(false)
-    }, 150) // 150ms cooldown after resize ends
-  }, [isResizing])
-  
-  // Set up event listeners for resizing
+  // Only listen for section toggle events (user interaction) - NO automatic resize on mount
   useEffect(() => {
-    if (isResizing) {
-      const handleMouseMoveWrapper = (e: MouseEvent) => {
-        handleMouseMove(e)
-      }
-      
-      const handleMouseUpWrapper = (e: MouseEvent) => {
-        handleMouseUp(e)
-      }
-      
-      // Prevent clicks during resize
-      const handleClick = (e: MouseEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-      
-      document.addEventListener('mousemove', handleMouseMoveWrapper, { passive: false })
-      document.addEventListener('mouseup', handleMouseUpWrapper, { passive: false })
-      document.addEventListener('click', handleClick, { capture: true, passive: false })
-      document.body.style.cursor = 'col-resize'
-      document.body.style.userSelect = 'none'
-      document.body.style.pointerEvents = 'auto'
-      
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMoveWrapper)
-        document.removeEventListener('mouseup', handleMouseUpWrapper)
-        document.removeEventListener('click', handleClick, { capture: true })
-        document.body.style.cursor = ''
-        document.body.style.userSelect = ''
-        document.body.style.pointerEvents = ''
-      }
+    if (!mounted || !isSidebarOpen) return
+    
+    const handleContentChange = () => {
+      // Delay to allow animation to complete before measuring
+      setTimeout(() => {
+        calculateOptimalWidth()
+      }, 400) // Longer delay to ensure DOM is fully updated after animation
     }
-  }, [isResizing, handleMouseMove, handleMouseUp])
+    
+    // Listen for custom event from CollapsibleSection (only when user toggles sections)
+    window.addEventListener('sidebar-content-change', handleContentChange)
+    
+    return () => {
+      window.removeEventListener('sidebar-content-change', handleContentChange)
+    }
+  }, [mounted, isSidebarOpen, calculateOptimalWidth])
 
   // Recursive function to build nested structure (strips category prefix)
   const buildNestedStructure = (docs: Doc[], category: string): Record<string, any> => {
@@ -525,49 +636,30 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
     <aside 
       ref={sidebarRef}
       className="hidden lg:block flex-shrink-0 border-r border-border/40 relative transition-all duration-300"
-      style={mounted ? { width: `${sidebarWidth}px` } : { width: '220px' }}
+      style={mounted ? { width: `${sidebarWidth}px` } : { width: '200px' }}
     >
-      {/* Resize handle - wider hit area for better UX */}
-      <div
-        className={`absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-20 transition-colors ${
-          isResizing ? 'bg-primary/60' : 'hover:bg-primary/30'
-        }`}
-        onMouseDown={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          setIsResizing(true)
-        }}
-        onClick={(e) => {
-          // Prevent any click events during or after resize
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        style={{ 
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          touchAction: 'none',
-          pointerEvents: 'auto'
-        }}
-      />
-      
-      <nav className="sticky top-20 space-y-0 max-h-[calc(100vh-5rem)] overflow-y-auto hide-scrollbar pb-8 text-sm pr-6 text-left">
+      <nav 
+        ref={navRef}
+        className="sticky top-20 space-y-0 max-h-[calc(100vh-5rem)] overflow-y-auto hide-scrollbar pb-8 text-sm pr-3 text-left"
+        id="docs-sidebar-nav"
+      >
         <Link
           href={pathname.startsWith('/knowledge-base') ? '/knowledge-base/docs' : '/docs'}
-          className={`flex items-center gap-2 px-3 py-2 transition-all duration-200 ${
+          className={`flex items-center gap-2 px-2.5 py-2 transition-all duration-200 ${
             pathname === (pathname.startsWith('/knowledge-base') ? '/knowledge-base/docs' : '/docs')
               ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]'
               : 'text-muted-foreground hover:text-foreground dark:hover:text-white dark:hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]'
           }`}
         >
           <svg
-            className="w-4 h-4 flex-shrink-0"
+            className="w-3.5 h-3.5 flex-shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <span className="text-base text-left">Overview</span>
+          <span className="text-sm text-left">Overview</span>
         </Link>
         {sortedCategories.map(([category, structure]) => {
           // Get all docs from this category to check if active

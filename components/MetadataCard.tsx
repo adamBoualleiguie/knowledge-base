@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { User, Clock, Calendar, Tag } from 'lucide-react'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
+import { getBlogTagColor } from '@/lib/tag-colors'
 
 // Get basePath from Next.js config (for static export)
 const getBasePath = () => {
@@ -154,7 +155,7 @@ export function MetadataCard({
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-2 py-1 text-xs font-medium bg-muted text-foreground rounded-md"
+                    className={`px-2 py-1 text-xs font-medium rounded-md border ${getBlogTagColor(tag)}`}
                   >
                     {tag}
                   </span>

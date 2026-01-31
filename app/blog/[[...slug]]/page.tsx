@@ -7,6 +7,7 @@ import { MetadataCard } from '@/components/MetadataCard'
 import { TableOfContents } from '@/components/TableOfContents'
 import { calculateReadTime } from '@/lib/readTime'
 import { DocsSearchBar } from '@/components/DocsSearchBar'
+import { getBlogTagColor } from '@/lib/tag-colors'
 
 interface BlogPageProps {
   params: {
@@ -97,7 +98,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
                       {blog.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="px-2.5 py-1 bg-muted rounded-md text-xs font-medium"
+                          className={`px-2.5 py-1 text-xs font-medium rounded-md border ${getBlogTagColor(tag)}`}
                         >
                           {tag}
                         </span>
