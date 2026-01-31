@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { SidebarProvider } from '@/components/SidebarContext'
 import { ReadingProgress } from '@/components/ReadingProgress'
+import { PageLoader } from '@/components/PageLoader'
 import { allDocs } from 'contentlayer/generated'
 
 export const metadata: Metadata = {
@@ -54,6 +55,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SidebarProvider>
+            <PageLoader />
             <Navigation docs={docsForSearch} />
             <ReadingProgress />
             <main className="min-h-screen">{children}</main>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import NextImage from 'next/image'
+import { MediaLoader } from './MediaLoader'
 
 interface ImageProps {
   src: string
@@ -89,29 +90,31 @@ export function DocImage({ src, alt, width, height, caption }: ImageProps) {
           onMouseLeave={() => setIsHovered(false)}
           onClick={handleClick}
         >
-          <div 
-            className="relative w-full"
-            style={{ 
-              aspectRatio: aspectRatio || 'auto',
-              minHeight: '200px'
-            }}
-          >
-            <NextImage
-              src={normalizedSrc}
-              alt={alt}
-              width={imageDimensions.width}
-              height={imageDimensions.height}
-              className={`
-                w-full h-full object-contain transition-transform duration-300
-                ${isHovered ? 'scale-105' : 'scale-100'}
-              `}
-              style={{
-                objectFit: 'contain',
+          <MediaLoader>
+            <div 
+              className="relative w-full"
+              style={{ 
+                aspectRatio: aspectRatio || 'auto',
+                minHeight: '200px'
               }}
-              unoptimized={normalizedSrc.startsWith('/')}
-              priority={false}
-            />
-          </div>
+            >
+              <NextImage
+                src={normalizedSrc}
+                alt={alt}
+                width={imageDimensions.width}
+                height={imageDimensions.height}
+                className={`
+                  w-full h-full object-contain transition-transform duration-300
+                  ${isHovered ? 'scale-105' : 'scale-100'}
+                `}
+                style={{
+                  objectFit: 'contain',
+                }}
+                unoptimized={normalizedSrc.startsWith('/')}
+                priority={false}
+              />
+            </div>
+          </MediaLoader>
           <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
             <div className="bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-md text-sm text-foreground flex items-center gap-2">
               <svg

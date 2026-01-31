@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { MediaLoader } from './MediaLoader'
 
 interface VideoProps {
   src: string
@@ -71,27 +72,40 @@ export function DocVideo({
     setIsPlaying(false)
   }
 
+  const [videoLoading, setVideoLoading] = useState(true)
+
+  const handleCanPlay = () => {
+    setVideoLoading(false)
+  }
+
+  const handleLoadedData = () => {
+    setVideoLoading(false)
+  }
+
   return (
     <figure className="my-8">
-      <div className="relative overflow-hidden rounded-lg border border-border bg-muted/30">
-        <video
-          ref={videoRef}
-          src={normalizedSrc}
-          poster={normalizedPoster}
-          controls={controls}
-          autoPlay={autoplay}
-          loop={loop}
-          muted={muted}
-          onPlay={handlePlay}
-          onPause={handlePause}
-          className="w-full h-auto"
-          style={{
-            maxWidth: '100%',
-            height: 'auto',
-          }}
-        >
-          Your browser does not support the video tag.
-        </video>
+      <MediaLoader>
+        <div className="relative overflow-hidden rounded-lg border border-border bg-muted/30">
+          <video
+            ref={videoRef}
+            src={normalizedSrc}
+            poster={normalizedPoster}
+            controls={controls}
+            autoPlay={autoplay}
+            loop={loop}
+            muted={muted}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onCanPlay={handleCanPlay}
+            onLoadedData={handleLoadedData}
+            className="w-full h-auto"
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+          >
+            Your browser does not support the video tag.
+          </video>
         {!controls && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors">
             <button
@@ -121,7 +135,8 @@ export function DocVideo({
             </button>
           </div>
         )}
-      </div>
+        </div>
+      </MediaLoader>
       {caption && (
         <figcaption className="mt-3 text-sm text-muted-foreground text-center italic">
           {caption}
