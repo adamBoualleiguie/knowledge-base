@@ -707,3 +707,126 @@ code, pre {
   background: #484f58;
 }
 
+/* Homepage animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(20deg);
+  }
+  75% {
+    transform: rotate(-20deg);
+  }
+}
+
+.animate-wave {
+  animation: wave 0.5s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.7s ease-out;
+}
+
+/* Tailwind-compatible animation utilities */
+@layer utilities {
+  .animate-in {
+    animation-fill-mode: both;
+  }
+  
+  .fade-in {
+    animation: fade-in 0.7s ease-out;
+  }
+  
+  .slide-in-from-bottom-4 {
+    animation: slide-in-from-bottom 0.7s ease-out;
+  }
+  
+  .slide-in-from-bottom-8 {
+    animation: slide-in-from-bottom 1s ease-out;
+  }
+  
+  .duration-700 {
+    animation-duration: 700ms;
+  }
+  
+  .duration-1000 {
+    animation-duration: 1000ms;
+  }
+  
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+  
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+  
+  .animate-spin-slow {
+    animation: spin 3s linear infinite;
+  }
+  
+  .animate-spin-reverse {
+    animation: spin-reverse 1.5s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
