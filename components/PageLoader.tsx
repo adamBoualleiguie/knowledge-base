@@ -1,13 +1,12 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useEffect, useState, useRef, Suspense } from 'react'
+import { usePathname } from 'next/navigation'
 
-export function PageLoader() {
+function PageLoaderContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [progress, setProgress] = useState(0)
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const [mounted, setMounted] = useState(false)
   const prevPathnameRef = useRef(pathname)
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -25,7 +24,7 @@ export function PageLoader() {
       return
     }
 
-    // Start loading when pathname or searchParams change
+    // Start loading when pathname changes
     setIsLoading(true)
     setProgress(0)
     prevPathnameRef.current = pathname
@@ -60,9 +59,9 @@ export function PageLoader() {
     }
 
     // Check if page is already loaded
-    if (document.readyState === 'complete') {
+    if (typeof window !== 'undefined' && document.readyState === 'complete') {
       setTimeout(handleLoad, 100)
-    } else {
+    } else if (typeof window !== 'undefined') {
       window.addEventListener('load', handleLoad, { once: true })
     }
 
@@ -76,9 +75,11 @@ export function PageLoader() {
         clearInterval(progressIntervalRef.current)
       }
       clearTimeout(fallbackTimeout)
-      window.removeEventListener('load', handleLoad)
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('load', handleLoad)
+      }
     }
-  }, [pathname, searchParams, mounted])
+  }, [pathname, mounted])
 
   if (!isLoading || !mounted) return null
 
@@ -136,6 +137,14 @@ export function PageLoader() {
         </div>
       </div>
     </div>
+  )
+}
+
+export function PageLoader() {
+  return (
+    <Suspense fallback={null}>
+      <PageLoaderContent />
+    </Suspense>
   )
 }
 
