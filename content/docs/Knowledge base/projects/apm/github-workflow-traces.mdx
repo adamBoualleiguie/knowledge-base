@@ -1,0 +1,435 @@
+---
+title: Collecting GitHub Actions Traces with OpenTelemetry and SigNoz
+description: Setting up observability for GitHub Actions workflows using OpenTelemetry Collector and SigNoz to track traces and metrics.
+publishedAt: 2026-02-02
+order: 4
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+metaDescription: Collecting Github actions traces with Otel and signoz.
+showMetadata: true
+tags: [github-actions, opentelemetry, signoz, observability]
+---
+
+# Collecting GitHub Actions Traces with OpenTelemetry and SigNoz
+
+GitHub Actions and similar CI/CD solutions are crucial for automation, maintainability, and project lifecycle management. They help enforce standards and keep things clean — but when it comes to **workflow observability**, what are we really talking about?
+
+## The Problem
+
+Normally, when a DevOps or SRE engineer looks at GitHub Actions, they see:
+- Individual actions and steps
+- Workflows separated by repository
+- Failures (maybe) — if someone reports them
+- Performance issues — only when developers complain
+
+But imagine managing a complex project with many GitHub workflows, hundreds of steps, and countless moving parts. How do you know:
+- What are the bottlenecks?
+- Where are the issues?
+- What's causing latency?
+- What's the success rate of a given action?
+
+You need **performance KPIs**, **metrics**, and **traces** that tell you the health of your workflows. That's exactly what we're going to implement.
+
+In this guide, I'm going to show you how to collect traces from your GitHub repository workflows and actions, and provide a dashboard with traces and metrics that will help you improve, detect anomalies early, and optimize your GitHub Actions workflows.
+
+---
+
+## Architecture Overview
+
+For this demo, I have the following environment setup:
+- **k3s cluster** — lightweight Kubernetes
+- **SigNoz** — installed in k3s
+- **OpenTelemetry Operator** — installed and ready
+
+Here's how the architecture works:
+
+1. **GitHub repository** with a configured webhook pointing to a public URL (I'm using an ngrok URL for demo purposes)
+2. **ngrok** exposing an OpenTelemetry Collector with GitHub receiver via NodePort service
+3. **OpenTelemetry Collector** created by the OTel Collector CR, pointing to SigNoz as the exporter backend
+4. **SigNoz UI** to visualize and analyze traces
+---
+
+## Prerequisites
+
+Before we start, make sure you have:
+- A Kubernetes cluster (I'm using k3s)
+- SigNoz installed and running
+- OpenTelemetry Operator installed
+- A GitHub repository with admin access
+- ngrok or another tunneling solution for exposing the webhook endpoint
+
+<Callout type="note" title="Demo Environment">
+I'm using ngrok for this demo to expose the webhook endpoint publicly. In production, you'd want to use a proper ingress controller or a cloud load balancer.
+</Callout>
+
+---
+
+## Step 1: Create a GitHub Personal Access Token
+
+First, we need to create a **Fine-grained Personal Access Token** in GitHub. Even though we're not scraping in this setup, GitHub forces us to configure a scraper — this is mentioned in the OpenTelemetry Collector Contrib source code for the GitHub receiver.
+
+<Callout type="warning" title="Why a Token is Required">
+Check this out: the GitHub receiver source code requires a scraper configuration even if you're only using webhooks. See the [GitHub receiver config](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/49743ba8ca81d2a5080dc9b6e7aee7929b881ae1/receiver/githubreceiver/config.go#L73) for details.
+</Callout>
+
+Let's create the token:
+
+1. Go to GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens
+2. Click "Generate new token"
+3. Give it a name like "GitHub Actions Observability"
+4. Set expiration (I'm using 90 days for this demo)
+5. Select the repository you want to monitor
+6. Grant the following permissions:
+   - `actions: read` — to read workflow information
+   - `metadata: read` — to read repository metadata
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/githubapm-PAT.png"
+  alt="Creating GitHub Personal Access Token"
+  caption="Creating a Fine-grained Personal Access Token in GitHub"
+/>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/githubapm-PAT2.png"
+  alt="GitHub Personal Access Token permissions"
+  caption="Setting permissions for the GitHub Personal Access Token"
+/>
+
+<Callout type="note" title="Save Your Token">
+Make sure to copy the token immediately — you won't be able to see it again. We'll add it to a Kubernetes secret in the next step.
+</Callout>
+
+---
+
+## Step 2: Setup OpenTelemetry Collector with GitHub Receiver
+
+Now I'm going to create the OpenTelemetry Collector configuration with the GitHub receiver. This collector will receive webhook events from GitHub and convert them into traces.
+
+### Create the Secret
+
+First, let's create a Kubernetes secret with the GitHub token and webhook secret:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-webhook-secret
+  namespace: opentelemetry-operator-system
+type: Opaque
+stringData:
+  secret: topsecret
+  github-token: YOUR_GITHUB_TOKEN_HERE
+```
+
+<Callout type="warning" title="Security Note">
+Replace `YOUR_GITHUB_TOKEN_HERE` with your actual token, and change `topsecret` to a strong random string for the webhook secret.
+</Callout>
+
+### Create the OpenTelemetry Collector
+
+Now let's create the OpenTelemetry Collector Custom Resource:
+
+```yaml
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-github
+  namespace: opentelemetry-operator-system
+spec:
+  mode: deployment
+
+  # Using the official opentelemetry-collector-contrib image
+  image: otel/opentelemetry-collector-contrib:0.141.0
+  imagePullPolicy: IfNotPresent
+
+  env:
+    - name: GITHUB_WEBHOOK_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: github-webhook-secret
+          key: secret
+
+    - name: GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: github-webhook-secret
+          key: github-token
+
+  config:
+    extensions:
+      bearertokenauth/github:
+        token: ${env:GITHUB_TOKEN}
+
+    receivers:
+      github:
+        webhook:
+          endpoint: 0.0.0.0:19418
+          path: /events
+          health_path: /health
+          secret: ${env:GITHUB_WEBHOOK_SECRET}
+          service_name: github-webhooks
+
+        # This became mandatory — I checked the GitHub receiver source code
+        # See: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/49743ba8ca81d2a5080dc9b6e7aee7929b881ae1/receiver/githubreceiver/config.go#L73
+        scrapers:
+          scraper:
+            github_org: YOUR_GITHUB_ORG
+            auth:
+              authenticator: bearertokenauth/github
+
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+      batch: {}
+
+    exporters:
+      otlp/signoz:
+        endpoint: signoz-otel-collector.signoz.svc.cluster.local:4317
+        tls:
+          insecure: true
+
+      debug:
+        verbosity: detailed
+
+    service:
+      extensions: [bearertokenauth/github]
+
+      pipelines:
+        traces:
+          receivers: [github]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/signoz, debug]
+
+        metrics:
+          receivers: [github]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/signoz]
+```
+
+<Callout type="note" title="Configuration Details">
+- Replace `YOUR_GITHUB_ORG` with your GitHub organization or username
+- The webhook endpoint is set to `/events` on port `19418`
+- The health check endpoint is at `/health`
+- Traces and metrics are exported to SigNoz via OTLP
+</Callout>
+
+### Expose the Webhook Service
+
+Now we need to expose the webhook service so GitHub can reach it. For this demo, I'm using a NodePort service:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-github-webhook
+  namespace: opentelemetry-operator-system
+spec:
+  type: NodePort   # For demo purposes — using ngrok to expose publicly
+  selector:
+    app.kubernetes.io/instance: opentelemetry-operator-system.otel-github
+    app.kubernetes.io/component: opentelemetry-collector
+  ports:
+    - name: github-webhook
+      port: 19418
+      targetPort: 19418
+      nodePort: 31942   # Optional if using NodePort
+```
+
+Apply these resources:
+
+<Terminal
+  title="Apply OpenTelemetry Collector Configuration"
+  commands={[
+    {
+      command: 'kubectl apply -f github-secret.yaml --kubeconfig k3s-signoz-cluster.yaml',
+      output: 'secret/github-webhook-secret created'
+    },
+    {
+      command: 'kubectl apply -f otel-collector-github.yaml --kubeconfig k3s-signoz-cluster.yaml',
+      output: 'opentelemetrycollector.opentelemetry.io/otel-github created'
+    },
+    {
+      command: 'kubectl apply -f github-webhook-service.yaml --kubeconfig k3s-signoz-cluster.yaml',
+      output: 'service/otel-github-webhook created'
+    },
+    {
+      command: 'kubectl get pods -n opentelemetry-operator-system | grep otel-github',
+      output: 'otel-github-collector-7d8f9c4b5-abc123   1/1     Running   0          2m'
+    }
+  ]}
+/>
+
+---
+
+## Step 3: Expose the Webhook Endpoint
+
+Since we're running this in a local k3s cluster, we need to expose the webhook service publicly so GitHub can reach it. I'm using ngrok for this demo.
+
+<Terminal
+  title="Expose Webhook with ngrok"
+  commands={[
+    {
+      command: 'ngrok http http://K3S_NODE_IP:31942',
+      output: 'Forwarding                    https://abc123.ngrok.io -> http://192.168.1.100:31942'
+    }
+  ]}
+/>
+
+<Callout type="note" title="Production Setup">
+In production, you'd use a proper ingress controller (like nginx-ingress or Traefik) with a domain name and TLS certificates. For this demo, ngrok works perfectly.
+</Callout>
+
+---
+
+## Step 4: Configure GitHub Webhook
+
+Now I'm going to configure the webhook in GitHub to send events to our OpenTelemetry Collector.
+
+### Create the Webhook
+
+1. Go to your GitHub repository
+2. Navigate to **Settings** → **Webhooks**
+3. Click **Add webhook**
+4. Configure the webhook:
+   - **Payload URL**: `https://your-ngrok-url.ngrok.io/events`
+   - **Content type**: `application/json`
+   - **Secret**: The same secret you used in the Kubernetes secret (in my case, `topsecret`)
+   - **Which events**: Select **Let me select individual events**
+   - Enable:
+     - `workflow_run` — to track workflow runs
+     - `workflow_job` — to track individual job executions
+
+<Callout type="warning" title="Important: Add /events to URL">
+Make sure you add `/events` to your exposed webhook URL. The GitHub receiver expects webhook events at the `/events` path.
+</Callout>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/githubwebhook.png"
+  alt="GitHub webhook configuration"
+  caption="Configuring the GitHub webhook with workflow_run and workflow_job events"
+/>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/githubwebhook2.png"
+  alt="GitHub webhook events selection"
+  caption="Selecting workflow_run and workflow_job events for the webhook"
+/>
+
+### Test the Webhook
+
+After creating the webhook, GitHub will send a test delivery. You can check if it was received successfully:
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/githubwebhook3.png"
+  alt="GitHub webhook test delivery"
+  caption="Testing the webhook delivery in GitHub"
+/>
+
+<Callout type="success" title="Webhook Configured">
+If you see a successful delivery (200 response), your webhook is configured correctly and GitHub can reach your OpenTelemetry Collector!
+</Callout>
+
+---
+
+## Step 5: Test the Setup
+
+Now let's test the entire setup. I'm going to trigger a workflow by creating a PR and merging it to main. Since we're in a knowledge base repo, I'll use a simple workflow action that updates the website via GitHub Pages.
+
+When the PR is merged and the workflow starts in the main branch, we should see traces appearing in SigNoz.
+
+<Callout type="info" title="What to Expect">
+You should see traces for:
+- Workflow run events
+- Individual job executions
+- Step-level traces
+- Duration and status information
+</Callout>
+
+### Viewing Traces in SigNoz
+
+After the workflow runs, navigate to SigNoz and check the traces:
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/githubtraces1.png"
+  alt="GitHub workflow traces in SigNoz"
+  caption="GitHub Actions workflow traces visible in SigNoz"
+/>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/apm/githubtraces2.png"
+  alt="Detailed GitHub workflow trace"
+  caption="Detailed view of a GitHub Actions workflow trace showing individual steps"
+/>
+
+<Highlight color="green"> Perfect! We've successfully set up observability for GitHub Actions workflows. </Highlight>
+
+---
+
+## What We've Achieved
+
+Now we can:
+- **Detect anomalies** in workflow execution
+- **Identify bottlenecks** in CI/CD pipelines
+- **Track performance metrics** for each workflow
+- **Monitor success rates** across different actions
+- **Get early warnings** when workflows start to degrade
+
+This observability setup will help you:
+- Optimize slow workflows
+- Debug failures faster
+- Understand workflow dependencies
+- Track improvements over time
+
+---
+
+## Next Steps
+
+In the next document, I'm going to show you how to enhance this setup to also collect **GitHub workflow metrics**. This is a simple addition to the collector configuration that will give you even more insights into your CI/CD pipeline performance.
+
+<Callout type="note" title="Metrics Enhancement">
+The metrics enhancement is just a small addition to the collector CR — we'll add metric-specific processors and exporters to get detailed performance data.
+</Callout>
+
+---
+
+## Troubleshooting
+
+### Webhook Not Receiving Events
+
+If you're not seeing traces in SigNoz:
+1. Check the webhook delivery logs in GitHub
+2. Verify the ngrok tunnel is still active
+3. Check the OpenTelemetry Collector logs: `kubectl logs -n opentelemetry-operator-system -l app.kubernetes.io/component=opentelemetry-collector`
+4. Ensure the webhook secret matches in both GitHub and the Kubernetes secret
+
+### Collector Not Starting
+
+If the collector pod isn't running:
+1. Check pod status: `kubectl get pods -n opentelemetry-operator-system`
+2. Check pod logs: `kubectl logs -n opentelemetry-operator-system <pod-name>`
+3. Verify the secret exists and has the correct keys
+4. Check the OpenTelemetry Collector CR for syntax errors
+
+### No Traces in SigNoz
+
+If traces aren't appearing in SigNoz:
+1. Verify SigNoz is running: `kubectl get pods -n signoz`
+2. Check the OTLP exporter endpoint is correct
+3. Verify network connectivity between collector and SigNoz
+4. Check the collector debug logs for export errors
+
+---
+
+## Summary
+
+We've successfully set up observability for GitHub Actions workflows using:
+- **OpenTelemetry Collector** with GitHub receiver
+- **GitHub webhooks** for real-time event delivery
+- **SigNoz** for trace visualization and analysis
+
+This setup gives you complete visibility into your CI/CD pipeline, helping you detect issues early and optimize performance. The traces show you exactly what's happening in your workflows, when it's happening, and how long each step takes.
+
+<Callout type="success" title="You're All Set!">
+Your GitHub Actions observability is now live. Every workflow run will generate traces that you can analyze in SigNoz to improve your CI/CD pipeline.
+</Callout>

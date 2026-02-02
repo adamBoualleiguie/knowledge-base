@@ -35,9 +35,30 @@ export function getBlogTagColor(tag: string): string {
     'introduction': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30',
     'open-source': 'bg-green-500/10 text-green-400 border-green-500/30',
     'technology': 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    
+    // Observability & Monitoring tags
+    'opentelemetry': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+    'signoz': 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+    'observability': 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    'monitoring': 'bg-red-500/10 text-red-400 border-red-500/30',
+    'tracing': 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    'metrics': 'bg-green-500/10 text-green-400 border-green-500/30',
+    'apm': 'bg-pink-500/10 text-pink-400 border-pink-500/30',
+    
+    // CI/CD tags
+    'github-actions': 'bg-gray-500/10 text-gray-400 border-gray-500/30',
+    'cicd': 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    'ci-cd': 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    'github': 'bg-gray-500/10 text-gray-400 border-gray-500/30',
+    
+    // Infrastructure tags
+    'k8s': 'bg-sky-500/10 text-sky-400 border-sky-500/30',
+    'k3s': 'bg-sky-500/10 text-sky-400 border-sky-500/30',
+    'containers': 'bg-teal-500/10 text-teal-400 border-teal-500/30',
   }
   
   // Return mapped color or default
   return colorMap[normalizedTag] || 'bg-muted text-muted-foreground border-border'
 }
+
 
