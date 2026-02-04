@@ -1,0 +1,422 @@
+---
+title: Lab Setup
+description: Setting up a local lab environment to simulate the Vendor Agnostic Surveillance architecture using Multipass VMs and Tailscale VPN
+publishedAt: 2026-02-03
+order: 2
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+tags: [surveillance, video-platform, kerberos, edge-computing, cloud-native, ip-cameras, vendor-agnostic, lab-setup, k3s, tailscale]
+showMetadata: true
+---
+
+# Lab Setup
+
+In this guide, I'm going to walk you through setting up a local lab environment that simulates the architecture we deployed for the client. Since I need to respect the client's NDA, I'll show you how to replicate the setup using local virtual machines instead of the actual production environment.
+
+---
+
+## What We're Building
+
+The client provides a cloud setup for the k3s master node, and this cluster will have different nodes at different sites where cameras are located. 
+
+**Key constraints:**
+- k3s nodes will run Kerberos agents and other components at each site
+- Communication must not require inbound firewall connections or port forwarding
+- Everything must work over **Tailscale VPN** — edge k3s nodes run Tailscale clients and connect to the cloud master via the VPN mesh
+
+<Callout type="info" title="Why This Lab Setup?">
+This lab setup lets me demonstrate the architecture without exposing client-specific details. The principles are the same — we're just using local VMs instead of production infrastructure.
+</Callout>
+
+---
+
+## Lab Architecture
+
+For this lab, I'm setting up:
+
+- **VM 1**: `k3s-master` — The master node (simulating the cloud master)
+- **VM 2**: `node-site-tunis-1` — An edge node (simulating a site with cameras)
+
+Each VM will have Tailscale installed and configured to connect to the master via Tailscale VPN.
+
+### Resource Allocation
+
+Here's the resource allocation I'm using for each VM:
+
+<table>
+  <thead>
+    <tr>
+      <th>VM Name</th>
+      <th>Role</th>
+      <th>RAM</th>
+      <th>Storage</th>
+      <th>vCPU</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>k3s-master</code></td>
+      <td>Master Node</td>
+      <td>2 GB</td>
+      <td>10 GB</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td><code>node-site-tunis-1</code></td>
+      <td>Edge Node</td>
+      <td>4 GB</td>
+      <td>20 GB</td>
+      <td>4</td>
+    </tr>
+  </tbody>
+</table>
+
+<Callout type="note" title="Resource Sizing">
+These resources are sufficient for a lab environment. In production, you'd scale these based on your actual workload requirements.
+</Callout>
+
+---
+
+## Prerequisites
+
+Before we start, make sure you have:
+
+- **Ubuntu** (or Windows with WSL2)
+- **Multipass** — for provisioning real virtual machines
+- **Basic tools** — `helm`, `kubectl`, etc. (standard Kubernetes tooling)
+
+<Callout type="warning" title="Windows Users">
+If you're on Windows, you can use WSL2. Just make sure Multipass works correctly in your WSL environment.
+</Callout>
+
+---
+
+## Step 1: Provision the VMs
+
+Let's start by provisioning both virtual machines using Multipass.
+
+### Provision Master VM
+
+<Terminal
+  title="Provision k3s-master VM"
+  commands={[
+    {
+      command: 'multipass launch 22.04 --name k3s-master --cpus 4 --mem 2G --disk 10G',
+      output: 'Starting k3s-master\nLaunching k3s-master\nLaunched: k3s-master'
+    }
+  ]}
+/>
+
+### Provision Edge Node VM
+
+<Terminal
+  title="Provision node-site-tunis-1 VM"
+  commands={[
+    {
+      command: 'multipass launch 22.04 --name node-site-tunis-1 --cpus 4 --mem 4G --disk 20G',
+      output: 'Starting node-site-tunis-1\nLaunching node-site-tunis-1\nLaunched: node-site-tunis-1'
+    }
+  ]}
+/>
+
+### Verify VMs are Running
+
+<Terminal
+  title="Check VM Status"
+  commands={[
+    {
+      command: 'multipass list',
+      output: 'Name                    State             IPv4             Image\nk3s-master              Running           10.149.205.22    Ubuntu 22.04 LTS\nnode-site-tunis-1       Running           10.149.205.220   Ubuntu 22.04 LTS'
+    }
+  ]}
+/>
+
+<Callout type="success" title="VMs Ready">
+Both VMs are now running and ready for configuration. Notice they have different IP addresses on the local network — we'll connect them via Tailscale VPN.
+</Callout>
+
+---
+
+## Step 2: Fix DNS Resolution Issues
+
+Before we proceed, I need to address a common issue with k3s and CoreDNS. There's a conflict between systemd-resolved and CoreDNS that can cause DNS resolution problems.
+
+<Callout type="warning" title="DNS Resolution Conflict">
+To avoid loop resolution issues between CoreDNS and systemd-resolved, I highly recommend disabling systemd-resolved and setting up your own `/etc/resolv.conf` with public DNS servers like `8.8.8.8`.
+</Callout>
+
+<Callout type="note" title="Production DNS Setup">
+In production, for better security, I highly recommend setting up managed DNS with restrictions. I always set up a self-hosted AdGuard DNS with blocking of ads, ransomware C2 servers, etc. I'll write an article about AdGuard setup in the future.
+</Callout>
+
+Let's fix this on the master node first:
+
+<Terminal
+  title="Fix DNS on k3s-master"
+  commands={[
+    {
+      command: 'sudo systemctl disable systemd-resolved --now',
+      output: 'Removed /etc/systemd/system/dbus-org.freedesktop.resolve1.service.\nRemoved /etc/systemd/system/multi-user.target.wants/systemd-resolved.service.'
+    },
+    {
+      command: 'sudo rm /etc/resolv.conf',
+      output: ''
+    },
+    {
+      command: 'sudo nano /etc/resolv.conf',
+      output: ''
+    },
+    {
+      command: 'sudo chattr +i /etc/resolv.conf',
+      output: ''
+    },
+    {
+      command: 'cat /etc/resolv.conf',
+      output: 'nameserver 8.8.8.8\nnameserver 8.8.4.4'
+    },
+    {
+      command: 'ping -c 2 google.com',
+      output: 'PING google.com (142.250.180.142) 56(84) bytes of data.\n64 bytes from mil04s43-in-f14.1e100.net (142.250.180.142): icmp_seq=1 ttl=110 time=43.7 ms\n64 bytes from mil04s43-in-f14.1e100.net (142.250.180.142): icmp_seq=2 ttl=110 time=50.3 ms\n\n--- google.com ping statistics ---\n2 packets transmitted, 2 received, 0% packet loss, time 1002ms\nrtt min/avg/max/mdev = 43.749/47.002/50.255/3.253 ms'
+    }
+  ]}
+/>
+
+<Callout type="info" title="Making resolv.conf Immutable">
+The `chattr +i` command makes `/etc/resolv.conf` immutable, preventing systemd-resolved from overwriting it. This ensures our DNS configuration persists.
+</Callout>
+
+Repeat the same DNS fix on the edge node (`node-site-tunis-1`).
+
+---
+
+## Step 3: Install Tailscale on Both VMs
+
+Now I'm going to install Tailscale on both VMs. This will create the VPN mesh network that connects our edge nodes to the master.
+
+### Install Tailscale on Master
+
+<Terminal
+  title="Install Tailscale on k3s-master"
+  commands={[
+    {
+      command: 'curl -fsSL https://tailscale.com/install.sh | sh',
+      output: 'Installing Tailscale for ubuntu jammy, using method apt\n+ sudo mkdir -p --mode=0755 /usr/share/keyrings\n+ curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg\n+ sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg\n+ sudo chmod 0644 /usr/share/keyrings/tailscale-archive-keyring.gpg\n+ curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.tailscale-keyring.list\n+ sudo tee /etc/apt/sources.list.d/tailscale.list\n# Tailscale packages for ubuntu jammy\ndeb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu jammy main\n+ sudo chmod 0644 /etc/apt/sources.list.d/tailscale.list\n+ sudo apt-get update\n...\n+ sudo apt-get install -y tailscale tailscale-archive-keyring\n...\nInstallation complete! Log in to start using Tailscale by running:\n\nsudo tailscale up'
+    },
+    {
+      command: 'sudo tailscale up',
+      output: ''
+    }
+  ]}
+/>
+
+After running `sudo tailscale up`, you'll need to authenticate. Follow the instructions to log in via the provided URL.
+
+### Get Master's Tailscale IP
+
+Once authenticated, get the Tailscale IP address of the master:
+
+<Terminal
+  title="Get Master Tailscale IP"
+  commands={[
+    {
+      command: 'tailscale ip -4',
+      output: '100.125.228.57'
+    }
+  ]}
+/>
+
+<Callout type="note" title="Tailscale IP Address">
+This is the Tailscale-assigned IP address (in the 100.x.x.x range). This is the IP we'll use for k3s node registration, not the local network IP.
+</Callout>
+
+### Install Tailscale on Edge Node
+
+Now let's install Tailscale on the edge node and connect it to the same Tailscale network:
+
+<Terminal
+  title="Install Tailscale on node-site-tunis-1"
+  commands={[
+    {
+      command: 'curl -fsSL https://tailscale.com/install.sh | sh',
+      output: 'Installing Tailscale for ubuntu jammy, using method apt\n...\nInstallation complete! Log in to start using Tailscale by running:\n\nsudo tailscale up'
+    },
+    {
+      command: 'sudo tailscale up',
+      output: ''
+    }
+  ]}
+/>
+
+### Verify Tailscale Connection
+
+You can verify both nodes are connected by checking the Tailscale dashboard. Here's what it should look like:
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/tailscale-dashboard.png"
+  alt="Tailscale dashboard showing connected nodes"
+  caption="Tailscale dashboard showing both nodes connected in the mesh network"
+/>
+
+Let's also verify connectivity by pinging the master from the edge node:
+
+<Terminal
+  title="Test Connectivity via Tailscale"
+  commands={[
+    {
+      command: 'ping -c 2 100.125.228.57',
+      output: 'PING 100.125.228.57 (100.125.228.57) 56(84) bytes of data.\n64 bytes from 100.125.228.57: icmp_seq=1 ttl=64 time=280 ms\n64 bytes from 100.125.228.57: icmp_seq=2 ttl=64 time=2.11 ms\n\n--- 100.125.228.57 ping statistics ---\n2 packets transmitted, 2 received, 0% packet loss, time 1001ms\nrtt min/avg/max/mdev = 2.111/141.114/280.118/139.003 ms'
+    }
+  ]}
+/>
+
+<Callout type="success" title="VPN Mesh Established">
+Perfect! Both nodes can now communicate via Tailscale VPN. The first ping might be slower as Tailscale establishes the direct connection, but subsequent pings should be much faster.
+</Callout>
+
+---
+
+## Step 4: Install k3s
+
+Now I'm going to install k3s on both nodes. Since this is a demo, I'm using default settings, but there are many things to consider in production.
+
+<Callout type="note" title="Swap Disabled by Default">
+By default, Multipass sets up VMs with no swap, which is required for k3s and Kubernetes in general to work properly. This is already configured correctly.
+</Callout>
+
+### Install k3s on Master Node
+
+<Terminal
+  title="Install k3s on k3s-master"
+  commands={[
+    {
+      command: 'curl -sfL https://get.k3s.io | sh -',
+      output: '[INFO]  Finding release for channel stable\n[INFO]  Using v1.34.3+k3s1 as release\n[INFO]  Downloading hash https://github.com/k3s-io/k3s/releases/download/v1.34.3+k3s1/sha256sum-amd64.txt\n[INFO]  Downloading binary https://github.com/k3s-io/k3s/releases/download/v1.34.3+k3s1/k3s\n[INFO]  Verifying binary download\n[INFO]  Installing k3s to /usr/local/bin/k3s\n[INFO]  Skipping installation of SELinux RPM\n[INFO]  Creating /usr/local/bin/kubectl symlink to k3s\n[INFO]  Creating /usr/local/bin/crictl symlink to k3s\n[INFO]  Creating /usr/local/bin/ctr symlink to k3s\n[INFO]  Creating killall script /usr/local/bin/k3s-killall.sh\n[INFO]  Creating uninstall script /usr/local/bin/k3s-uninstall.sh\n[INFO]  env: Creating environment file /etc/systemd/system/k3s.service.env\n[INFO]  systemd: Creating service file /etc/systemd/system/k3s.service\n[INFO]  systemd: Enabling k3s unit\nCreated symlink /etc/systemd/system/multi-user.target.wants/k3s.service → /lib/systemd/system/k3s.service.\n[INFO]  systemd: Starting k3s'
+    },
+    {
+      command: 'sudo k3s kubectl get nodes',
+      output: 'NAME         STATUS   ROLES           AGE   VERSION\nk3s-master   Ready    control-plane   29s   v1.34.3+k3s1'
+    }
+  ]}
+/>
+
+<Callout type="success" title="Master Node Ready">
+The k3s master is now running! Notice it's already showing as Ready with the control-plane role.
+</Callout>
+
+### Get Node Registration Token
+
+We need the node token to register the edge node:
+
+<Terminal
+  title="Get Node Registration Token"
+  commands={[
+    {
+      command: 'sudo cat /var/lib/rancher/k3s/server/node-token',
+      output: 'K10eabe2f5ab3ea2eb0022a97617b405f51cd736a897a3875025401b687288cfe25::server:fb00f5ba3d048e181531f88c02695ea1'
+    }
+  ]}
+/>
+
+<Callout type="warning" title="Keep Token Secure">
+Save this token securely — you'll need it to register worker nodes. In production, use proper secret management.
+</Callout>
+
+### Install k3s on Edge Node
+
+Now let's install k3s on the edge node. **Important**: We need to configure it to connect to the master using the Tailscale IP address, not the local network IP.
+
+<Terminal
+  title="Install k3s on node-site-tunis-1"
+  commands={[
+    {
+      command: 'export K3S_URL=https://100.125.228.57:6443',
+      output: ''
+    },
+    {
+      command: 'export K3S_TOKEN=K10eabe2f5ab3ea2eb0022a97617b405f51cd736a897a3875025401b687288cfe25::server:fb00f5ba3d048e181531f88c02695ea1',
+      output: ''
+    },
+    {
+      command: 'curl -sfL https://get.k3s.io | sh -',
+      output: '[INFO]  Finding release for channel stable\n[INFO]  Using v1.34.3+k3s1 as release\n[INFO]  Downloading hash https://github.com/k3s-io/k3s/releases/download/v1.34.3+k3s1/sha256sum-amd64.txt\n[INFO]  Downloading binary https://github.com/k3s-io/k3s/releases/download/v1.34.3+k3s1/k3s\n[INFO]  Verifying binary download\n[INFO]  Installing k3s to /usr/local/bin/k3s\n[INFO]  Skipping installation of SELinux RPM\n[INFO]  Creating /usr/local/bin/kubectl symlink to k3s\n[INFO]  Creating /usr/local/bin/crictl symlink to k3s\n[INFO]  Creating /usr/local/bin/ctr symlink to k3s\n[INFO]  Creating killall script /usr/local/bin/k3s-killall.sh\n[INFO]  Creating uninstall script /usr/local/bin/k3s-agent-uninstall.sh\n[INFO]  env: Creating environment file /etc/systemd/system/k3s-agent.service.env\n[INFO]  systemd: Creating service file /etc/systemd/system/k3s-agent.service\n[INFO]  systemd: Enabling k3s-agent unit\nCreated symlink /etc/systemd/system/multi-user.target.wants/k3s-agent.service → /lib/systemd/system/k3s-agent.service.\n[INFO]  systemd: Starting k3s-agent'
+    }
+  ]}
+/>
+
+<Callout type="info" title="Using Tailscale IP">
+Notice I'm using the Tailscale IP address (`100.125.228.57`) for `K3S_URL`. This ensures the edge node connects to the master through the Tailscale VPN, not the local network.
+</Callout>
+
+### Verify Cluster Status
+
+Let's verify that both nodes are now part of the cluster:
+
+<Terminal
+  title="Verify Cluster Nodes"
+  commands={[
+    {
+      command: 'sudo k3s kubectl get nodes -o wide',
+      output: 'NAME                STATUS   ROLES           AGE    VERSION        INTERNAL-IP      EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME\nk3s-master          Ready    control-plane   7m5s   v1.34.3+k3s1   10.149.205.22    <none>        Ubuntu 22.04.5 LTS   5.15.0-164-generic   containerd://2.1.5-k3s1\nnode-site-tunis-1   Ready    <none>          110s   v1.34.3+k3s1   10.149.205.220   <none>        Ubuntu 22.04.5 LTS   5.15.0-164-generic   containerd://2.1.5-k3s1'
+    }
+  ]}
+/>
+
+<Callout type="success" title="Cluster Ready">
+Perfect! Both nodes are now part of the k3s cluster. The edge node is connected via Tailscale VPN, demonstrating the outbound-only connectivity model.
+</Callout>
+
+### Visual Cluster Status
+
+For easier cluster management, I like to use `k9s` — a terminal UI for Kubernetes. Here's what the cluster looks like:
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/clusternodestatus.png"
+  alt="k9s showing cluster node status"
+  caption="k9s terminal UI showing both nodes in the cluster"
+/>
+
+<Callout type="info" title="Try k9s">
+I highly recommend installing `k9s` for easier cluster interaction. It's a great terminal UI that makes working with Kubernetes much more intuitive.
+</Callout>
+
+---
+
+## Production Considerations
+
+This lab setup is great for testing, but production deployments differ in several important ways:
+
+### Tailscale Enterprise Plan
+
+<Callout type="note" title="VPN Management">
+To avoid the overhead of managing VPN access manually, we followed Tailscale's Enterprise plan. This gives us better control over access policies, device management, and security features.
+</Callout>
+
+### Automated Edge Node Setup
+
+For edge nodes at scale, we automated the entire process:
+
+- **Lightweight OS** — We use Alpine-based OS for minimal resource footprint
+- **Cloud-init automation** — Automated installation using cloud-init configs
+- **Rapid provisioning** — At scale, we only need to set up a serial connection to a Raspberry Pi, and the agent is ready to go
+
+<Callout type="info" title="Automation Details">
+This automation aspect will be further explained in future documents, as we rely on it along with Kerberos Factory to automate the entire edge node lifecycle.
+</Callout>
+
+---
+
+## Summary
+
+We've successfully set up a lab environment that simulates the production architecture:
+
+- ✅ Two VMs provisioned (master and edge node)
+- ✅ DNS resolution fixed to avoid CoreDNS conflicts
+- ✅ Tailscale VPN installed and configured on both nodes
+- ✅ k3s cluster established with edge node connected via Tailscale
+- ✅ Cluster verified and ready for workloads
+
+<Callout type="success" title="Lab Environment Ready">
+Your lab environment is now ready! You can deploy Kerberos Agents and test the full architecture locally before moving to production.
+</Callout>
+
+In the next documents, I'll show you how to deploy Kerberos Factory, configure agents, and set up the complete video platform stack.

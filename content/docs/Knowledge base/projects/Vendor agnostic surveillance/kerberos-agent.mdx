@@ -1,0 +1,431 @@
+---
+title: Kerberos Agent Deployment
+description: Deploying Kerberos Agent on the edge node to process video streams from Dahua cameras
+publishedAt: 2026-02-03
+order: 3
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+tags: [surveillance, video-platform, kerberos, edge-computing, cloud-native, ip-cameras, vendor-agnostic, kerberos-agent]
+showMetadata: true
+---
+
+# Kerberos Agent Deployment
+
+Now let's talk about the **Kerberos Agent** — this is where the magic happens. The Kerberos Agent is an isolated and scalable video management agent with a strong focus on user experience, scalability, resilience, extension, and integration. It's the backbone of the entire Kerberos.io ecosystem, and is used as a foundation for small deployments to production-level deployments with thousands of cameras.
+
+<Callout type="info" title="What is a Kerberos Agent?">
+By now you'll understand that Kerberos.io applies the concept of agents. An agent runs next to (or on) your camera and processes a single camera feed. It applies motion-based or continuous recording and makes those recordings available through a user-friendly web interface. A Kerberos Agent allows you to connect to other cloud services or integrate with custom applications.
+</Callout>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/kerberos-agent-architecture.png"
+  alt="Kerberos Agent architecture"
+  caption="Kerberos Agent architecture showing how it processes camera feeds"
+/>
+
+---
+
+## Deploying Kerberos Agent on Edge Node
+
+Before we deploy the agent, I need to mention something important: for this demo, I don't have a real camera to test with. So I'm going to show you how I set up a **fake camera** for testing purposes.
+
+<Callout type="note" title="Fake Camera Setup">
+This is a lab environment, so I'm simulating a camera using FFmpeg. In production, you'd be connecting to real IP cameras via RTSP.
+</Callout>
+
+---
+
+## Setting Up a Fake Camera for Testing
+
+Since I don't have a real camera, I need to simulate a live RTSP stream that the Kerberos Agent can consume. Here's my approach:
+
+**The idea:** The Kerberos Agent will fetch any RTSP stream provided by a camera. I'm going to fake that using FFmpeg.
+
+**The setup:**
+- We'll use a video file (`thiefinhouse.mp4`) as the source
+- On the edge node (`node-site-tunis-1`), this video file will be mounted into a container
+- The container will run FFmpeg, looping the video and serving it via RTSP at a given port
+
+For fun, I'll be using this video:
+
+<DocVideo
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/thiefinhouse.mp4"
+  caption="Sample video used for fake camera testing"
+  autoplay
+  loop
+  muted
+  controls
+/>
+
+The Kerberos Agent can then connect to this RTSP URL as if it were a real camera.
+
+<Callout type="info" title="Fake Camera Goal">
+In short: "Create a fake RTSP camera in Kubernetes using FFmpeg and a local video file so the Kerberos Agent can consume it."
+</Callout>
+
+---
+
+## Step 1: Prepare the Video File
+
+Let's set up the fake camera. First, I'll prepare the video file on the edge node:
+
+<Terminal
+  title="Prepare Video File on Edge Node"
+  commands={[
+    {
+      command: 'mkdir -p ~/fake-camera',
+      output: ''
+    },
+    {
+      command: 'cd ~/fake-camera',
+      output: ''
+    },
+    {
+      command: 'wget https://assets.mixkit.co/videos/12830/12830-720.mp4',
+      output: '--2026-02-04 02:48:05--  https://assets.mixkit.co/videos/12830/12830-720.mp4\nResolving assets.mixkit.co (assets.mixkit.co)... 3.164.182.23, 3.164.182.109, 3.164.182.58, ...\nConnecting to assets.mixkit.co (assets.mixkit.co)|3.164.182.23|:443... connected.\nHTTP request sent, awaiting response... 200 OK\nLength: 5092510 (4.9M) [video/mp4]\nSaving to: \'12830-720.mp4\'\n\n12830-720.mp4                        100%[====================================================================>]   4.86M  1.09MB/s    in 4.5s    \n\n2026-02-04 02:48:09 (1.09 MB/s) - \'12830-720.mp4\' saved [5092510/5092510]'
+    },
+    {
+      command: 'ls',
+      output: '12830-720.mp4'
+    },
+    {
+      command: 'file 12830-720.mp4',
+      output: '12830-720.mp4: ISO Media, Apple iTunes Video (.M4V) Video'
+    },
+    {
+      command: 'mv 12830-720.mp4 thiefinhouse.mp4',
+      output: ''
+    },
+    {
+      command: 'ls',
+      output: 'thiefinhouse.mp4'
+    }
+  ]}
+/>
+
+<Callout type="success" title="Video Ready">
+Perfect! The video file is now ready. Now let's create the fake camera deployment.
+</Callout>
+
+---
+
+## Step 2: Create Namespace and Label Node
+
+Before deploying the fake camera, I need to create a namespace and label the edge node:
+
+<Terminal
+  title="Setup Namespace and Node Labeling"
+  commands={[
+    {
+      command: 'kubectl create ns kerberos-agents',
+      output: 'namespace/kerberos-agents created'
+    },
+    {
+      command: 'kubectl label node node-site-tunis-1 node-role=fake-camera',
+      output: 'node/node-site-tunis-1 labeled'
+    },
+    {
+      command: 'kubectl get nodes --show-labels',
+      output: 'NAME                STATUS   ROLES           AGE   VERSION        LABELS\nk3s-master          Ready    control-plane   78m   v1.34.3+k3s1   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=k3s,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k3s-master,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=true,node.kubernetes.io/instance-type=k3s\nnode-site-tunis-1   Ready    <none>          72m   v1.34.3+k3s1   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=k3s,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=node-site-tunis-1,kubernetes.io/os=linux,node-role=fake-camera,node.kubernetes.io/instance-type=k3s'
+    }
+  ]}
+/>
+
+<Callout type="info" title="Node Labeling Strategy">
+By labeling the node with `node-role=fake-camera`, I can ensure that both the fake camera and the Kerberos Agent will be scheduled on the edge node (`node-site-tunis-1`), mimicking the real-world scenario where cameras are located at the edge.
+</Callout>
+
+---
+
+## Step 3: Deploy the Fake Camera
+
+Now I'll create the deployment manifest for the fake camera. This uses MediaMTX as an RTSP server and FFmpeg to stream the video file:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fake-camera
+  namespace: kerberos-agents
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fake-camera
+  template:
+    metadata:
+      labels:
+        app: fake-camera
+    spec:
+      nodeSelector:
+        node-role: fake-camera
+      containers:
+      - name: rtsp-server
+        image: bluenviron/mediamtx:latest
+        ports:
+        - containerPort: 8554
+
+      - name: ffmpeg
+        image: jrottenberg/ffmpeg:5.1-ubuntu
+        command:
+          - /bin/bash
+          - -c
+          - |
+            sleep 5 && \
+            ffmpeg -re -stream_loop -1 -i /videos/thiefinhouse.mp4 \
+            -c:v libx264 -preset veryfast -tune zerolatency \
+            -f rtsp rtsp://127.0.0.1:8554/demo
+        volumeMounts:
+        - name: video-volume
+          mountPath: /videos
+
+      volumes:
+      - name: video-volume
+        hostPath:
+          path: /home/ubuntu/fake-camera
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fake-camera-svc
+  namespace: kerberos-agents
+spec:
+  selector:
+    app: fake-camera
+  ports:
+    - name: rtsp
+      port: 8554
+      targetPort: 8554
+      protocol: TCP
+  type: NodePort
+```
+
+<Callout type="note" title="How This Works">
+The deployment uses two containers:
+- **MediaMTX**: Acts as the RTSP server, listening on port 8554
+- **FFmpeg**: Streams the video file in a loop to the RTSP server
+
+The video file is mounted from the host path `/home/ubuntu/fake-camera` into the container, so FFmpeg can access it.
+</Callout>
+
+Apply the manifest:
+
+<Terminal
+  title="Deploy Fake Camera"
+  commands={[
+    {
+      command: 'kubectl apply -f fake-camera.yml',
+      output: 'deployment.apps/fake-camera created\nservice/fake-camera-svc created'
+    },
+    {
+      command: 'kubectl get pods -n kerberos-agents',
+      output: 'NAME                          READY   STATUS    RESTARTS   AGE\nfake-camera-xxxxxxxxxx-xxxxx   2/2     Running   0          30s'
+    }
+  ]}
+/>
+
+---
+
+## Step 4: Test the Fake Camera
+
+Now let's verify that the fake camera is working properly. To test this, I:
+
+1. Connected my host PC (the one running the Multipass VMs) to Tailscale using the same account, so I can reach both the master and the edge node
+2. Used VLC to listen for the RTSP feed
+
+<Callout type="info" title="Accessing the RTSP Stream">
+Since the service is type NodePort, I can access it using the Tailscale IP of the edge node. In my case, I used: `rtsp://100.70.53.105:31800/demo`
+</Callout>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/vlcfakecameratest.png"
+  alt="VLC testing fake camera RTSP stream"
+  caption="VLC configured to connect to the fake camera RTSP stream"
+/>
+
+And there it is — I can see my camera stream! There's a thief in the house!
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/vlcfeed.png"
+  alt="VLC showing the fake camera video feed"
+  caption="VLC successfully displaying the fake camera video feed"
+/>
+
+<Callout type="success" title="Fake Camera Working">
+Perfect! The fake camera is up and running. Now we can move on to deploying the Kerberos Agent.
+</Callout>
+
+---
+
+## Step 5: Deploy Kerberos Agent
+
+Now let's focus on deploying the Kerberos Agent. For more details about deploying Kerberos Agent on Kubernetes, check the [official documentation](https://github.com/kerberos-io/agent/tree/master/deployments/kubernetes). For our lab environment, I'm going to customize things to align with our setup.
+
+Here's the deployment manifest I'm using:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent
+  namespace: kerberos-agents
+  labels:
+    app: agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent
+  template:
+    metadata:
+      labels:
+        app: agent
+    spec:
+      nodeSelector:
+        node-role: fake-camera   # Force agent onto node-site-tunis-1
+      containers:
+        - name: agent
+          image: kerberos/agent:3.2.3
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          env:
+            - name: AGENT_NAME
+              value: demo-agent
+            - name: AGENT_CAPTURE_IPCAMERA_RTSP
+              value: rtsp://fake-camera-svc:8554/demo
+            - name: AGENT_HUB_KEY
+              value: yyy
+            - name: AGENT_HUB_PRIVATE_KEY
+              value: yyy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-svc
+  namespace: kerberos-agents
+  labels:
+    app: agent
+spec:
+  type: NodePort
+  selector:
+    app: agent
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+```
+
+<Callout type="info" title="Key Configuration Points">
+- **Node Selector**: Forces the agent to run on the edge node (`node-site-tunis-1`)
+- **RTSP URL**: Points to our fake camera service: `rtsp://fake-camera-svc:8554/demo`
+- **Hub Keys**: These are placeholders for now — we'll configure proper Hub integration later
+</Callout>
+
+Apply the deployment:
+
+<Terminal
+  title="Deploy Kerberos Agent"
+  commands={[
+    {
+      command: 'kubectl apply -f kerberos-agent.yml',
+      output: 'deployment.apps/agent created\nservice/agent-svc created'
+    },
+    {
+      command: 'kubectl get pods -n kerberos-agents',
+      output: 'NAME                          READY   STATUS    RESTARTS   AGE\nagent-xxxxxxxxxx-xxxxx         1/1     Running   0          45s\nfake-camera-xxxxxxxxxx-xxxxx   2/2     Running   0          5m'
+    }
+  ]}
+/>
+
+---
+
+## Step 6: Verify Agent is Working
+
+Let's check the agent pod logs to make sure everything is working:
+
+<Terminal
+  title="Check Agent Pod Logs"
+  commands={[
+    {
+      command: 'kubectl logs -n kerberos-agents -l app=agent --tail=20',
+      output: '[INFO] Agent starting...\n[INFO] Connecting to RTSP stream...\n[INFO] Stream connected successfully\n[WARN] Failed to get camera microphone\n[INFO] Agent ready'
+    }
+  ]}
+/>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/agentpodlog.png"
+  alt="Kerberos Agent pod logs"
+  caption="Kerberos Agent pod logs showing successful connection to RTSP stream"
+/>
+
+<Callout type="note" title="About the Microphone Error">
+You might notice an error in the logs about the camera microphone. This is actually the Kerberos Agent trying to get the microphone from the camera — but remember, it's a fake camera! 😄 The agent is working perfectly; it's just that our fake camera doesn't have a microphone.
+</Callout>
+
+---
+
+## Step 7: Access the Agent UI
+
+Now I can connect to the agent UI (used for local on-site configuration if needed). The default username and password are `root` / `root`.
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/kerberosagentui.png"
+  alt="Kerberos Agent UI showing live video feed"
+  caption="Kerberos Agent UI showing the live video feed from our fake camera"
+/>
+
+<Callout type="success" title="Agent is Live!">
+Perfect! Our "thief" is live! The agent is successfully processing the video stream and making it available through the web interface.
+</Callout>
+
+---
+
+## Advanced Features
+
+This opens up a vast range of possibilities and features for configuration:
+
+- **Motion Detection Models** — Set up AI-powered motion detection
+- **Recognition Models** — Implement object and person recognition
+- **Kafka Integration** — Trigger events from Kafka topics for external processing
+- **Region of Interest (ROI)** — Define specific areas where motion should be tracked
+
+### Setting Up Region of Interest
+
+For example, we can set up **Region of Interest** in the Kerberos Agent. By defining one or more regions, motion will be tracked only in the regions you have defined.
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/Vendor agnostic surveillance/kerberosagentregion.png"
+  alt="Kerberos Agent Region of Interest configuration"
+  caption="Configuring Region of Interest to track motion only in specific areas (windows and doors)"
+/>
+
+<Callout type="info" title="Smart Alerts">
+Now we get alerted before that thief enters the windows or doors! This is just one example of the powerful features available in Kerberos Agent.
+</Callout>
+
+---
+
+## Summary
+
+At this point, we've successfully:
+
+- ✅ Set up a fake camera using FFmpeg and MediaMTX
+- ✅ Deployed the Kerberos Agent on the edge node
+- ✅ Verified the agent is processing the video stream
+- ✅ Accessed the agent UI for configuration
+
+<Callout type="success" title="Ready for Next Steps">
+The agent is now running and processing video streams. We can move to the next step: deploying the Kerberos Factory and going further with the complete platform setup.
+</Callout>
+
+The Kerberos Agent is the foundation that processes video at the edge. In the next document, I'll show you how to deploy Kerberos Factory to orchestrate multiple agents and manage them centrally from the cloud.

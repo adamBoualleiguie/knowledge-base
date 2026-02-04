@@ -1,0 +1,378 @@
+---
+title: Introduction
+description: Introduction to the Vendor Agnostic Surveillance project - A real-world case study of building a cloud-controlled video platform for distributed IP cameras
+publishedAt: 2026-02-03
+order: 1
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+tags: [surveillance, video-platform, kerberos, edge-computing, cloud-native, ip-cameras, vendor-agnostic]
+showMetadata: true
+---
+
+# Introduction
+
+In this document, I'm sharing my experience building a **vendor-agnostic surveillance platform** for a client with a growing fleet of IP cameras deployed across multiple geographic locations. This project presented unique challenges around network isolation, vendor independence, and operational simplicity — challenges that led to an interesting architectural journey.
+
+---
+
+## Client Context and Business Requirements
+
+The engagement started with a client operating a growing fleet of IP cameras deployed across **multiple geographic locations and independent networks**. These cameras weren't installed in controlled data centers, but in real-world environments such as streets, public areas, and remote sites.
+
+As the deployment expanded, the client began experiencing limitations with traditional camera management approaches and vendor-provided cloud platforms.
+
+<Callout type="info" title="Client Objective">
+The client's goal wasn't simply to view camera feeds, but to **establish a scalable, cloud-controlled video platform** that could evolve independently of camera vendors.
+</Callout>
+
+---
+
+## Core Client Demands
+
+The client expressed several non-negotiable requirements that shaped our entire approach:
+
+### Centralized Cloud Access
+
+The client required a **single cloud entry point** to access:
+
+- Live video streams
+- Motion-based recordings
+- Historical footage
+
+This access needed to span **all locations and networks**, without requiring operators to connect to individual sites.
+
+This was a critical requirement — operators needed to <Highlight color="blue">access any camera from anywhere, without VPNs or site-specific connections. </Highlight>
+
+### Network Isolation and Security
+
+Most camera installations were located behind:
+
+- NAT or CGNAT
+- ISP-managed routers
+- Restricted firewall environments
+
+As a result:
+
+- **Inbound connections were not allowed**
+- **Port forwarding was explicitly forbidden**
+- The solution had to rely entirely on **outbound-initiated communication**
+
+Security and operational simplicity were top priorities.
+
+<Callout type="warning" title="Network Constraint">
+This constraint eliminated many traditional approaches. We couldn't use port forwarding or any solution requiring inbound firewall rules. However, we could use outbound-initiated VPN connections (like Tailscale) that establish connections from the edge to the cloud.
+</Callout>
+
+---
+
+### No On-Premise Infrastructure
+
+The client did not want to deploy or maintain:
+
+- NVRs or DVRs
+- Raspberry Pi devices
+- Custom gateway appliances
+- Dedicated edge servers per site
+
+Any solution requiring additional hardware at each location was considered **operationally unviable**.
+
+<Callout type="note" title="Operational Reality">
+The client needed a solution that could scale without adding operational overhead at each site. This ruled out traditional on-premise video management systems.
+</Callout>
+
+---
+
+### Independence from Vendor Cloud Platforms
+
+While some cameras already supported vendor cloud services (e.g., IMOU-like platforms), the client wanted to:
+
+- Avoid long-term vendor lock-in
+- Retain ownership of video data
+- Control retention policies and storage location
+- Integrate video data with their own systems
+
+The goal was to **replicate the convenience of vendor cloud applications**, while fully owning the platform.
+
+<Callout type="info" title="Vendor Independence">
+This requirement pushed us toward open protocols and vendor-agnostic solutions, rather than proprietary SDKs or vendor-specific integrations.
+</Callout>
+
+---
+
+### Heterogeneous and Evolving Hardware
+
+The initial deployment was based on **Dahua IP cameras**, but the client explicitly required:
+
+- The ability to onboard additional vendors in the future
+- Minimal assumptions about camera firmware internals
+- Reliance on **open and widely supported protocols** wherever possible
+
+This ruled out approaches tightly coupled to a single vendor SDK.
+
+---
+
+## Problem Statement
+
+Summarizing the client's challenge:
+
+> *How can we build a cloud-controlled video platform that provides centralized visibility into cameras deployed across isolated networks, without inbound connectivity, without on-premise gateways, and without relying on vendor cloud services — while remaining scalable and vendor-agnostic?*
+
+This problem statement directly informed the architectural choices I'll describe in the next section.
+
+<Callout type="note" title="Architectural Challenge">
+This problem required a fundamentally different approach than traditional video surveillance systems. We needed to think about edge computing, outbound connectivity patterns, and cloud-native orchestration.
+</Callout>
+
+---
+
+## Architecture Decision: Why We Chose the Kerberos Edge-Based Platform
+
+After evaluating multiple approaches, I chose an **edge-based architecture using the Kerberos.io platform**. This decision wasn't made lightly — it came after exploring and rejecting several alternatives.
+
+### Client Requirements and Constraints
+
+The client's core requirement was to **centrally access live and recorded video streams from multiple cameras deployed across different networks**, without relying on traditional on-premise infrastructure or vendor-locked cloud services.
+
+<Callout type="info" title="Key Constraints Summary">
+Here's a quick summary of what we were working with:
+
+- Cameras across **multiple isolated networks** (NAT, CGNAT, ISP-managed)
+- **No port forwarding** or inbound firewall rules
+- **No dedicated on-premise gateway hardware**
+- Cameras in **public and street environments** with limited physical access
+- Preference for a **cloud-centric operating model**
+- Requirement for **vendor independence**
+- Initial hardware: **Dahua IP cameras**
+- Target UX: **IMOU-like cloud applications**, but fully self-hosted
+</Callout>
+
+In short:
+
+> *"We want centralized cloud visibility and control over distributed cameras, without opening inbound ports, deploying extra hardware, or depending on a vendor cloud."*
+
+---
+
+## Initial Options Explored
+
+Before committing to a platform and architecture, I evaluated several approaches. Here's what I considered and why each was rejected:
+
+### Option 1: Flashing or Modifying Camera Firmware
+
+One option was to directly modify the camera firmware to:
+
+- Embed custom streaming logic
+- Push video directly to a proprietary cloud
+- Bypass vendor cloud services entirely
+
+**Why I rejected it:**
+
+- High risk of permanently bricking devices
+- Firmware updates could silently break functionality
+- Legal, warranty, and support implications
+- Not scalable across camera models or vendors
+- Operationally fragile in production environments
+
+<Callout type="danger" title="Too Risky">
+This approach was considered **too invasive and risky** for a client-facing system. The potential for bricking devices and warranty issues made it a non-starter.
+</Callout>
+
+---
+
+### Option 2: DNS Hijacking / Vendor Cloud Mimicry
+
+Another approach I explored was:
+
+- Hijacking or overriding DNS used by vendor cloud services (e.g., IMOU/Dahua)
+- Mimicking vendor cloud endpoints
+- Intercepting camera-to-cloud communication
+
+**Why I rejected it:**
+
+- Highly brittle and dependent on undocumented protocols
+- Vendor protocols are encrypted and proprietary
+- Significant reverse-engineering effort
+- Legal and ethical concerns
+- Not maintainable or future-proof
+
+<Callout type="warning" title="Not Production-Ready">
+While technically interesting, this approach is **unsuitable for a production system**. The brittleness and legal concerns made it impractical.
+</Callout>
+
+---
+
+### Option 3: Direct Camera-to-Cloud Integration via SDKs
+
+Using the Dahua SDK, I explored:
+
+- Connecting cameras directly to a custom cloud backend
+- Handling authentication, streaming, NAT traversal, and reconnection logic ourselves
+
+**Challenges I identified:**
+
+- NAT traversal still relies on outbound connections and session persistence
+- SDK behavior varies across firmware and models
+- Difficult to normalize across vendors
+- Re-implements complex problems already solved elsewhere (buffering, resilience, scaling)
+
+<Callout type="note" title="Development Cost">
+This approach significantly increased **development and long-term maintenance cost**. We'd be reinventing the wheel for problems that edge platforms already solve.
+</Callout>
+
+---
+
+## The Chosen Approach: Edge-Based Platform Using Kerberos.io
+
+After evaluating the available options, I adopted an **edge-based architecture using the Kerberos.io platform**, which aligns with modern cloud-native video systems.
+
+Instead of modifying cameras or emulating vendor clouds, I introduced a **distributed edge layer** that:
+
+- Runs close to the cameras (inside their local networks)
+- Pulls video streams using standard protocols (RTSP / ONVIF)
+- Establishes **outbound-only connections** to the cloud
+- Processes video at the edge and publishes metadata and recordings upstream
+- Requires **no inbound connectivity**, port forwarding, or firewall exceptions
+- Is centrally orchestrated and observable from the cloud
+
+This model closely mirrors how commercial camera clouds operate internally — while keeping **full ownership and control** within our system.
+
+<Callout type="success" title="Best of Both Worlds">
+This approach gives us the convenience of cloud platforms with the control and ownership of self-hosted solutions.
+</Callout>
+
+---
+
+## Why the Kerberos.io Solution Stack ?
+
+Rather than relying on a single component, I adopted the **full Kerberos.io ecosystem**, where each component addresses a specific architectural concern.
+
+### Kerberos Agent – Edge Video Processing
+
+Kerberos Agent acts as the **edge execution unit**:
+
+- Pulls RTSP streams from Dahua cameras
+- Performs motion detection, buffering, and recording locally
+- Ensures resilience during network interruptions
+- Communicates outward to cloud services only
+
+This keeps heavy video processing **close to the source**, reducing bandwidth usage and improving reliability.
+
+The edge-first approach means we're not sending raw video streams over the internet <Highlight color="green">only processed recordings and metadata. </Highlight>
+
+---
+
+### Kerberos Factory – Cloud-Orchestrated Deployment
+
+Kerberos Factory provides centralized orchestration by:
+
+- Managing Kerberos Agents as Kubernetes resources
+- Scheduling one agent per camera stream
+- Enabling scalable, declarative deployments across environments
+
+<Callout type="note" title="Edge Infrastructure Decision">
+At this point, the client was convinced that to achieve the edge agent strategy, we needed to set up a lightweight k3s node at each site, exposed to the master node in the cloud via secure VPN connectivity using Tailscale. This device was proposed as a simple Raspberry Pi solution — a minimal hardware requirement that could run the edge Kubernetes node while maintaining the outbound-only connectivity model.
+</Callout>
+
+This allowed me to treat each camera as a **managed, cloud-controlled workload**, rather than a static device.
+
+<Callout type="info" title="Kubernetes-Native">
+Factory integrates seamlessly with Kubernetes, allowing us to use standard Kubernetes tooling for scaling, monitoring, and management.
+</Callout>
+
+---
+
+### Kerberos Vault – Bring Your Own Storage (BYOS)
+
+Kerberos Vault decouples compute from storage by:
+
+- Allowing recordings to be stored in client-controlled storage backends
+- Supporting multiple storage providers
+- Acting as the storage integration layer for consuming applications
+
+This ensures **data ownership, compliance, and flexibility**.
+
+---
+
+### Kerberos Hub – Centralized Visibility
+
+Kerberos Hub provides the user-facing layer:
+
+- A single web-based interface for all recordings
+- Unified visibility across all agents and locations
+- No cloud-side video processing, preserving the edge-first design
+
+Hub completes the IMOU-like experience — but without vendor lock-in.
+
+---
+
+## Architectural Outcome
+
+The resulting system architecture:
+
+```
+[Dahua Cameras]
+      ↓ RTSP
+[Kerberos Agents (Edge)]
+      ↓ Outbound Connections via Tailscale VPN
+[Kerberos Factory + Vault]
+      ↓
+[Kerberos Hub / Client Applications]
+```
+
+<Callout type="info" title="How Outbound Connections Work in Practice">
+In reality, the outbound connections from edge k3s nodes to the cloud master are **established through Tailscale VPN**. Here's how it works:
+
+**Tailscale VPN provides:**
+- **Outbound-only connectivity** — The edge k3s nodes initiate connections to Tailscale's coordination servers, eliminating the need for inbound firewall rules
+- **Secure mesh VPN** — All traffic between edge nodes and the cloud master is encrypted and routed through a secure mesh network
+- **No public IPs required** — Edge nodes don't need public IP addresses or port forwarding
+- **Automatic reconnection** — The VPN automatically reconnects if the connection drops, maintaining high availability
+- **Zero-config networking** — Tailscale handles NAT traversal and firewall punching automatically
+
+**How k3s nodes are exposed:**
+- Each edge k3s node runs a Tailscale client that establishes an outbound connection to Tailscale's coordination servers
+- The cloud master also runs Tailscale, creating a secure mesh network between all nodes
+- Kubernetes API traffic, agent-to-factory communication, and all other control plane traffic flows through this secure VPN tunnel
+- From the perspective of both networks, this appears as standard outbound HTTPS traffic, making it firewall-friendly
+
+This architecture maintains the **outbound-only connectivity model** while providing the secure, reliable connectivity needed for Kubernetes cluster management and agent orchestration.
+</Callout>
+
+<Callout type="success" title="Key Properties">
+The architecture delivers:
+
+- ✅ No inbound firewall rules
+- ✅ No dependency on vendor cloud services
+- ✅ No on-premise NVRs or gateways
+- ✅ Horizontally scalable via Kubernetes
+- ✅ Fully cloud-managed and observable
+- ✅ Vendor-agnostic by design
+</Callout>
+
+This architecture delivers a **cloud-camera experience comparable to proprietary platforms**, while preserving **control, extensibility, and data ownership**.
+
+---
+
+## Summary
+
+The decision to adopt the Kerberos.io platform was driven by **practical deployment constraints and long-term sustainability**, not experimentation.
+
+**What I rejected:**
+
+- Firmware modification — too risky
+- Cloud protocol mimicry — too brittle
+- Direct SDK integration — too vendor-specific
+
+**What I chose:**
+
+The Kerberos.io ecosystem provided a **clean separation of concerns**:
+
+- **Edge processing** (Agent) — handles video processing close to cameras
+- **Cloud orchestration** (Factory) — manages agents as Kubernetes workloads
+- **Storage independence** (Vault) — decouples storage from compute
+- **Unified visibility** (Hub) — provides the user-facing interface
+
+Together, these components enabled a **production-ready, vendor-neutral camera cloud architecture** aligned with the client's goals.
+
+<Callout type="note" title="Next Steps">
+In the following documents, I'll dive deeper into the implementation details, deployment strategies, and lessons learned from this project.
+</Callout>
