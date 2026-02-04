@@ -33,6 +33,7 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
   // Always sync state with defaultOpen prop - this ensures sections open when they should
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const pathname = usePathname()
+  const { setSidebarOpen } = useSidebar()
 
   const triggerWidthRecalc = () => {
     // Trigger width recalculation after state update
@@ -204,6 +205,7 @@ function NestedSection({
   parentPath?: string
   category?: string
 }) {
+  const { setSidebarOpen } = useSidebar()
   const entries = Object.entries(structure).filter(([key]) => key !== '_docs' && key !== '_root')
   
   // Get documents at this level
