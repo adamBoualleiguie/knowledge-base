@@ -28,7 +28,7 @@ interface CollapsibleSectionProps {
   level?: number
 }
 
-function CollapsibleSection({ title, children, defaultOpen = false, titleLink = null, level = 0 }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, children, defaultOpen = false, titleLink = null, level = 0, 'data-section-active': dataSectionActive = false }: CollapsibleSectionProps) {
   // Always sync state with defaultOpen prop - this ensures sections open when they should
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const pathname = usePathname()
@@ -44,9 +44,8 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
   // CRITICAL: Sync isOpen with defaultOpen whenever it changes
   // This ensures sections open when they contain the active document
   useEffect(() => {
-    if (defaultOpen) {
-      setIsOpen(true)
-    }
+    // Always sync with defaultOpen - if defaultOpen is true, the section should be open
+    setIsOpen(defaultOpen)
   }, [defaultOpen]) // This will run whenever defaultOpen changes
   
   // Listen for sidebar reopen event to ensure active sections are expanded
@@ -108,7 +107,7 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
  // Run once on mount
 
   return (
-    <div className="mt-1">
+    <div className="mt-1" data-section-active={dataSectionActive} data-section-open={isOpen}>
       <div 
         className={`w-full flex items-center justify-between ${paddingClass} pr-2 py-1.5`}
         style={paddingStyle}
@@ -117,6 +116,12 @@ function CollapsibleSection({ title, children, defaultOpen = false, titleLink = 
           <Link
             href={titleLink}
             className={isSubsection ? subsectionClasses : mainSectionClasses}
+            onClick={() => {
+              // Close sidebar on mobile when clicking a section link
+              if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                setSidebarOpen(false)
+              }
+            }}
           >
             <span className="text-left block">{title}</span>
           </Link>
@@ -157,6 +162,31 @@ function getDocOrder(doc: Doc): number {
   return isNaN(order) ? 999 : order
 }
 
+// Helper to determine if any doc in this structure (at any depth) matches the current pathname
+// Moved outside NestedSection so it can be used at the top level for categories
+function hasActiveDoc(node: any, pathname: string): boolean {
+    const nodeDocs: Doc[] = node._docs || []
+    const nodeRootDocs: Doc[] = node._root || []
+
+    // Check if any document at this level matches the current pathname
+    const hasMatch = [...nodeDocs, ...nodeRootDocs].some((doc) => {
+      // Normalize both URLs for comparison (handle trailing slashes)
+      const docUrl = doc.url?.replace(/\/$/, '') || ''
+      const currentPath = pathname?.replace(/\/$/, '') || ''
+      return docUrl === currentPath
+    })
+
+    if (hasMatch) {
+      return true
+    }
+
+    // Recursively check child nodes
+    return Object.entries(node).some(([key, child]) => {
+      if (key === '_docs' || key === '_root') return false
+      return hasActiveDoc(child, pathname)
+    })
+}
+
 // Recursive component to render nested structure
 function NestedSection({
   structure,
@@ -178,30 +208,6 @@ function NestedSection({
   // Get documents at this level
   const docs = structure._docs || []
   const rootDocs = structure._root || []
-
-  // Helper to determine if any doc in this structure (at any depth) matches the current pathname
-  const hasActiveDoc = (node: any): boolean => {
-    const nodeDocs: Doc[] = node._docs || []
-    const nodeRootDocs: Doc[] = node._root || []
-
-    // Check if any document at this level matches the current pathname
-    const hasMatch = [...nodeDocs, ...nodeRootDocs].some((doc) => {
-      // Normalize both URLs for comparison (handle trailing slashes)
-      const docUrl = doc.url?.replace(/\/$/, '') || ''
-      const currentPath = pathname?.replace(/\/$/, '') || ''
-      return docUrl === currentPath
-    })
-
-    if (hasMatch) {
-      return true
-    }
-
-    // Recursively check child nodes
-    return Object.entries(node).some(([key, child]) => {
-      if (key === '_docs' || key === '_root') return false
-      return hasActiveDoc(child)
-    })
-  }
   
   // Sort entries (subsections) - use parentPath for nested subsections
   const sortedEntries = entries.sort(([a], [b]) => {
@@ -314,7 +320,7 @@ function NestedSection({
       {/* Render subsections recursively */}
       {sortedEntries.map(([subsectionName, subsectionStructure]) => {
         const subsectionPath = parentPath ? `${parentPath}/${subsectionName}` : subsectionName
-        const subsectionIsActive = hasActiveDoc(subsectionStructure)
+        const subsectionIsActive = hasActiveDoc(subsectionStructure, pathname)
         
         // Check if overview page exists - look in _root first, then by slug
         const subsectionRootDocs: Doc[] = (subsectionStructure as any)._root || []
@@ -329,6 +335,7 @@ function NestedSection({
             defaultOpen={subsectionIsActive}
             titleLink={overviewUrl}
             level={level + 1}
+            data-section-active={subsectionIsActive}
           >
             <NestedSection
               structure={subsectionStructure}
@@ -348,27 +355,48 @@ function NestedSection({
           className={`space-y-0.5 text-left ${documentPaddingClass}`}
           style={documentPaddingStyle}
         >
-          {sortedDocs.map((doc) => (
-            <Link
-              key={doc._id}
-              href={doc.url}
-              className={`flex items-center gap-1.5 pl-2.5 pr-2 py-1 transition-all duration-200 ${
-                pathname === doc.url
-                  ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
-                  : 'text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200 dark:hover:drop-shadow-[0_0_3px_rgba(255,255,255,0.15)]'
-              }`}
-            >
-              <svg
-                className="w-3 h-3 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {sortedDocs.map((doc) => {
+            // Normalize URLs for comparison (handle trailing slashes and basePath)
+            const docUrl = doc.url?.replace(/\/$/, '') || ''
+            const currentPath = pathname?.replace(/\/$/, '') || ''
+            const isActive = docUrl === currentPath
+            
+            return (
+              <Link
+                key={doc._id}
+                href={doc.url}
+                className={`relative flex items-center gap-1.5 pl-2.5 pr-2 py-1.5 rounded-md transition-all duration-200 ${
+                  isActive
+                    ? 'bg-primary/15 text-primary font-semibold border-l-2 border-primary shadow-md dark:bg-primary/25 dark:text-primary dark:border-primary dark:shadow-[0_0_15px_rgba(255,94,25,0.4)]'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-accent/30'
+                }`}
+                onClick={() => {
+                  // Close sidebar on mobile when clicking a link
+                  if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                    setSidebarOpen(false)
+                  }
+                }}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span className="truncate text-xs text-left">{doc.title}</span>
-            </Link>
-          ))}
+                {/* Shine effect for active item */}
+                {isActive && (
+                  <span className="absolute inset-0 rounded-md bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer pointer-events-none z-0" />
+                )}
+                <svg
+                  className={`w-3 h-3 flex-shrink-0 transition-colors relative z-10 ${
+                    isActive ? 'text-primary' : 'text-current'
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className={`truncate text-xs text-left relative z-10 ${isActive ? 'font-semibold' : ''}`}>
+                  {doc.title}
+                </span>
+              </Link>
+            )
+          })}
         </div>
       )}
     </>
@@ -379,8 +407,9 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
   // Use allDocs prop if provided, otherwise fall back to docs
   const allDocs = allDocsProp || docs
   const pathname = usePathname()
-  const { isSidebarOpen } = useSidebar()
+  const { isSidebarOpen, setSidebarOpen } = useSidebar()
   const prevSidebarOpenRef = useRef(isSidebarOpen)
+  const prevPathnameRef = useRef(pathname)
   
   // Dynamic sidebar width based on content
   const [sidebarWidth, setSidebarWidth] = useState(200) // Default: 200px
@@ -510,26 +539,47 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
     }
   }, [mounted, isSidebarOpen, sidebarWidth])
   
+  // Don't auto-open on pathname change - let users control the sidebar
+  // Only track pathname changes for section expansion
+  useEffect(() => {
+    prevPathnameRef.current = pathname
+  }, [pathname])
+  
+  // Don't auto-open on mount - let SidebarContext handle initial state from localStorage
+  // This allows users to have full control over sidebar state
+
   // Initialize mounted state and ensure active sections are expanded on initial load
   useEffect(() => {
     setMounted(true)
     
-    // On initial mount, if sidebar is open, ensure active document's sections are expanded
-    if (isSidebarOpen) {
-      setTimeout(() => {
+    // Don't auto-open on mount - let SidebarContext handle initial state
+    // This allows users to have control over sidebar state
+  }, []) // Run once on mount
+  
+  // Ensure active sections are expanded and scroll to active document when sidebar is open
+  useEffect(() => {
+    if (mounted && isSidebarOpen) {
+      // Use a longer delay to ensure all sections have rendered and can expand
+      const timeoutId = setTimeout(() => {
         // Trigger a custom event that CollapsibleSection can listen to
+        // This will force all sections with defaultOpen=true to expand
         window.dispatchEvent(new CustomEvent('sidebar-reopened', { detail: { pathname } }))
         
-        // Scroll active document into view
-        if (navRef.current) {
-          const activeLink = navRef.current.querySelector(`a[href="${pathname}"]`)
-          if (activeLink) {
-            activeLink.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // Scroll active document into view after sections are expanded
+        setTimeout(() => {
+          if (navRef.current) {
+            // Try to find active link by matching href or by checking if it's the current pathname
+            const activeLink = navRef.current.querySelector(`a[href="${pathname}"], a[href="${pathname}/"]`) as HTMLAnchorElement | null
+            if (activeLink) {
+              activeLink.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
           }
-        }
-      }, 300) // Delay to ensure DOM is ready
+        }, 300)
+      }, 600) // Longer delay to ensure all sections are rendered and React has updated state
+      
+      return () => clearTimeout(timeoutId)
     }
-  }, []) // Run once on mount
+  }, [mounted, isSidebarOpen, pathname])
   
   // Only listen for section toggle events (user interaction) - NO automatic resize on mount
   useEffect(() => {
@@ -628,21 +678,73 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
     return a.localeCompare(b)
   })
 
+  // Don't render anything if sidebar is closed
   if (!isSidebarOpen) {
     return null
   }
 
   return (
-    <aside 
-      ref={sidebarRef}
-      className="hidden lg:block flex-shrink-0 border-r border-border/40 relative transition-all duration-300"
-      style={mounted ? { width: `${sidebarWidth}px` } : { width: '200px' }}
-    >
+    <>
+      {/* Mobile backdrop overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setSidebarOpen(false)
+          }}
+          aria-hidden="true"
+        />
+      )}
+      
+      {/* Sidebar - Desktop: always visible when open, Mobile: slide-in drawer */}
+      <aside 
+        ref={sidebarRef}
+        className={`
+          fixed lg:static
+          top-0 left-0 h-full lg:h-auto
+          z-50 lg:z-auto
+          flex-shrink-0 border-r border-border/40 
+          bg-background
+          transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          lg:translate-x-0
+          lg:block
+          lg:relative
+          w-64 sm:w-72
+          shadow-xl lg:shadow-none
+        `}
+        style={mounted && typeof window !== 'undefined' && window.innerWidth >= 1024 ? { width: `${sidebarWidth}px` } : undefined}
+      >
       <nav 
         ref={navRef}
-        className="sticky top-20 space-y-0 max-h-[calc(100vh-5rem)] overflow-y-auto hide-scrollbar pb-8 text-sm pr-3 text-left"
+        className="sticky lg:sticky top-0 lg:top-20 space-y-0 h-full lg:h-auto max-h-screen lg:max-h-[calc(100vh-5rem)] overflow-y-auto hide-scrollbar pb-8 text-sm pr-3 pl-4 lg:pl-0 pt-20 lg:pt-0 text-left"
         id="docs-sidebar-nav"
       >
+        {/* Mobile close button */}
+        <div className="lg:hidden flex items-center justify-between mb-4 pb-4 border-b border-border/40 sticky top-0 bg-background z-10 pt-4">
+          <h2 className="text-lg font-semibold text-foreground">Navigation</h2>
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setSidebarOpen(false)
+            }}
+            className="p-2 rounded-lg hover:bg-accent active:bg-accent transition-colors touch-manipulation"
+            aria-label="Close sidebar"
+          >
+            <svg
+              className="w-5 h-5 text-foreground"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
         <Link
           href={pathname.startsWith('/knowledge-base') ? '/knowledge-base/docs' : '/docs'}
           className={`flex items-center gap-2 px-2.5 py-2 transition-all duration-200 ${
@@ -650,6 +752,12 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
               ? 'text-foreground font-semibold dark:text-white dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]'
               : 'text-muted-foreground hover:text-foreground dark:hover:text-white dark:hover:drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]'
           }`}
+          onClick={() => {
+            // Close sidebar on mobile when clicking a link
+            if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+              setSidebarOpen(false)
+            }
+          }}
         >
           <svg
             className="w-3.5 h-3.5 flex-shrink-0"
@@ -662,9 +770,8 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
           <span className="text-sm text-left">Overview</span>
         </Link>
         {sortedCategories.map(([category, structure]) => {
-          // Get all docs from this category to check if active
-          const allCategoryDocs = groupedDocs[category] || []
-          const isCategoryActive = allCategoryDocs.some((doc) => pathname === doc.url)
+          // Check if category is active by recursively checking if it contains the active document
+          const isCategoryActive = hasActiveDoc(structure, pathname)
           
           // Check if category has any content
           const hasContent = Object.keys(structure).length > 0
@@ -696,6 +803,7 @@ export function DocsSidebar({ docs, allDocs: allDocsProp }: DocsSidebarProps) {
         })}
       </nav>
     </aside>
+    </>
   )
 }
 

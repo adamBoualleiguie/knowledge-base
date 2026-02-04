@@ -24,14 +24,29 @@ export function SidebarToggle() {
   return (
     <button
       onClick={toggleSidebar}
-      className="fixed left-4 top-24 z-50 p-2.5 rounded-lg bg-background border border-border shadow-lg hover:bg-accent transition-all duration-200 hover:shadow-xl hover:border-primary/50 lg:left-6"
+      className="
+        fixed 
+        top-[68px] right-3 
+        lg:top-24 lg:left-6 lg:right-auto
+        z-50 
+        p-2 lg:p-2.5 
+        rounded-lg 
+        bg-background/95 backdrop-blur-sm
+        border border-border/60
+        shadow-md 
+        hover:bg-accent active:bg-accent 
+        transition-all duration-200 
+        hover:shadow-lg hover:border-primary/50 
+        touch-manipulation
+        lg:bg-background lg:border-border lg:shadow-lg
+      "
       aria-label={isSidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
       title={isSidebarOpen ? 'Hide sidebar (more reading space)' : 'Show sidebar (navigation)'}
     >
       {isSidebarOpen ? (
-        <X className="w-5 h-5 text-foreground" />
+        <X className="w-4 h-4 lg:w-5 lg:h-5 text-foreground" />
       ) : (
-        <Menu className="w-5 h-5 text-foreground" />
+        <Menu className="w-4 h-4 lg:w-5 lg:h-5 text-foreground" />
       )}
     </button>
   )
