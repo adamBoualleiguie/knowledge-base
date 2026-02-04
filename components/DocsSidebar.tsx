@@ -26,6 +26,7 @@ interface CollapsibleSectionProps {
   defaultOpen?: boolean
   titleLink?: string | null
   level?: number
+  'data-section-active'?: boolean
 }
 
 function CollapsibleSection({ title, children, defaultOpen = false, titleLink = null, level = 0, 'data-section-active': dataSectionActive = false }: CollapsibleSectionProps) {
