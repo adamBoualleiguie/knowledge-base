@@ -303,6 +303,43 @@ const siteName = 'Knowledge Base - Adam Boualleiguie'
 
 // Generate metadata for Open Graph and Twitter Cards
 export async function generateMetadata({ params }: DocPageProps): Promise<NextMetadata> {
+  // If no slug, it's the docs listing page
+  if (!params?.slug || params.slug.length === 0) {
+    const docsListingUrl = `${baseUrl}${basePath}/docs/`
+    const ogImage = `${baseUrl}${basePath}/og-image.png`
+    
+    return {
+      title: `Documentation | ${siteName}`,
+      description: 'Welcome to the documentation. Here you\'ll find guides, tutorials, and reference materials.',
+      openGraph: {
+        type: 'website',
+        url: docsListingUrl,
+        title: `Documentation | ${siteName}`,
+        description: 'Welcome to the documentation. Here you\'ll find guides, tutorials, and reference materials.',
+        siteName: siteName,
+        images: [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: 'Knowledge Base Documentation',
+          },
+        ],
+        locale: 'en_US',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `Documentation | ${siteName}`,
+        description: 'Welcome to the documentation. Here you\'ll find guides, tutorials, and reference materials.',
+        images: [ogImage],
+      },
+      alternates: {
+        canonical: docsListingUrl,
+      },
+    }
+  }
+
+  // Individual doc page
   const doc = await getDocFromParams(params)
   
   if (!doc) {

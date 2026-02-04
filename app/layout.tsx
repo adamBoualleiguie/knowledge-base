@@ -9,9 +9,14 @@ import { ReadingProgress } from '@/components/ReadingProgress'
 import { PageLoader } from '@/components/PageLoader'
 import { allDocs } from 'contentlayer/generated'
 
+const baseUrl = 'https://adamboualleiguie.github.io'
+const basePath = '/knowledge-base'
+const siteName = 'Knowledge Base - Adam Boualleiguie'
+const ogImage = `${baseUrl}${basePath}/og-image.png`
+
 export const metadata: Metadata = {
-  title: 'Knowledge Base - Adam',
-  description: 'Personal portfolio, documentation, and blog',
+  title: siteName,
+  description: 'Personal hub showcasing DevOps & SysOps mastery. Documentation, blog, and portfolio.',
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
@@ -19,6 +24,31 @@ export const metadata: Metadata = {
     apple: [
       { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' },
     ],
+  },
+  openGraph: {
+    type: 'website',
+    url: `${baseUrl}${basePath}/`,
+    title: siteName,
+    description: 'Personal hub showcasing DevOps & SysOps mastery. Documentation, blog, and portfolio.',
+    siteName: siteName,
+    images: [
+      {
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: siteName,
+      },
+    ],
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteName,
+    description: 'Personal hub showcasing DevOps & SysOps mastery. Documentation, blog, and portfolio.',
+    images: [ogImage],
+  },
+  alternates: {
+    canonical: `${baseUrl}${basePath}/`,
   },
 }
 

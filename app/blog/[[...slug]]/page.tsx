@@ -8,6 +8,7 @@ import { TableOfContents } from '@/components/TableOfContents'
 import { calculateReadTime } from '@/lib/readTime'
 import { DocsSearchBar } from '@/components/DocsSearchBar'
 import { getBlogTagColor } from '@/lib/tag-colors'
+import type { Metadata as NextMetadata } from 'next'
 
 interface BlogPageProps {
   params: {
@@ -35,6 +36,101 @@ export async function generateStaticParams() {
     { slug: [] },
     ...blogParams,
   ]
+}
+
+// Base URL for Open Graph images and links
+const baseUrl = 'https://adamboualleiguie.github.io'
+const basePath = '/knowledge-base'
+const siteName = 'Knowledge Base - Adam Boualleiguie'
+
+// Generate metadata for Open Graph and Twitter Cards
+export async function generateMetadata({ params }: BlogPageProps): Promise<NextMetadata> {
+  // If no slug, it's the blog listing page
+  if (!params?.slug || params.slug.length === 0) {
+    const blogListingUrl = `${baseUrl}${basePath}/blog/`
+    const ogImage = `${baseUrl}${basePath}/og-image.png`
+    
+    return {
+      title: `Blog | ${siteName}`,
+      description: 'Stay updated with product updates, company news, and articles on development, technology, and open-source tools.',
+      openGraph: {
+        type: 'website',
+        url: blogListingUrl,
+        title: `Blog | ${siteName}`,
+        description: 'Stay updated with product updates, company news, and articles on development, technology, and open-source tools.',
+        siteName: siteName,
+        images: [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: 'Knowledge Base Blog',
+          },
+        ],
+        locale: 'en_US',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `Blog | ${siteName}`,
+        description: 'Stay updated with product updates, company news, and articles on development, technology, and open-source tools.',
+        images: [ogImage],
+      },
+      alternates: {
+        canonical: blogListingUrl,
+      },
+    }
+  }
+
+  // Individual blog post
+  const blog = await getBlogFromParams(params)
+  
+  if (!blog) {
+    return {
+      title: 'Blog Post',
+      description: 'Blog post from Knowledge Base',
+    }
+  }
+
+  const blogUrl = `${baseUrl}${basePath}${blog.url}`
+  const blogTitle = blog.title
+  const blogDescription = blog.description || `${blogTitle} - Blog post from Knowledge Base`
+  const ogImage = `${baseUrl}${basePath}/og-image.png`
+
+  return {
+    title: `${blogTitle} | ${siteName}`,
+    description: blogDescription,
+    authors: blog.author ? [{ name: blog.author }] : undefined,
+    openGraph: {
+      type: 'article',
+      url: blogUrl,
+      title: blogTitle,
+      description: blogDescription,
+      siteName: siteName,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: blogTitle,
+        },
+      ],
+      locale: 'en_US',
+      publishedTime: blog.publishedAt,
+      modifiedTime: blog.updatedAt || blog.publishedAt,
+      authors: blog.author ? [blog.author] : undefined,
+      tags: blog.tags,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: blogTitle,
+      description: blogDescription,
+      images: [ogImage],
+      creator: blog.author ? `@${blog.author.replace(/\s+/g, '')}` : undefined,
+    },
+    alternates: {
+      canonical: blogUrl,
+    },
+  }
 }
 
 export default async function BlogPage({ params }: BlogPageProps) {
