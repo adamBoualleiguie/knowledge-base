@@ -30,26 +30,28 @@ export function DocImage({ src, alt, width, height, caption }: ImageProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [imageDimensions, setImageDimensions] = useState({ width: width || 1200, height: height || 800 })
   const [basePath, setBasePath] = useState('')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     setBasePath(getBasePath())
   }, [])
 
-  // Normalize src to include basePath if needed
-  const normalizedSrc = src.startsWith('/') && basePath && !src.startsWith(basePath)
+  // Normalize src to include basePath if needed - only after mount to avoid double requests
+  const normalizedSrc = mounted && src.startsWith('/') && basePath && !src.startsWith(basePath)
     ? `${basePath}${src}`
     : src
 
   useEffect(() => {
-    // Load image to get natural dimensions if not provided
-    if (!width || !height) {
+    // Only load image dimensions after we have the correct path
+    if (mounted && (!width || !height)) {
       const img = new window.Image()
       img.onload = () => {
         setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight })
       }
       img.src = normalizedSrc
     }
-  }, [normalizedSrc, width, height])
+  }, [normalizedSrc, width, height, mounted])
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -80,6 +82,17 @@ export function DocImage({ src, alt, width, height, caption }: ImageProps) {
   }
 
   const aspectRatio = imageDimensions.width / imageDimensions.height
+
+  // Don't render image until mounted to avoid double requests
+  if (!mounted) {
+    return (
+      <figure className="my-8 group">
+        <div className="relative overflow-hidden rounded-lg border border-border bg-muted/30 min-h-[200px] flex items-center justify-center">
+          <div className="text-muted-foreground text-sm">Loading image...</div>
+        </div>
+      </figure>
+    )
+  }
 
   return (
     <>

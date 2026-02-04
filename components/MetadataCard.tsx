@@ -74,12 +74,15 @@ export function MetadataCard({
   const displayReadTime = readTime || 0
   const [basePath, setBasePath] = useState('')
   const [imageError, setImageError] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     setBasePath(getBasePath())
   }, [])
 
-  const photoPath = resolveAuthorPhoto(authorPhoto, basePath)
+  // Only resolve photo path after mount to avoid double requests
+  const photoPath = mounted ? resolveAuthorPhoto(authorPhoto, basePath) : null
 
   return (
     <div className="w-64 p-6 border border-border rounded-lg bg-card shadow-sm">

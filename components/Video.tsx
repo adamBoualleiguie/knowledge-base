@@ -38,17 +38,19 @@ export function DocVideo({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [basePath, setBasePath] = useState('')
+  const [mounted, setMounted] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
+    setMounted(true)
     setBasePath(getBasePath())
   }, [])
 
-  // Normalize src and poster to include basePath if needed
-  const normalizedSrc = src.startsWith('/') && basePath && !src.startsWith(basePath)
+  // Normalize src and poster to include basePath if needed - only after mount to avoid double requests
+  const normalizedSrc = mounted && src.startsWith('/') && basePath && !src.startsWith(basePath)
     ? `${basePath}${src}`
     : src
-  const normalizedPoster = poster && poster.startsWith('/') && basePath && !poster.startsWith(basePath)
+  const normalizedPoster = mounted && poster && poster.startsWith('/') && basePath && !poster.startsWith(basePath)
     ? `${basePath}${poster}`
     : poster
 
@@ -80,6 +82,17 @@ export function DocVideo({
 
   const handleLoadedData = () => {
     setVideoLoading(false)
+  }
+
+  // Don't render video until mounted to avoid double requests
+  if (!mounted) {
+    return (
+      <figure className="my-8">
+        <div className="relative overflow-hidden rounded-lg border border-border bg-muted/30 min-h-[200px] flex items-center justify-center">
+          <div className="text-muted-foreground text-sm">Loading video...</div>
+        </div>
+      </figure>
+    )
   }
 
   return (

@@ -142,24 +142,33 @@ export function TableOfContents({ content, onContentChange }: TableOfContentsPro
     if (headings.length === 0) return
 
     const updateActiveHeading = () => {
-      const scrollPosition = window.scrollY + 100 // Offset for sticky header
-          const headingElements = headings
-            .map((h) => document.getElementById(h.id))
-            .filter((el) => el !== null && !el.closest('.callout-container')) as HTMLElement[]
+      // Offset for sticky header and some buffer
+      const scrollOffset = 120
+      const scrollPosition = window.scrollY + scrollOffset
+      
+      const headingElements = headings
+        .map((h) => document.getElementById(h.id))
+        .filter((el) => el !== null && !el.closest('.callout-container')) as HTMLElement[]
 
-          if (headingElements.length === 0) return
+      if (headingElements.length === 0) return
 
-          // Find the heading that's currently in view
-          let currentActiveId = ''
+      // Find the heading that's currently in view
+      let currentActiveId = ''
 
-          for (let i = headingElements.length - 1; i >= 0; i--) {
-            const heading = headingElements[i]
-            // Check if heading is visible (not hidden in inactive tabs) and not inside a callout
-            const isVisible = heading.offsetParent !== null && !heading.closest('.callout-container')
-            if (!isVisible) continue
+      // Check from bottom to top to find the last heading that has passed the scroll position
+      for (let i = headingElements.length - 1; i >= 0; i--) {
+        const heading = headingElements[i]
+        // Check if heading is visible (not hidden in inactive tabs) and not inside a callout
+        const isVisible = heading.offsetParent !== null && !heading.closest('.callout-container')
+        if (!isVisible) continue
+    
+        const headingRect = heading.getBoundingClientRect()
+        const headingTop = headingRect.top + window.scrollY
+        const headingBottom = headingRect.bottom + window.scrollY
         
-        const headingTop = heading.getBoundingClientRect().top + window.scrollY
-        
+        // Check if the heading is in the viewport with some buffer
+        // Consider a heading active if its top has passed the scroll position
+        // or if we're within the heading's area
         if (headingTop <= scrollPosition) {
           currentActiveId = heading.id
           break
@@ -168,62 +177,96 @@ export function TableOfContents({ content, onContentChange }: TableOfContentsPro
 
       // If scrolled past all headings, highlight the last visible one
       if (!currentActiveId && headingElements.length > 0) {
-        const visibleHeadings = headingElements.filter(h => h.offsetParent !== null)
+        const visibleHeadings = headingElements.filter(h => {
+          const isVisible = h.offsetParent !== null && !h.closest('.callout-container')
+          return isVisible
+        })
         if (visibleHeadings.length > 0) {
           const lastHeading = visibleHeadings[visibleHeadings.length - 1]
-          const lastHeadingBottom = lastHeading.getBoundingClientRect().bottom + window.scrollY
-          if (scrollPosition >= lastHeadingBottom - 200) {
+          const lastHeadingRect = lastHeading.getBoundingClientRect()
+          const lastHeadingBottom = lastHeadingRect.bottom + window.scrollY
+          // If we're near the bottom of the page, highlight the last heading
+          if (scrollPosition >= lastHeadingBottom - 300) {
             currentActiveId = lastHeading.id
           }
         }
       }
 
-      setActiveId(currentActiveId)
+      // Only update if the active ID actually changed to avoid unnecessary re-renders
+      if (currentActiveId !== activeId) {
+        setActiveId(currentActiveId)
+      }
     }
 
-    window.addEventListener('scroll', updateActiveHeading)
+    // Use passive listener for better performance
+    window.addEventListener('scroll', updateActiveHeading, { passive: true })
+    // Also listen for resize events in case layout changes
+    window.addEventListener('resize', updateActiveHeading, { passive: true })
     updateActiveHeading() // Initial check
 
-    return () => window.removeEventListener('scroll', updateActiveHeading)
-  }, [headings])
+    return () => {
+      window.removeEventListener('scroll', updateActiveHeading)
+      window.removeEventListener('resize', updateActiveHeading)
+    }
+  }, [headings, activeId])
 
   // Auto-scroll to active item when it changes
   useEffect(() => {
-    if (activeId && activeItemRef.current && navRef.current) {
-      // Use setTimeout to ensure DOM is updated
-      setTimeout(() => {
-        if (activeItemRef.current && navRef.current) {
-          const nav = navRef.current
-          const activeItem = activeItemRef.current
-          
-          // Get positions
-          const navRect = nav.getBoundingClientRect()
-          const itemRect = activeItem.getBoundingClientRect()
-          
-          // Calculate if item is outside visible area
-          const itemTop = itemRect.top - navRect.top + nav.scrollTop
-          const itemBottom = itemTop + itemRect.height
-          const navScrollTop = nav.scrollTop
-          const navHeight = nav.clientHeight
-          const navScrollBottom = navScrollTop + navHeight
-          
-          // Scroll to show active item if it's not fully visible
-          if (itemTop < navScrollTop) {
-            // Item is above visible area, scroll to show it at top
-            nav.scrollTo({
-              top: itemTop - 20, // Add some padding
-              behavior: 'smooth'
-            })
-          } else if (itemBottom > navScrollBottom) {
-            // Item is below visible area, scroll to show it at bottom
-            nav.scrollTo({
-              top: itemBottom - navHeight + 20, // Add some padding
-              behavior: 'smooth'
-            })
-          }
-        }
-      }, 100)
+    if (!activeId || !navRef.current) return
+
+    // Use requestAnimationFrame and setTimeout to ensure DOM is fully updated
+    const scrollToActive = () => {
+      // Find the active item in the DOM (in case ref wasn't set yet)
+      const activeItem = navRef.current?.querySelector(`li a[href="#${activeId}"]`)?.closest('li') as HTMLLIElement | null
+      const activeItemElement = activeItemRef.current || activeItem
+      
+      if (!activeItemElement || !navRef.current) return
+
+      const nav = navRef.current
+      
+      // Get positions relative to the nav container
+      const navRect = nav.getBoundingClientRect()
+      const itemRect = activeItemElement.getBoundingClientRect()
+      
+      // Calculate positions relative to nav's scroll container
+      const itemTopRelative = itemRect.top - navRect.top + nav.scrollTop
+      const itemBottomRelative = itemTopRelative + activeItemElement.offsetHeight
+      
+      // Get current scroll state
+      const navScrollTop = nav.scrollTop
+      const navHeight = nav.clientHeight
+      const navScrollBottom = navScrollTop + navHeight
+      
+      // Calculate padding (keep some space at top and bottom)
+      const paddingTop = 30
+      const paddingBottom = 30
+      
+      // Check if item is outside visible area and scroll if needed
+      const isAboveViewport = itemTopRelative < navScrollTop + paddingTop
+      const isBelowViewport = itemBottomRelative > navScrollBottom - paddingBottom
+      
+      if (isAboveViewport) {
+        // Item is above visible area or too close to top, scroll to show it with padding
+        nav.scrollTo({
+          top: Math.max(0, itemTopRelative - paddingTop),
+          behavior: 'smooth'
+        })
+      } else if (isBelowViewport) {
+        // Item is below visible area or too close to bottom, scroll to show it with padding
+        const targetScroll = itemBottomRelative - navHeight + paddingBottom
+        nav.scrollTo({
+          top: Math.max(0, targetScroll),
+          behavior: 'smooth'
+        })
+      }
     }
+
+    // Use multiple delays to ensure DOM is updated
+    requestAnimationFrame(() => {
+      setTimeout(scrollToActive, 100)
+      // Also try again after a longer delay in case of slow renders
+      setTimeout(scrollToActive, 300)
+    })
   }, [activeId])
 
   if (headings.length === 0) {
@@ -261,7 +304,12 @@ export function TableOfContents({ content, onContentChange }: TableOfContentsPro
             return (
               <li
                 key={`${heading.id}-${index}`}
-                ref={isActive ? activeItemRef : null}
+                ref={isActive ? (el) => {
+                  // Update ref when this item becomes active
+                  if (el && isActive) {
+                    activeItemRef.current = el
+                  }
+                } : null}
                 className={`
                   relative
                   ${heading.level === 2 ? 'pl-0' : heading.level === 3 ? 'pl-4' : heading.level === 4 ? 'pl-8' : ''}

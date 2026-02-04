@@ -40,6 +40,37 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className="font-sans antialiased">
+        {/* Fix favicon paths to respect basePath */}
+        <Script
+          id="fix-favicon"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const path = window.location.pathname;
+                const basePath = path.startsWith('/knowledge-base') ? '/knowledge-base' : '';
+                
+                // Remove existing favicon links
+                document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach(link => link.remove());
+                
+                // Add favicon with correct basePath
+                const faviconLink = document.createElement('link');
+                faviconLink.rel = 'icon';
+                faviconLink.type = 'image/svg+xml';
+                faviconLink.href = basePath + '/favicon.svg';
+                document.head.appendChild(faviconLink);
+                
+                // Add apple touch icon with correct basePath
+                const appleLink = document.createElement('link');
+                appleLink.rel = 'apple-touch-icon';
+                appleLink.sizes = '180x180';
+                appleLink.type = 'image/svg+xml';
+                appleLink.href = basePath + '/apple-touch-icon.svg';
+                document.head.appendChild(appleLink);
+              })();
+            `,
+          }}
+        />
         {/* Cloudflare Web Analytics */}
         <Script
           defer

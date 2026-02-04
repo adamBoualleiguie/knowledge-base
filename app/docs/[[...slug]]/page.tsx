@@ -144,6 +144,40 @@ function sortDocsByOrder(docs: Doc[]): Doc[] {
   })
 }
 
+/**
+ * Get the path prefix for a document (section/subsection path)
+ * Example: "Knowledge-base/projects/Vendor agnostic surveillance/intro" -> "Knowledge-base/projects/Vendor agnostic surveillance"
+ * Example: "Knowledge-base/overview" -> "Knowledge-base" (document at section root)
+ */
+function getDocPathPrefix(slug: string): string {
+  const parts = slug.split('/')
+  // Return all parts except the last one (document name)
+  // If only one part, return empty string (document at root)
+  return parts.length > 1 ? parts.slice(0, -1).join('/') : ''
+}
+
+/**
+ * Get the depth level of a document path (number of path segments)
+ * Example: "Knowledge-base/projects/Vendor agnostic surveillance" -> 3
+ * Example: "Knowledge-base" -> 1
+ * Example: "" (root) -> 0
+ */
+function getPathDepth(pathPrefix: string): number {
+  if (!pathPrefix) return 0
+  return pathPrefix.split('/').length
+}
+
+/**
+ * Check if two documents are in the same context (same section/subsection path)
+ */
+function areInSameContext(slug1: string, slug2: string): boolean {
+  return getDocPathPrefix(slug1) === getDocPathPrefix(slug2)
+}
+
+/**
+ * Get previous and next documents within the same section/subsection context
+ * This ensures navigation stays within the same hierarchical level
+ */
 function getPrevNextDocs(currentSlug: string) {
   // Sort docs using the same ordering as sidebar
   const sortedDocs = sortDocsByOrder(allDocs)
@@ -154,8 +188,82 @@ function getPrevNextDocs(currentSlug: string) {
     return { prevDoc: null, nextDoc: null }
   }
 
-  const prevDoc = currentIndex > 0 ? sortedDocs[currentIndex - 1] : null
-  const nextDoc = currentIndex < sortedDocs.length - 1 ? sortedDocs[currentIndex + 1] : null
+  const currentPathPrefix = getDocPathPrefix(currentSlug)
+  const currentDepth = getPathDepth(currentPathPrefix)
+
+  // Find documents in the same context (same section/subsection path)
+  const sameContextDocs = sortedDocs.filter((doc) => 
+    areInSameContext(doc.slug, currentSlug)
+  )
+
+  // Find the index within the same context
+  const contextIndex = sameContextDocs.findIndex((doc) => doc.slug === currentSlug)
+
+  if (contextIndex === -1) {
+    return { prevDoc: null, nextDoc: null }
+  }
+
+  // Try to find previous document in the same context
+  let prevDoc: Doc | null = null
+  if (contextIndex > 0) {
+    // Previous document in same context
+    prevDoc = sameContextDocs[contextIndex - 1]
+  } else {
+    // We're at the first document in this context
+    // Look for the last document in the previous context at the same depth level
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      const candidate = sortedDocs[i]
+      const candidatePathPrefix = getDocPathPrefix(candidate.slug)
+      const candidateDepth = getPathDepth(candidatePathPrefix)
+      
+      // Check if it's at the same depth level
+      if (candidateDepth === currentDepth) {
+        // Same depth, different context - this is our previous context
+        // Get all docs in that context and take the last one
+        const prevContextDocs = sortedDocs.filter((doc) => 
+          areInSameContext(doc.slug, candidate.slug)
+        )
+        if (prevContextDocs.length > 0) {
+          prevDoc = prevContextDocs[prevContextDocs.length - 1]
+        }
+        break
+      } else if (candidateDepth < currentDepth) {
+        // We've gone up a level, stop searching
+        break
+      }
+    }
+  }
+
+  // Try to find next document in the same context
+  let nextDoc: Doc | null = null
+  if (contextIndex < sameContextDocs.length - 1) {
+    // Next document in same context
+    nextDoc = sameContextDocs[contextIndex + 1]
+  } else {
+    // We're at the last document in this context
+    // Look for the first document in the next context at the same depth level
+    for (let i = currentIndex + 1; i < sortedDocs.length; i++) {
+      const candidate = sortedDocs[i]
+      const candidatePathPrefix = getDocPathPrefix(candidate.slug)
+      const candidateDepth = getPathDepth(candidatePathPrefix)
+      
+      // Check if it's at the same depth level
+      if (candidateDepth === currentDepth) {
+        // Same depth, different context - this is our next context
+        // Get all docs in that context and take the first one
+        const nextContextDocs = sortedDocs.filter((doc) => 
+          areInSameContext(doc.slug, candidate.slug)
+        )
+        if (nextContextDocs.length > 0) {
+          nextDoc = nextContextDocs[0]
+        }
+        break
+      } else if (candidateDepth < currentDepth) {
+        // We've gone up a level, stop searching
+        break
+      }
+    }
+  }
 
   return {
     prevDoc: prevDoc
