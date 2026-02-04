@@ -314,12 +314,12 @@ export async function generateMetadata({ params }: DocPageProps): Promise<NextMe
 
   const docUrl = `${baseUrl}${basePath}${doc.url}`
   const docTitle = doc.title
-  const docDescription = doc.description || `Read ${doc.title} on Knowledge Base`
+  // Use actual description from document, or create a meaningful fallback
+  const docDescription = doc.description || `${docTitle} - Documentation from Knowledge Base`
   
-  // Use default OG image
-  // Note: For best compatibility, use PNG/JPG (1200x630px recommended)
-  // SVG works but some platforms prefer raster images
-  const ogImage = `${baseUrl}${basePath}/og-image.svg`
+  // Use PNG for OG image (WhatsApp, Facebook, Twitter require PNG/JPG, not SVG)
+  // The image should be 1200x630px for best results
+  const ogImage = `${baseUrl}${basePath}/og-image.png`
 
   // Build metadata
   const metadata: NextMetadata = {
