@@ -12,6 +12,8 @@ import { calculateReadTime } from '@/lib/readTime'
 import { getSectionOrder, getSubsectionOrder } from '@/config/docs-order.config'
 import { compareDesc } from 'date-fns'
 import type { Doc } from 'contentlayer/generated'
+import type { Metadata as NextMetadata } from 'next'
+import type { Metadata } from 'next'
 
 interface DocPageProps {
   params: {
@@ -292,6 +294,71 @@ export async function generateStaticParams() {
     { slug: [] },
     ...docParams,
   ]
+}
+
+// Base URL for Open Graph images and links
+const baseUrl = 'https://adamboualleiguie.github.io'
+const basePath = '/knowledge-base'
+const siteName = 'Knowledge Base - Adam Boualleiguie'
+
+// Generate metadata for Open Graph and Twitter Cards
+export async function generateMetadata({ params }: DocPageProps): Promise<NextMetadata> {
+  const doc = await getDocFromParams(params)
+  
+  if (!doc) {
+    return {
+      title: 'Documentation',
+      description: 'Knowledge Base Documentation',
+    }
+  }
+
+  const docUrl = `${baseUrl}${basePath}${doc.url}`
+  const docTitle = doc.title
+  const docDescription = doc.description || `Read ${doc.title} on Knowledge Base`
+  
+  // Use default OG image
+  // Note: For best compatibility, use PNG/JPG (1200x630px recommended)
+  // SVG works but some platforms prefer raster images
+  const ogImage = `${baseUrl}${basePath}/og-image.svg`
+
+  // Build metadata
+  const metadata: NextMetadata = {
+    title: `${docTitle} | ${siteName}`,
+    description: docDescription,
+    authors: doc.author ? [{ name: doc.author }] : undefined,
+    openGraph: {
+      type: 'article',
+      url: docUrl,
+      title: docTitle,
+      description: docDescription,
+      siteName: siteName,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: docTitle,
+        },
+      ],
+      locale: 'en_US',
+      publishedTime: doc.publishedAt,
+      modifiedTime: doc.updatedAt || doc.publishedAt,
+      authors: doc.author ? [doc.author] : undefined,
+      tags: doc.tags,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: docTitle,
+      description: docDescription,
+      images: [ogImage],
+      creator: doc.author ? `@${doc.author.replace(/\s+/g, '')}` : undefined,
+    },
+    alternates: {
+      canonical: docUrl,
+    },
+  }
+
+  return metadata
 }
 
 export default async function DocPage({ params }: DocPageProps) {
