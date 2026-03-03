@@ -1,3 +1,4 @@
+when you create a docs and not familiar with the features in knowledge base , meaning the syntax in mdx ,  you can feed this file to your AI  so he gets how to develop MDX file , this way you will get a lean  formated version for your documentation to add
 # AI Documentation System Guide
 
 This is a comprehensive guide for AI systems to create MDX documentation files for this Knowledge Base website. Use this guide to understand all available features, syntax, and best practices.
