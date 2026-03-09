@@ -12,7 +12,7 @@ export function Footer() {
 
   const [activeIndex, setActiveIndex] = useState<number>(-1)
   const hasAnimatedRef = useRef(false)
-  const footerRef = useRef<HTMLElement>(null)
+  const footerRef = useRef<HTMLDivElement>(null)
   const isHoveredRef = useRef(false)
 
   useEffect(() => {
