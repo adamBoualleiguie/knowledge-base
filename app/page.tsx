@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { allBlogs, allDocs, allCertifications } from 'contentlayer/generated'
 import { compareDesc } from 'date-fns'
 import { Typewriter } from 'react-simple-typewriter'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Highlight } from '@/components/Highlight'
 import { getBlogTagColor } from '@/lib/tag-colors'
 import { CertImage } from '@/components/CertImage'
@@ -131,6 +131,33 @@ export default function Home() {
   const [showDocs, setShowDocs] = useState(false)
   const [showBlog, setShowBlog] = useState(false)
   const [showRecruiter, setShowRecruiter] = useState(false)
+  const [showConnect, setShowConnect] = useState(false)
+  
+  // Connect Animation state
+  const [activeConnectIndex, setActiveConnectIndex] = useState<number>(-1)
+  const isConnectHoveredRef = useRef(false)
+
+  useEffect(() => {
+    if (showConnect) {
+      // Start the wave animation (left to right, then right to left)
+      const sequence = [0, 1, 2, 3, 4, 3, 2, 1, 0]
+      
+      sequence.forEach((iconIndex, step) => {
+        setTimeout(() => {
+          if (!isConnectHoveredRef.current) {
+            setActiveConnectIndex(iconIndex)
+          }
+        }, step * 300) // 300ms per step
+      })
+
+      // Clear active index after the last animation
+      setTimeout(() => {
+        if (!isConnectHoveredRef.current) {
+          setActiveConnectIndex(-1)
+        }
+      }, sequence.length * 300)
+    }
+  }, [showConnect])
 
   useEffect(() => {
     const hiTimeout = setTimeout(() => {
@@ -150,40 +177,60 @@ export default function Home() {
       setShowCTAs(true)
     }, 7500) // CTAs appear
 
+    const connectTimeout = setTimeout(() => {
+      setShowConnect(true)
+    }, 8500) // Connect section appears right after CTAs
+
     const whyTimeout = setTimeout(() => {
       setShowWhy(true)
-    }, 9000) // Why section appears
+    }, 9500) // Why section appears
+
+    // We calculate when the connect animation ends: 
+    // connect section appears at 8500ms
+    // animation takes 7 steps * 300ms = 2100ms
+    // So animation finishes at ~10600ms. 
+    // We add a little breathing room and scroll at 11500ms, which aligns perfectly with "About" section appearing
+    const autoScrollTimeout = setTimeout(() => {
+      if (window.scrollY < 100) {
+        window.scrollBy({ 
+          top: window.innerHeight * 0.4,
+          behavior: 'smooth' 
+        })
+      }
+    }, 11500)
 
     const aboutTimeout = setTimeout(() => {
       setShowAbout(true)
-    }, 11000) // About section appears
+    }, 11500) // About section appears
 
     const skillsTimeout = setTimeout(() => {
       setShowSkills(true)
-    }, 12000) // Skills section appears
+    }, 12500) // Skills section appears
 
     const certsTimeout = setTimeout(() => {
       setShowCerts(true)
-    }, 13000) // Certs section appears
+    }, 13500) // Certs section appears
 
     const docsTimeout = setTimeout(() => {
       setShowDocs(true)
-    }, 14000) // Docs section appears
+    }, 14500) // Docs section appears
 
     const blogTimeout = setTimeout(() => {
       setShowBlog(true)
-    }, 15000) // Blog section appears
+    }, 15500) // Blog section appears
 
     const recruiterTimeout = setTimeout(() => {
       setShowRecruiter(true)
-    }, 16000) // Recruiter section appears
+    }, 16500) // Recruiter section appears
 
     return () => {
       clearTimeout(hiTimeout)
       clearTimeout(titleTimeout)
       clearTimeout(valueTimeout)
       clearTimeout(ctaTimeout)
+      clearTimeout(connectTimeout)
       clearTimeout(whyTimeout)
+      clearTimeout(autoScrollTimeout)
       clearTimeout(aboutTimeout)
       clearTimeout(skillsTimeout)
       clearTimeout(certsTimeout)
@@ -291,6 +338,102 @@ export default function Home() {
           </p>
         )}
       </section>
+
+      {/* ================= CONTACT IN HOME (AFTER HERO) ================= */}
+      {showConnect && (
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16 animate-fade-in" style={{ animationDelay: '600ms' }}>
+          <div className="max-w-3xl mx-auto flex flex-col items-center justify-center">
+            <h3 className="text-xl font-medium mb-6 text-muted-foreground">Let's Connect</h3>
+            <div 
+              className="flex flex-wrap gap-6 justify-center"
+              onMouseEnter={() => {
+                isConnectHoveredRef.current = true
+                setActiveConnectIndex(-1)
+              }}
+              onTouchStart={() => {
+                isConnectHoveredRef.current = true
+                setActiveConnectIndex(-1)
+              }}
+            >
+              {[
+                {
+                  name: 'GitHub',
+                  url: 'https://github.com/adamBoualleiguie',
+                  icon: (
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                    </svg>
+                  ),
+                  activeClasses: "border-foreground/50 bg-foreground/5 text-foreground shadow-[0_0_15px_rgba(255,255,255,0.5)] -translate-y-2 scale-110",
+                  hoverClasses: "hover:border-foreground/50 hover:bg-foreground/5 hover:text-foreground hover:-translate-y-2 hover:scale-110"
+                },
+                {
+                  name: 'LinkedIn',
+                  url: 'https://www.linkedin.com/in/boualleiguieadam/',
+                  icon: (
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fillRule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clipRule="evenodd" />
+                    </svg>
+                  ),
+                  activeClasses: "border-[#0A66C2]/50 bg-[#0A66C2]/10 text-[#0A66C2] shadow-[0_0_15px_rgba(10,102,194,0.5)] -translate-y-2 scale-110",
+                  hoverClasses: "hover:border-[#0A66C2]/50 hover:bg-[#0A66C2]/10 hover:text-[#0A66C2] hover:-translate-y-2 hover:scale-110"
+                },
+                {
+                  name: 'Credly',
+                  url: 'https://www.credly.com/users/adam-boualleiguie/badges#credly',
+                  icon: (
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 0L1.604 6v12L12 24l10.396-6V6L12 0zm0 2.14l8.528 4.924-4.887 2.822L12 7.783l-3.641 2.103-4.887-2.822L12 2.14zm-9.458 6.4l3.968 2.29-3.968 2.29V8.54zm9.458 13.32l-8.528-4.924 4.887-2.822L12 16.217l3.641-2.103 4.887 2.822-8.528 4.924zm9.458-6.4l-3.968-2.29 3.968-2.29v4.58z"/>
+                    </svg>
+                  ),
+                  activeClasses: "border-[#FF6B00]/50 bg-[#FF6B00]/10 text-[#FF6B00] shadow-[0_0_15px_rgba(255,107,0,0.5)] -translate-y-2 scale-110",
+                  hoverClasses: "hover:border-[#FF6B00]/50 hover:bg-[#FF6B00]/10 hover:text-[#FF6B00] hover:-translate-y-2 hover:scale-110"
+                },
+                {
+                  name: 'Upwork',
+                  url: 'https://www.upwork.com/freelancers/~010ba71237624305d2?mp_source=share',
+                  icon: (
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M17.48,6.06c-2.07,0-3.64,1.07-4.48,2.77V6.37h-2.5v7.65c0,1.93-1.57,3.5-3.5,3.5s-3.5-1.57-3.5-3.5V6.37H1v7.65c0,3.31,2.69,6,6,6s6-2.69,6-6v-1.63c.69,1.25,2.16,2.68,4.18,2.68,3.22,0,5.82-2.58,5.82-6.06S20.7,6.06,17.48,6.06Zm0,9.62c-1.88,0-3.32-1.5-3.32-3.56s1.44-3.56,3.32-3.56,3.32,1.5,3.32,3.56-1.44,3.56-3.32,3.56Z" />
+                    </svg>
+                  ),
+                  activeClasses: "border-[#14A800]/50 bg-[#14A800]/10 text-[#14A800] shadow-[0_0_15px_rgba(20,168,0,0.5)] -translate-y-2 scale-110",
+                  hoverClasses: "hover:border-[#14A800]/50 hover:bg-[#14A800]/10 hover:text-[#14A800] hover:-translate-y-2 hover:scale-110"
+                },
+                {
+                  name: 'WhatsApp',
+                  url: 'https://wa.me/21626999276?text=Hello%20Adam%20%2C%20I%20saw%20your%20amazing%20portfolio%20and%20would%20love%20to%20connect%21',
+                  icon: (
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12.031 0C5.385 0 0 5.386 0 12.035c0 2.128.552 4.205 1.6 6.027L.17 23.3l5.4-1.411c1.766.953 3.753 1.455 5.766 1.455 6.645 0 12.03-5.385 12.03-12.033C23.366 5.386 17.98 0 12.031 0zm0 21.365c-1.802 0-3.567-.485-5.116-1.4l-.367-.217-3.8.993 1.01-3.705-.238-.38c-1.002-1.597-1.53-3.447-1.53-5.351 0-5.545 4.512-10.057 10.06-10.057 5.548 0 10.06 4.512 10.06 10.057 0 5.546-4.512 10.06-10.06 10.06zm5.518-7.53c-.303-.151-1.792-.885-2.07-.987-.278-.102-.48-.152-.682.152-.202.303-.783.987-.96 1.19-.177.202-.354.227-.657.076-1.402-.71-2.457-1.341-3.4-2.827-.177-.278-.019-.429.132-.58.136-.137.303-.354.454-.53.152-.177.202-.303.303-.505.101-.202.051-.38-.025-.53-.076-.152-.682-1.644-.935-2.25-.246-.593-.497-.512-.682-.52-.177-.008-.38-.01-.582-.01-.202 0-.53.076-.808.38-.278.303-1.06 1.037-1.06 2.528 0 1.49 1.086 2.932 1.238 3.134.152.202 2.14 3.266 5.183 4.56.723.307 1.288.49 1.728.627.725.226 1.385.194 1.905.117.584-.086 1.792-.733 2.045-1.44.253-.707.253-1.314.177-1.44-.076-.127-.278-.203-.58-.354z" />
+                    </svg>
+                  ),
+                  activeClasses: "border-[#25D366]/50 bg-[#25D366]/10 text-[#25D366] shadow-[0_0_15px_rgba(37,211,102,0.5)] -translate-y-2 scale-110",
+                  hoverClasses: "hover:border-[#25D366]/50 hover:bg-[#25D366]/10 hover:text-[#25D366] hover:-translate-y-2 hover:scale-110"
+                }
+              ].map((link, index) => (
+                <a 
+                  key={link.name}
+                  href={link.url}
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={`p-3 sm:p-4 bg-background border rounded-xl transition-all duration-300 shadow-sm group ${
+                    activeConnectIndex === index 
+                      ? link.activeClasses 
+                      : `border-border text-muted-foreground ${link.hoverClasses}`
+                  }`}
+                  aria-label={link.name}
+                  title={link.name}
+                >
+                  <div className="transition-transform duration-300">
+                    {link.icon}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ================= WHY THIS SITE EXISTS ================= */}
       {showWhy && (
@@ -653,6 +796,7 @@ export default function Home() {
           </div>
         </section>
       )}
+
     </div>
   )
 }
