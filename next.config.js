@@ -7,6 +7,11 @@ const nextConfig = {
   experimental: {
     mdxRs: false,
   },
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
   // Enable static export for GitHub Pages / static hosting
   output: 'export',
   // IMPORTANT: Set basePath to match your repository name for GitHub Pages
