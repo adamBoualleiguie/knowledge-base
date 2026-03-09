@@ -17,6 +17,11 @@ export const Doc = defineDocumentType(() => ({
       description: 'The description of the document',
       required: false,
     },
+    metaDescription: {
+      type: 'string',
+      description: 'The meta description for SEO',
+      required: false,
+    },
     publishedAt: {
       type: 'date',
       description: 'The date the document was published',
