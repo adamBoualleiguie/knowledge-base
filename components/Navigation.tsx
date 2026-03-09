@@ -41,6 +41,7 @@ export function Navigation({ docs = [] }: NavigationProps) {
 
   const navItems = [
     { href: '/', label: 'Home' },
+    { href: '/certifications', label: 'Certifications' },
     { href: '/docs', label: 'Documentation' },
     { href: '/blog', label: 'Blog' },
   ]

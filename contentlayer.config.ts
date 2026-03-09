@@ -137,9 +137,63 @@ export const Blog = defineDocumentType(() => ({
   },
 }))
 
+export const Certification = defineDocumentType(() => ({
+  name: 'Certification',
+  filePathPattern: 'certifications/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    name: {
+      type: 'string',
+      description: 'The name of the certification',
+      required: true,
+    },
+    issuingOrganization: {
+      type: 'string',
+      description: 'The issuing organization',
+      required: true,
+    },
+    issueDate: {
+      type: 'string',
+      description: 'The issue date',
+      required: true,
+    },
+    credentialId: {
+      type: 'string',
+      description: 'The credential ID',
+      required: false,
+    },
+    credentialUrl: {
+      type: 'string',
+      description: 'The credential URL',
+      required: false,
+    },
+    skills: {
+      type: 'list',
+      of: { type: 'string' },
+      description: 'Skills learned',
+      required: false,
+    },
+    media: {
+      type: 'string',
+      description: 'Path to certification image',
+      required: false,
+    },
+  },
+  computedFields: {
+    url: {
+      type: 'string',
+      resolve: (cert) => `/certifications`,
+    },
+    slug: {
+      type: 'string',
+      resolve: (cert) => cert._raw.sourceFileName.replace(/\.mdx$/, ''),
+    },
+  },
+}))
+
 export default makeSource({
   contentDirPath: './content',
-  documentTypes: [Doc, Blog],
+  documentTypes: [Doc, Blog, Certification],
   disableImportAliasWarning: true, // Suppress the baseUrl warning
   mdx: {
     remarkPlugins: [],

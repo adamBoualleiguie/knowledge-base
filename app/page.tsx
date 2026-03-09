@@ -1,12 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { allBlogs, allDocs } from 'contentlayer/generated'
+import { allBlogs, allDocs, allCertifications } from 'contentlayer/generated'
 import { compareDesc } from 'date-fns'
 import { Typewriter } from 'react-simple-typewriter'
 import { useState, useEffect } from 'react'
 import { Highlight } from '@/components/Highlight'
 import { getBlogTagColor } from '@/lib/tag-colors'
+import { CertImage } from '@/components/CertImage'
 
 // Get basePath from Next.js config (for static export)
 const getBasePath = () => {
@@ -101,6 +102,15 @@ export default function Home() {
     })
     .slice(0, 3)
 
+  // Get latest 3 certifications sorted by issueDate
+  const latestCerts = [...allCertifications]
+    .sort((a, b) => {
+      const dateA = new Date(a.issueDate)
+      const dateB = new Date(b.issueDate)
+      return dateB.getTime() - dateA.getTime()
+    })
+    .slice(0, 3)
+
   const [basePath, setBasePath] = useState('')
 
   // Determine basePath dynamically (same approach as Navigation.tsx)
@@ -108,7 +118,7 @@ export default function Home() {
     setBasePath(getBasePath())
   }, [])
 
-  // Enhanced state sequence: Hi → Name → Title → Value Statement → CTAs → Why → About → Skills → Docs → Blog → Recruiter
+  // Enhanced state sequence: Hi → Name → Title → Value Statement → CTAs → Why → About → Skills → Certs → Docs → Blog → Recruiter
   const [showHi, setShowHi] = useState(true)
   const [showName, setShowName] = useState(false)
   const [showTitle, setShowTitle] = useState(false)
@@ -117,6 +127,7 @@ export default function Home() {
   const [showWhy, setShowWhy] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [showSkills, setShowSkills] = useState(false)
+  const [showCerts, setShowCerts] = useState(false)
   const [showDocs, setShowDocs] = useState(false)
   const [showBlog, setShowBlog] = useState(false)
   const [showRecruiter, setShowRecruiter] = useState(false)
@@ -151,17 +162,21 @@ export default function Home() {
       setShowSkills(true)
     }, 12000) // Skills section appears
 
+    const certsTimeout = setTimeout(() => {
+      setShowCerts(true)
+    }, 13000) // Certs section appears
+
     const docsTimeout = setTimeout(() => {
       setShowDocs(true)
-    }, 13000) // Docs section appears
+    }, 14000) // Docs section appears
 
     const blogTimeout = setTimeout(() => {
       setShowBlog(true)
-    }, 14000) // Blog section appears
+    }, 15000) // Blog section appears
 
     const recruiterTimeout = setTimeout(() => {
       setShowRecruiter(true)
-    }, 15000) // Recruiter section appears
+    }, 16000) // Recruiter section appears
 
     return () => {
       clearTimeout(hiTimeout)
@@ -171,6 +186,7 @@ export default function Home() {
       clearTimeout(whyTimeout)
       clearTimeout(aboutTimeout)
       clearTimeout(skillsTimeout)
+      clearTimeout(certsTimeout)
       clearTimeout(docsTimeout)
       clearTimeout(blogTimeout)
       clearTimeout(recruiterTimeout)
@@ -244,6 +260,16 @@ export default function Home() {
               <span className="relative z-10">Explore the Knowledge Base</span>
               <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/10 to-primary/0 
                             translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            </Link>
+
+            <Link
+              href="/certifications"
+              className="px-8 py-3.5 border-2 border-primary/50 text-foreground rounded-lg
+                       hover:bg-primary/10 transition-all duration-300 font-medium
+                       shadow-lg hover:shadow-xl hover:scale-105 active:scale-95
+                       relative overflow-hidden group"
+            >
+              <span className="relative z-10">View Certifications</span>
             </Link>
 
             <a
@@ -381,10 +407,90 @@ export default function Home() {
         </section>
       )}
 
-      {/* ================= LATEST DOCUMENTATION ================= */}
-      {showDocs && latestDocs.length > 0 && (
+      {/* ================= LATEST CERTIFICATIONS ================= */}
+      {showCerts && latestCerts.length > 0 && (
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 animate-fade-in">
           <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center">
+              Latest Certifications
+            </h2>
+            <p className="text-center text-muted-foreground mb-12 max-w-3xl mx-auto text-base sm:text-lg">
+              Continuous learning and validated expertise across various technologies.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+              {latestCerts.map((cert, index) => (
+                <div
+                  key={cert._id}
+                  className="group flex flex-col border border-border rounded-xl 
+                           transition-all duration-300 hover:shadow-lg hover:-translate-y-1
+                           animate-fade-in bg-card/50 overflow-hidden"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <Link href={`/certifications#${cert.slug}`} className="flex-1 flex flex-col p-6 pb-0">
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="px-2.5 py-1 text-xs font-medium rounded-md border bg-primary/10 text-primary border-primary/30">
+                        {cert.issuingOrganization}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                      {cert.name}
+                    </h3>
+                    {cert.skills && cert.skills.length > 0 && (
+                      <div className="flex gap-2 flex-wrap mb-4 content-start">
+                        {cert.skills.slice(0, 3).map((skill) => (
+                          <span
+                            key={skill}
+                            className={`px-2.5 py-1 text-xs font-medium rounded-md border ${getBlogTagColor(skill)}`}
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {cert.skills.length > 3 && (
+                          <span className="px-2.5 py-1 text-xs font-medium rounded-md border bg-muted text-muted-foreground border-border">
+                            +{cert.skills.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </Link>
+
+                  {cert.media && (
+                    <div className="px-6 py-4 mt-auto">
+                      <Link href={`/certifications#${cert.slug}`} className="relative rounded-lg overflow-hidden border border-border/50 bg-background/50 h-32 flex items-center justify-center block">
+                        <CertImage src={cert.media} alt={cert.name} disableZoom={true} />
+                      </Link>
+                    </div>
+                  )}
+                  
+                  <Link href={`/certifications#${cert.slug}`} className="px-6 pb-6 pt-2 block mt-auto">
+                    <time className="text-sm text-muted-foreground">
+                      {cert.issueDate}
+                    </time>
+                  </Link>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 text-center">
+              <Link
+                href="/certifications"
+                className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors group"
+              >
+                View full certification catalogue
+                <span className="group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ================= LATEST DOCUMENTATION ================= */}
+      {showDocs && latestDocs.length > 0 && (
+        <section className="bg-muted/30 py-16 sm:py-20 animate-fade-in">
+          <div className="max-w-6xl mx-auto container px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center">
               Latest Documentation
             </h2>
@@ -403,7 +509,7 @@ export default function Home() {
                   <Link
                     key={doc._id}
                     href={doc.url}
-                    className="group flex flex-col p-6 border border-border rounded-xl 
+                    className="group flex flex-col p-6 border border-border rounded-xl bg-background
                              hover:border-primary/50 hover:bg-accent/50 
                              transition-all duration-300 
                              hover:shadow-lg hover:-translate-y-1
@@ -459,68 +565,66 @@ export default function Home() {
 
       {/* ================= KNOWLEDGE BASE - BLOG ================= */}
       {showBlog && latestBlogs.length > 0 && (
-        <section className="bg-muted/30 py-16 sm:py-20 animate-fade-in">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center">
-                Knowledge Base — Recent Notes & Deep Dives
-              </h2>
-              <p className="text-center text-muted-foreground mb-12 max-w-3xl mx-auto text-base sm:text-lg">
-                These articles are written as internal documentation first — shared publicly to help others and to sharpen my own understanding.
-              </p>
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 animate-fade-in">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center">
+              Knowledge Base — Recent Notes & Deep Dives
+            </h2>
+            <p className="text-center text-muted-foreground mb-12 max-w-3xl mx-auto text-base sm:text-lg">
+              These articles are written as internal documentation first — shared publicly to help others and to sharpen my own understanding.
+            </p>
 
-              <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-                {latestBlogs.map((blog, index) => (
-                  <Link
-                    key={blog._id}
-                    href={blog.url}
-                    className="group flex flex-col p-6 border border-border rounded-xl bg-background
-                             hover:border-primary/50 hover:bg-accent/50 
-                             transition-all duration-300 
-                             hover:shadow-lg hover:-translate-y-1
-                             animate-fade-in"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                      {blog.title}
-                    </h3>
-                    <p className="text-muted-foreground mb-4 line-clamp-3 leading-relaxed flex-1">
-                      {blog.description}
-                    </p>
-                    {blog.tags && blog.tags.length > 0 && (
-                      <div className="flex gap-2 flex-wrap mb-4">
-                        {blog.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className={`px-2.5 py-1 text-xs font-medium rounded-md border ${getBlogTagColor(tag)}`}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <time className="text-sm text-muted-foreground mt-auto">
-                      {new Date(blog.updatedAt || blog.publishedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </time>
-                  </Link>
-                ))}
-              </div>
-
-              <div className="mt-12 text-center">
+            <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+              {latestBlogs.map((blog, index) => (
                 <Link
-                  href="/blog"
-                  className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors group"
+                  key={blog._id}
+                  href={blog.url}
+                  className="group flex flex-col p-6 border border-border rounded-xl bg-card/50
+                           hover:border-primary/50 hover:bg-accent/50 
+                           transition-all duration-300 
+                           hover:shadow-lg hover:-translate-y-1
+                           animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  View all posts
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    →
-                  </span>
+                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                    {blog.title}
+                  </h3>
+                  <p className="text-muted-foreground mb-4 line-clamp-3 leading-relaxed flex-1">
+                    {blog.description}
+                  </p>
+                  {blog.tags && blog.tags.length > 0 && (
+                    <div className="flex gap-2 flex-wrap mb-4">
+                      {blog.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className={`px-2.5 py-1 text-xs font-medium rounded-md border ${getBlogTagColor(tag)}`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <time className="text-sm text-muted-foreground mt-auto">
+                    {new Date(blog.updatedAt || blog.publishedAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </time>
                 </Link>
-              </div>
+              ))}
+            </div>
+
+            <div className="mt-12 text-center">
+              <Link
+                href="/blog"
+                className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors group"
+              >
+                View all posts
+                <span className="group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
+              </Link>
             </div>
           </div>
         </section>
