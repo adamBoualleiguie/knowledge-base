@@ -5,6 +5,7 @@ import { Mdx } from '@/components/mdx-components'
 import { format, compareDesc } from 'date-fns'
 import { MetadataCard } from '@/components/MetadataCard'
 import { TableOfContents } from '@/components/TableOfContents'
+import { HeroMedia } from '@/components/HeroMedia'
 import { calculateReadTime } from '@/lib/readTime'
 import { DocsSearchBar } from '@/components/DocsSearchBar'
 import { getBlogTagColor } from '@/lib/tag-colors'
@@ -224,6 +225,13 @@ export default async function BlogPage({ params }: BlogPageProps) {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       <div className="flex gap-8 lg:gap-12">
         <article className="flex-1 max-w-3xl min-w-0">
+          {blog.heroMedia && (
+            <HeroMedia
+              src={blog.heroMedia}
+              alt={blog.title}
+              caption={undefined}
+            />
+          )}
           <div className="mb-10 pb-8 border-b border-border">
             <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               {blog.title}
