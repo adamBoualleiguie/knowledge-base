@@ -1,47 +1,117 @@
 ---
-title: Building a Modern Portfolio Website
-description: Learn how I built this portfolio website using Next.js and Contentlayer
+title: Building My Own Knowledge Base
+description: Why I turned years of scattered notes and two stuffed Notion accounts into a versioned, open-source knowledge base—and what documenting continuously taught me along the way.
 publishedAt: 2024-01-20
+updatedAt: 2025-03-09
 author: Adam Boualleiguie
 authorPhoto: adam-boualleiguie.jpeg
-tags: [nextjs, web-development, portfolio]
+heroMedia: assets/blogs/hero/documentation.jpg
+tags: [nextjs, web-development, portfolio, knowledge-sharing, documentation, open-source]
 ---
 
-# Building a Modern Portfolio Website
+# The initial act
 
-In this post, I'll share how I built this portfolio website using modern web technologies.
+Over more than five years of learning and working in production environments, I kept one idea at the back of my mind: **what I learn today helps me tomorrow—and what I document today helps me even more.**
 
-## Tech Stack
+Whether it’s runbooks, architecture docs, or personal notes, I’ve always treated documentation as a gift to my future self—or to whoever picks up the work next. Giving them a clear, precise, and actionable scope makes management and risk assessment faster and more reliable.
 
-The website is built with:
+<Highlight color="blue">Documenting isn’t just writing things down; it’s turning experience into something others can use.</Highlight>
 
-- **Next.js 14** - For the React framework
-- **Contentlayer** - For content management
-- **Tailwind CSS** - For styling
-- **TypeScript** - For type safety
+---
 
-## Key Features
+# The ease of documenting
+<DocImage
+  src="/assets/blogs/media/the-easeof-documenting.jpeg"
+  alt="The ease of documenting"
+  caption="Done in software engineering often means documenting what we built."
+/>
 
-1. **MDX Support** - Write content in Markdown with React components
-2. **Dark Mode** - Automatic dark mode support
-3. **Responsive Design** - Works on all devices
-4. **Fast Performance** - Optimized for speed
+This habit paid off in ways I didn’t expect. Time and again, documenting continuously sharpened my skills—whether I was writing architecture docs, guidelines, or educational material. When urgent, precision tasks showed up, I could deliver because I had already captured the context and the steps.
 
-## Lessons Learned
+The biggest lesson for me: your growth isn’t only “learn → face production → repeat.” <Highlight color="green">What actually makes you robust and lets you reuse your past hard work is documenting it.</Highlight> Experience plus documentation is what compounds.
 
-Building this website taught me a lot about:
+---
 
-- Content management with MDX
-- Next.js App Router
-- TypeScript best practices
-- Tailwind CSS utility classes
+# My journey in documentation
 
-## Conclusion
+Early in my career I was already drawn to documenting. Before AI tools were everywhere, I was hooked on **Notion**. I documented system design, learning notes, environment setup, and even reading notes from books.
 
-I'm really happy with how this turned out! The combination of Next.js and Contentlayer makes it easy to manage content while maintaining a great developer experience.
+As that data grew, something shifted. When I had to revisit an old project or redo something I’d done before, instead of thinking *“I remember doing this years ago—but I’d have to research it again”*, I could search my Notion and get a clear answer. It felt like past me was helping present me—and that made addressing issues, recalling project scope, and fixing things so much faster.
+
+<Highlight color="orange">That feeling—finding clean documentation exactly when you need it—is what I wanted to share, not just for me, but for anyone starting out.</Highlight>
+
+---
+
+# The snowballing of my data in Notion
+<DocImage
+  src="/assets/blogs/media/snowballing.png"
+  alt="The snowballing of my data in Notion"
+  caption="When knowledge grows faster than structure, things start to look like this."
+/>
+
+Over the years my Notion workspace became huge. Search and organization worked well at first. Then I hit the limits of the free plan—and ended up with two full Notion accounts, then started paying. The value was real, but so was the lock-in and the cost. I kept thinking: *what if this could be open, versioned, and shareable?*
+
+---
+
+# The idea
 
 
 
+<DocImage
+  src="/assets/blogs/media/idea.jpg"
+  alt="The Idea Grows"
+  caption="Notes become powerful when they’re organized and connected."
+/>
 
 
+I wanted to share more than “here’s my experience.” A lot of my work stays in private Notion, but the *mindset*—documenting continuously, making it easy for future you and your team—is something I care about. That idea grew stronger because I’ve always liked open-source approaches, public repos, and building in the open.
 
+So the goal became: <Highlight color="purple">not only share knowledge, but share a solution that helps others document well and build their own knowledge base.</Highlight>
+
+---
+
+# Now or never
+
+At some point I decided: why not share both the knowledge and the tooling? I wanted something robust, pleasant to use, easy to write in and share—and good enough that others could adopt it.
+
+I wanted a place where:
+
+- You can publish and structure your knowledge
+- Others can suggest improvements and contribute
+- Everything is **versioned** and **shared**
+
+<Highlight color="green">A versioned, shared knowledge base—and we’re now documenting it inside the solution itself.</Highlight>
+
+---
+
+# The inspiration
+<DocImage
+  src="/assets/blogs/media/signoz-inspiration.png"
+  alt="Signoz inspiration"
+  caption="Signoz.io inspiration"
+/>
+
+While designing this, I looked at a lot of doc platforms—Docusaurus and others. They’re solid, but I was aiming for something that felt right for *my* workflow. Then I discovered **SigNoz.io**. I was impressed by how they structure their docs, blog, and entire site—and that they open-sourced their documentation stack so the community could contribute.
+
+That inspired this project. This knowledge base is built with **Next.js**, **Tailwind CSS**, and **MDX** for content. I kept adding features to make writing and reading better: metadata cards, author photos, terminal-style blocks, Excalidraw diagrams, <Highlight color="blue">highlights</Highlight>, and more—all aimed at making documentation clearer and more engaging.
+
+---
+
+# Meet Knowledge Base ! 
+
+What you get is a documentation site built for developers who think in Markdown and MDX:
+
+- **Write in MDX** — structure, ordering, and live updates handled for you  
+- **Search and filter** — find content by keywords and tags  
+- **Deploy anywhere** — e.g. GitHub Pages, with optional analytics (e.g. Cloudflare)  
+- **Extensible** — metadata cards, code blocks, diagrams, highlights, and custom components
+
+If you’re curious how it’s built, the repo is open: you can read the source, see the features in action, and reuse or adapt it for your own knowledge base.
+
+---
+
+# Final thoughts
+
+I’m still migrating and reshaping content from my two packed Notion accounts into shareable docs and blog posts here. I’m also iterating on features so this stays a good place to contribute, fork for your own use, or send a PR.
+
+<Highlight color="orange">Documenting continuously didn’t just help me in production—it gave me a way to share what I care about with the community.</Highlight> If that resonates with you, feel free to explore the site, fork the project, or drop a contribution. Thanks for reading.

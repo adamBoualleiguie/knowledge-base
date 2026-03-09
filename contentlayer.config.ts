@@ -59,6 +59,11 @@ export const Doc = defineDocumentType(() => ({
       required: false,
       default: false,
     },
+    heroMedia: {
+      type: 'string',
+      description: 'Path to hero image or video at the top of the document (e.g. assets/docs/hero/intro.jpg)',
+      required: false,
+    },
   },
   computedFields: {
     url: {
@@ -119,6 +124,11 @@ export const Blog = defineDocumentType(() => ({
       type: 'list',
       of: { type: 'string' },
       description: 'Tags for the blog post',
+      required: false,
+    },
+    heroMedia: {
+      type: 'string',
+      description: 'Path to hero image or video at the top of the post (e.g. assets/blogs/hero/documentation.jpg)',
       required: false,
     },
   },

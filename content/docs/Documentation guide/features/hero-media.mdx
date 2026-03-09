@@ -1,0 +1,101 @@
+---
+title: Hero Image & Video
+description: Add a full-width hero image or video at the top of any document or blog post to catch the reader's attention
+publishedAt: 2024-01-01
+order: 10
+---
+
+# Hero Image & Video
+
+The **Hero Media** feature lets you display a striking image or video at the top of a documentation page or blog post. The hero appears above the title and description, giving your content an immediate visual hook and a more polished, editorial feel.
+
+## Overview
+
+When you set a hero in your frontmatter, it is rendered as a full-width, responsive banner at the very top of the page. It works the same way for both **docs** and **blog** posts, and is designed to look great on desktop and mobile.
+
+- **Images**: JPG, PNG, WebP, etc. — displayed with a consistent aspect ratio and subtle border
+- **Videos**: MP4, WebM, MOV, OGG — auto-play, muted, and looped for a cinematic hero effect
+- **Responsive**: Aspect ratio and max height adapt for small and large screens
+- **Static export**: Paths work correctly with GitHub Pages and other static hosting (basePath is handled automatically)
+
+## How to Use
+
+### In Blog Posts
+
+Add the `heroMedia` field to your blog post frontmatter. The value is the path to your image or video file, relative to the `public/` folder. You can omit the `public/` prefix.
+
+**Example — Blog post with hero image:**
+
+```yaml
+---
+title: Building My Own Knowledge Base
+description: Why I turned years of scattered notes into a versioned, open-source knowledge base.
+publishedAt: 2024-01-20
+author: Adam Boualleiguie
+heroMedia: assets/blogs/hero/documentation.jpg
+tags: [nextjs, documentation, open-source]
+---
+```
+
+The hero image will appear at the top of the post, above the title and description.
+
+### In Documentation
+
+Add the same `heroMedia` field to any doc frontmatter:
+
+**Example — Doc with hero image:**
+
+```yaml
+---
+title: Getting Started with the API
+description: Learn how to integrate with our API in under 10 minutes.
+publishedAt: 2024-01-01
+order: 1
+heroMedia: assets/docs/hero/api-overview.jpg
+---
+```
+
+### Path Conventions
+
+- **With or without `public/`**: Both `assets/blogs/hero/documentation.jpg` and `public/assets/blogs/hero/documentation.jpg` are valid. The leading `public/` is optional and will be normalized.
+- **With or without leading slash**: You can use `assets/...` or `/assets/...`. The component normalizes the path for you.
+- **Where to put files**: Place images and videos under `public/`, for example:
+  - `public/assets/blogs/hero/` — for blog heroes
+  - `public/assets/docs/hero/` — for documentation heroes
+
+### Hero Video
+
+Use a video file for a more dynamic hero. Supported formats include `.mp4`, `.webm`, `.mov`, `.ogg`, and `.m4v`. The video will auto-play, muted and looped, so it works well for short background clips.
+
+**Example — Blog post with hero video:**
+
+```yaml
+---
+title: Product Launch Recap
+description: A look back at our biggest release yet.
+publishedAt: 2024-06-01
+heroMedia: assets/blogs/hero/launch-video.mp4
+---
+```
+
+## Behavior and Styling
+
+- **Aspect ratio**: The hero uses a wide aspect ratio (about 21:9 on mobile, 2.5:1 on desktop) with a max height so it doesn’t dominate the page.
+- **Image fit**: Images use `object-cover` so they fill the hero area without distortion.
+- **Border and shadow**: A light border and shadow keep the hero visually distinct from the rest of the content.
+- **Caption**: The component supports an optional caption; when used from frontmatter, the doc/blog title is used as the `alt` text for accessibility. Caption can be extended in the component if needed later.
+
+## Optional Caption (Future Use)
+
+If the Hero Media component is used directly in MDX (e.g. in a custom layout), you can pass a `caption` prop. In the current implementation, docs and blog pages do not pass a caption from frontmatter; you can add a `heroCaption` field to the schema later if you want captions from frontmatter.
+
+## Summary
+
+| Field        | Type   | Required | Description                                      |
+| ------------ | ------ | -------- | ------------------------------------------------ |
+| `heroMedia`  | string | No       | Path to hero image or video (e.g. `assets/blogs/hero/documentation.jpg`) |
+
+- Use **hero image** for a strong visual at the top of a doc or post.
+- Use **hero video** for a short, muted, looping background clip.
+- Paths are normalized for static export (including GitHub Pages with a basePath).
+- Hero media is responsive and works on mobile and desktop.

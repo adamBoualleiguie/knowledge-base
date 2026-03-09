@@ -424,182 +424,114 @@ code, pre {
   display: none;  /* Chrome, Safari and Opera */
 }
 
-/* Highlight Marker - Animated text highlighting */
+/* Highlight Marker - Animated text highlighting
+   Uses background on the span + box-decoration-break: clone so the highlight
+   wraps correctly per line (no full-width block on wrapped lines). */
 .highlight-marker {
-  position: relative;
   padding: 0.15em 0.25em;
   margin: 0 0.1em;
   border-radius: 0.25em;
   display: inline;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  overflow: hidden;
   color: inherit;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0% 100%;
+  transition: background-size 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Default state - COMPLETELY HIDDEN (no background, no visual effect) */
-.highlight-marker::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 0.25em;
+/* Default state - no visible background */
+.highlight-marker.highlight-yellow {
+  background-image: linear-gradient(rgba(255, 235, 59, 0.5), rgba(255, 235, 59, 0.5));
 }
 
-.highlight-marker.highlight-yellow::before {
-  background-color: rgba(255, 235, 59, 0.5);
+.highlight-marker.highlight-orange {
+  background-image: linear-gradient(rgba(255, 152, 0, 0.5), rgba(255, 152, 0, 0.5));
 }
 
-.highlight-marker.highlight-orange::before {
-  background-color: rgba(255, 152, 0, 0.5);
+.highlight-marker.highlight-blue {
+  background-image: linear-gradient(rgba(33, 150, 243, 0.5), rgba(33, 150, 243, 0.5));
 }
 
-.highlight-marker.highlight-blue::before {
-  background-color: rgba(33, 150, 243, 0.5);
+.highlight-marker.highlight-green {
+  background-image: linear-gradient(rgba(76, 175, 80, 0.5), rgba(76, 175, 80, 0.5));
 }
 
-.highlight-marker.highlight-green::before {
-  background-color: rgba(76, 175, 80, 0.5);
+.highlight-marker.highlight-purple {
+  background-image: linear-gradient(rgba(156, 39, 176, 0.5), rgba(156, 39, 176, 0.5));
 }
 
-.highlight-marker.highlight-purple::before {
-  background-color: rgba(156, 39, 176, 0.5);
+/* Active state - reveal background (per line fragment, no full-width block) */
+.highlight-marker.highlight-active {
+  background-size: 100% 100%;
 }
 
-/* Active state - reveal from left to right */
-.highlight-marker.highlight-active::before {
-  transform: scaleX(1);
-  animation: highlight-draw 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* Active state - add glow effect after reveal */
-.highlight-marker.highlight-active.highlight-yellow::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  border-radius: 0.25em;
+/* Active state - subtle glow via box-shadow (follows text per line with box-decoration-break) */
+.highlight-marker.highlight-active.highlight-yellow {
   box-shadow: 0 0 0 2px rgba(255, 235, 59, 0.3), 0 2px 8px rgba(255, 235, 59, 0.2);
   animation: highlight-pulse-yellow 2s ease-in-out infinite;
-  pointer-events: none;
 }
 
-.highlight-marker.highlight-active.highlight-orange::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  border-radius: 0.25em;
+.highlight-marker.highlight-active.highlight-orange {
   box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.3), 0 2px 8px rgba(255, 152, 0, 0.2);
   animation: highlight-pulse-orange 2s ease-in-out infinite;
-  pointer-events: none;
 }
 
-.highlight-marker.highlight-active.highlight-blue::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  border-radius: 0.25em;
+.highlight-marker.highlight-active.highlight-blue {
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3), 0 2px 8px rgba(33, 150, 243, 0.2);
   animation: highlight-pulse-blue 2s ease-in-out infinite;
-  pointer-events: none;
 }
 
-.highlight-marker.highlight-active.highlight-green::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  border-radius: 0.25em;
+.highlight-marker.highlight-active.highlight-green {
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3), 0 2px 8px rgba(76, 175, 80, 0.2);
   animation: highlight-pulse-green 2s ease-in-out infinite;
-  pointer-events: none;
 }
 
-.highlight-marker.highlight-active.highlight-purple::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  border-radius: 0.25em;
+.highlight-marker.highlight-active.highlight-purple {
   box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.3), 0 2px 8px rgba(156, 39, 176, 0.2);
   animation: highlight-pulse-purple 2s ease-in-out infinite;
-  pointer-events: none;
 }
 
-/* Dark mode adjustments */
-.dark .highlight-marker.highlight-yellow::before {
-  background-color: rgba(255, 235, 59, 0.4);
+/* Dark mode adjustments - slightly stronger opacity */
+.dark .highlight-marker.highlight-yellow {
+  background-image: linear-gradient(rgba(255, 235, 59, 0.4), rgba(255, 235, 59, 0.4));
 }
 
-.dark .highlight-marker.highlight-orange::before {
-  background-color: rgba(255, 152, 0, 0.4);
+.dark .highlight-marker.highlight-orange {
+  background-image: linear-gradient(rgba(255, 152, 0, 0.4), rgba(255, 152, 0, 0.4));
 }
 
-.dark .highlight-marker.highlight-blue::before {
-  background-color: rgba(33, 150, 243, 0.4);
+.dark .highlight-marker.highlight-blue {
+  background-image: linear-gradient(rgba(33, 150, 243, 0.4), rgba(33, 150, 243, 0.4));
 }
 
-.dark .highlight-marker.highlight-green::before {
-  background-color: rgba(76, 175, 80, 0.4);
+.dark .highlight-marker.highlight-green {
+  background-image: linear-gradient(rgba(76, 175, 80, 0.4), rgba(76, 175, 80, 0.4));
 }
 
-.dark .highlight-marker.highlight-purple::before {
-  background-color: rgba(156, 39, 176, 0.4);
+.dark .highlight-marker.highlight-purple {
+  background-image: linear-gradient(rgba(156, 39, 176, 0.4), rgba(156, 39, 176, 0.4));
 }
 
-.dark .highlight-marker.highlight-active.highlight-yellow::after {
+.dark .highlight-marker.highlight-active.highlight-yellow {
   box-shadow: 0 0 0 2px rgba(255, 235, 59, 0.4), 0 2px 12px rgba(255, 235, 59, 0.3);
 }
 
-.dark .highlight-marker.highlight-active.highlight-orange::after {
+.dark .highlight-marker.highlight-active.highlight-orange {
   box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.4), 0 2px 12px rgba(255, 152, 0, 0.3);
 }
 
-.dark .highlight-marker.highlight-active.highlight-blue::after {
+.dark .highlight-marker.highlight-active.highlight-blue {
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.4), 0 2px 12px rgba(33, 150, 243, 0.3);
 }
 
-.dark .highlight-marker.highlight-active.highlight-green::after {
+.dark .highlight-marker.highlight-active.highlight-green {
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.4), 0 2px 12px rgba(76, 175, 80, 0.3);
 }
 
-.dark .highlight-marker.highlight-active.highlight-purple::after {
+.dark .highlight-marker.highlight-active.highlight-purple {
   box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.4), 0 2px 12px rgba(156, 39, 176, 0.3);
-}
-
-/* Draw animation - left to right reveal like highlighting with a marker */
-@keyframes highlight-draw {
-  0% {
-    transform: scaleX(0);
-    transform-origin: left;
-  }
-  100% {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
 }
 
 /* Pulse animations for active highlights */

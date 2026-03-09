@@ -8,6 +8,7 @@ import { TableOfContents } from '@/components/TableOfContents'
 import { DocNavigation } from '@/components/DocNavigation'
 import { AnchorLinks } from '@/components/AnchorLinks'
 import { MetadataCard } from '@/components/MetadataCard'
+import { HeroMedia } from '@/components/HeroMedia'
 import { calculateReadTime } from '@/lib/readTime'
 import { getSectionOrder, getSubsectionOrder } from '@/config/docs-order.config'
 import { compareDesc } from 'date-fns'
@@ -481,6 +482,13 @@ export default async function DocPage({ params }: DocPageProps) {
         <DocsSidebar docs={allDocs} allDocs={allDocs} />
         <div className="flex-1 max-w-4xl min-w-0 transition-all duration-300">
           <article>
+            {doc.heroMedia && (
+              <HeroMedia
+                src={doc.heroMedia}
+                alt={doc.title}
+                caption={undefined}
+              />
+            )}
             <div className="mb-8 pb-6 border-b border-border">
               <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-foreground">
                 {doc.title}
