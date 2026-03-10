@@ -1,0 +1,122 @@
+---
+title: When "Not a Secret" Became an Attack Vector — Google API Keys and Gemini
+description: Why I'm writing about the Truffle Security report on Google API keys, how Gemini changed the rules overnight, and what developers and teams should do to stay safe.
+publishedAt: 2026-03-10
+updatedAt: 2026-03-10
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+tags: [security, api-keys, google-cloud, gemini, trufflesecurity, devsecops, token-leaks]
+heroMedia: assets/blogs/hero/databreach-hero.webm
+---
+
+# The report that got my attention
+
+A couple of weeks ago, **Truffle Security**—a company that builds tools to detect, verify, and remediate leaked secrets—published a report titled [*Google API Keys Weren't Secrets. But Then Gemini Changed the Rules.*](https://trufflesecurity.com/blog/google-api-keys-werent-secrets-but-then-gemini-changed-the-rules). I read it and immediately thought about how many teams still treat API keys the way Google had been telling us to for years: *not as secrets.*
+
+Truffle’s finding is simple but serious: **Google API keys were not meant to be secret—until Gemini changed the rules.** I wanted to share why this matters and what I’m doing about it.
+
+<Highlight color="blue">For years, Google explicitly told developers that API keys are safe to embed in client-side code. That guidance is what made the recent change so dangerous.</Highlight>
+
+---
+
+# What we were told (and what changed)
+
+To integrate Google services—Maps, Firebase, and others—developers have long exposed API keys in front-end code. Google’s own docs said that was fine. **Firebase’s security checklist** still states that [API keys are not secrets](https://firebase.google.com/support/guides/security-checklist#api-keys-not-secret).
+
+<DocImage
+  src="/assets/blogs/media/not-secret-token.png"
+  alt="Firebase security checklist — API keys not secret"
+  caption="Firebase’s security checklist: API keys are not secret."
+/>
+
+**Google’s Maps JavaScript documentation** even instructs developers to paste the key directly into HTML. That was the recommended, normal way to do it.
+
+<DocImage
+  src="/assets/blogs/media/google-maps.png"
+  alt="Google Maps API key in client-side code"
+  caption="Google’s own docs: paste your key in the page."
+/>
+
+Then **Gemini changed the rules.** When you enable the **Gemini API** (Generative Language API) on a Google Cloud project, *every existing API key in that project*—including the ones sitting in public JavaScript on your website—can **silently gain access** to Gemini endpoints. No warning. No confirmation. No email.
+
+So all those keys we’ve been embedding for years, because Google said it was okay, suddenly became a real **attack vector**. That’s the shift I want everyone to internalize.
+
+---
+
+# What an attacker can do
+
+Once someone finds a key (and I’ll get to *how* in a moment), they can hit Gemini endpoints directly. For example:
+
+<Terminal
+  title="Probing a leaked key against Gemini"
+  commands={[
+    {
+      command: 'curl "https://generativelanguage.googleapis.com/v1beta/files?key=$API_KEY"',
+      output: '200 OK — access granted. Private data and billing at risk.',
+    },
+  ]}
+/>
+
+Instead of a **403 Forbidden**, they get a **200 OK**. From there, the impact is real:
+
+- **Access private data.** The `/files/` and `/cachedContents/` endpoints can expose uploaded datasets, documents, and cached context—everything the project owner stored via the Gemini API.
+- **Run up your bill.** Gemini API usage isn’t free. Depending on model and context, a threat actor maxing out calls can generate **thousands of dollars in charges per day** on a single victim account.
+
+So we’re talking about both **data exposure** and **financial abuse**. For a company, that can mean leaked data in the reconnaissance phase and a nasty billing attack in one go.
+
+---
+
+# How are these keys discovered?
+
+This was the part I dug into the most. **Who finds these keys, and how?**
+
+The answer: **crawlers.** The internet is constantly being snapshotted. The **Internet Archive** (Wayback Machine), **Common Crawl**, and others archive the web and offer public datasets. Attackers (and researchers) can pipe that data into key-detection tools—**Gitleaks**, **TruffleHog**, or even a simple `grep` for patterns like `AIza[0-9A-Za-z\-_]{35}`.
+
+<DocImage
+  src="/assets/blogs/media/common-crawl.png"
+  alt="Common Crawl — public web crawl data"
+  caption="Common Crawl and similar projects make archived web data available for analysis—and for abuse."
+/>
+
+Truffle Security did exactly that. They scanned crawl data and reported **over 2,863 live Google API keys** on the public internet—and that’s only for this key type. The same approach works for **GitHub tokens**, **AWS keys**, **Azure credentials**, and more. The surface is huge.
+
+<Highlight color="orange">Your old and new sites are already in crawl data. If a key ever lived in client-side code, assume it may be in someone’s dataset—and rotate it.</Highlight>
+
+---
+
+# What I did (and why I’m not sharing the script)
+
+<DocImage
+  src="/assets/blogs/media/scan-tokens.png"
+  alt="Scanning for tokens in crawl data"
+  caption="Piping crawl data through scanners to detect leaked keys."
+/>
+
+I wanted to see how fast someone could turn this into a practical pipeline. From a **defender’s perspective**, I think it’s important to understand the attacker’s playbook.
+
+It took me **under 30 minutes** to sketch a small pipeline: take **Common Crawl** `warc.paths` (or similar), pipe pages through scanners like **grep**, **TruffleHog**, or **Gitleaks**, and run key detection. For security and ethical reasons, I’m **not sharing the code or any results**. But in that short run, I was able to detect **over 50 leaked tokens**—and **some of them were active Google Gemini keys.**
+
+That’s not to boast; it’s to show that the barrier to abuse is low. If I can do it in half an hour for learning purposes, motivated attackers have already automated it.
+
+<DocImage
+  src="/assets/blogs/media/token-founds.png"
+  alt="Found tokens (redacted) — showcase"
+  caption="Found tokens (redacted) — showcase."
+/>
+
+---
+
+# Why I’m sharing this — and what you should do
+
+I’m writing this to **sensitize developers, DevOps engineers, and platform owners.** This isn’t theoretical. Keys that were “safe” by yesterday’s rules can be dangerous today.
+
+<Callout type="warning" title="What I recommend">
+1. **Rotate keys.** Assume any key that has ever been in client-side code or in crawlable content may be compromised. Rotate and invalidate.
+2. **Implement SAST.** Use static analysis to catch secrets before they reach the repo.
+3. **Enforce pre-commit hooks.** Run **Gitleaks** (or similar) before every commit so developers get immediate feedback instead of a leak report months later.
+4. **Stay updated on threat changes.** Google’s API keys weren’t “secret” until this change made the issue widespread. Product and security docs evolve; so should your assumptions.
+</Callout>
+
+<Highlight color="green">All your past and present sites are likely snapshotted somewhere. The only way to recover from a leak is to rotate keys and remediate actively—and to prevent the next leak with tooling and process.</Highlight>
+
+If this resonates with you, share it with your team, add Gitleaks to your pipeline, and double-check every key that’s ever touched the front end. Thanks for reading.

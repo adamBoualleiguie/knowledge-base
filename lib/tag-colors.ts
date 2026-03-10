@@ -55,6 +55,17 @@ export function getBlogTagColor(tag: string): string {
     'k8s': 'bg-sky-500/10 text-sky-400 border-sky-500/30',
     'k3s': 'bg-sky-500/10 text-sky-400 border-sky-500/30',
     'containers': 'bg-teal-500/10 text-teal-400 border-teal-500/30',
+
+    // Security tags (red / threat-focused)
+    'security': 'bg-red-500/10 text-red-400 border-red-500/30',
+    'api-keys': 'bg-red-500/10 text-red-400 border-red-500/30',
+    'trufflesecurity': 'bg-red-500/10 text-red-400 border-red-500/30',
+    'devsecops': 'bg-red-500/10 text-red-400 border-red-500/30',
+    'token-leaks': 'bg-red-500/10 text-red-400 border-red-500/30',
+
+    // Cloud / API provider tags
+    'google-cloud': 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    'gemini': 'bg-violet-500/10 text-violet-400 border-violet-500/30',
   }
   
   // Return mapped color or default
