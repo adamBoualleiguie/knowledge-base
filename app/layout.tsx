@@ -50,6 +50,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: `${baseUrl}${basePath}/`,
   },
+  verification: {
+    google: 'ZKOVZAjPeC2fOMXiK0fWpdZbnh2sJjpxD6eyvKXgVuA',
+  },
 }
 
 export default function RootLayout({
