@@ -1,0 +1,24 @@
+---
+company: "Proxym IT"
+role: "DockerIOs — Virtualized macOS CI Runners"
+startDate: "March 2022"
+endDate: "July 2022"
+location: "Tunisia"
+tags: ["Docker", "QEMU", "macOS", "GitLab", "Proxmox", "CI/CD", "iOS", "Virtualization"]
+media: "public/assets/careers/prx.png"
+---
+
+The company was hitting a **scaling wall**: GitLab pipeline jobs for **iOS builds** were growing, and physical **Mac Mini** runners were expensive and hard to scale. I proposed and led a project to run **fully virtualized macOS machines** as CI runners by leveraging **Docker-OSX** (QEMU-based macOS virtualization in Docker).
+
+<Callout type="warning" title="Challenge">
+High-spec iOS build jobs need macOS; buying and maintaining many Mac Minis was the bottleneck. We needed a way to scale runners without scaling hardware linearly.
+</Callout>
+
+**What I did:**
+
+- **Designed and implemented** virtualized macOS runners using **Docker-OSX** (QEMU + Docker), so we could run macOS build agents as containers.
+- **Deployed on Proxmox:** These “virtual” runners were in reality **high-spec VMs** on **Proxmox**, giving us many macOS build environments without a room full of Mac Minis.
+- **Integrated with GitLab:** Wired the new runners into the existing GitLab CI setup so iOS pipelines could use them transparently.
+- **Result:** Removed the bottleneck of physical macOS hardware for building iOS apps on demand; the team could run more concurrent iOS jobs and iterate faster.
+
+<Highlight color="purple">Sometimes the right fix is to change the constraint: we didn’t buy more Macs—we turned the problem into a virtualization and automation one, and scaled from there.</Highlight>

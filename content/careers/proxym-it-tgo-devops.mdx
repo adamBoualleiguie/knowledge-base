@@ -1,0 +1,27 @@
+---
+company: "Proxym IT"
+role: "DevOps Engineer — Technology Governance Office (TGO)"
+startDate: "October 2021"
+endDate: "February 202"
+location: "Tunisia"
+tags: ["GitLab", "CI/CD", "SonarQube", "License Compliance", "SAST", "DAST", "DefectDojo", "Banking", "Governance"]
+media: "public/assets/careers/prx.png"
+---
+
+At **Proxym IT** I joined the **Technology Governance Office (TGO)** and worked on DevOps, technology governance, and software architecture for a wide range of projects—banking, insurance, and others—across web and mobile platforms. My role was to bring **order, security, and repeatability** to how we built and delivered software at scale.
+
+<Callout type="info" title="Scale">
+We managed **over 1000 projects** on a self-managed GitLab instance: pipelines, access, and deployment patterns had to be consistent and governable.
+</Callout>
+
+**Key responsibilities and achievements:**
+
+- **Technology governance:** Defined and applied DevOps practices, CI/CD standards, and architecture guidelines so that TGO and delivery teams could align on quality and security.
+- **Artifact and license compliance:** Led a project to monitor **third-party licenses** across downstream projects and avoid distributing commercial products that relied on incompatible OSS. I integrated and adapted the [SonarQube License Check plugin](https://github.com/porscheinformatik/sonarqube-licensecheck), wiring it into GitLab pipelines so that JSON lock files and POMs were scanned as part of quality gates. That gave us clear visibility and helped prevent compliance issues with vendors and clients.
+- **SSDLC implementation:** Standardized CI/CD across **1,000+ projects** with reusable GitLab CI templates and components for Java, Node.js, and container-based pipelines—removing copy-paste and keeping delivery consistent. I enforced **pre-commit Git hooks (e.g. Gitleaks)** to block secrets and sensitive code before merge, and integrated **SAST** (SonarQube, Trivy, Hadolint) and **DAST** (OWASP ZAP, ArcherySec as ASOC). We centralized vulnerability management in **DefectDojo** to aggregate findings, handle false positives, and speed up client audits.
+- **WeHub — GitHub Actions and OVH:** Took a legacy codebase and moved it to **GitHub Actions** with full CI/CD and deployment to **OVH**, reducing manual steps and aligning the project with modern automation.
+- **Diag IT (Viola / MTA3):** Delivered **full CI/CD on GitLab** for [Diag IT](https://solutions.diag-it.fr/) mobile apps: build, test, and publish for Android and iOS in an automated, repeatable way.
+- **Nexus and artifact management:** Improved proxy usage and bandwidth, enforced **cleanup and compaction** policies (freeing **200GB+**), and led a **migration to a newer Nexus version** by converting and reconciling blobs the hard way when tooling was limited.
+- **GitLab self-hosted and runners:** Drove upgrades and a better runner strategy with the IT team: moved to **Docker runners** with **distributed caches (MinIO)** and built a **dashboard** to monitor **200+ daily pipelines**, spot bottlenecks, and give the DevOps and governance teams clear visibility.
+
+<Highlight color="green">Governance is not red tape—it’s making safe defaults easy so teams can ship fast without stepping on each other or on compliance.</Highlight>

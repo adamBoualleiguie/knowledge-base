@@ -316,7 +316,7 @@ export default function Home() {
                        shadow-lg hover:shadow-xl hover:scale-105 active:scale-95
                        relative overflow-hidden group"
             >
-              <span className="relative z-10">View Certifications</span>
+              <span className="relative z-10">Career & Certifications</span>
             </Link>
 
             <a
@@ -620,7 +620,7 @@ export default function Home() {
                 href="/certifications"
                 className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors group"
               >
-                View full certification catalogue
+                Career & certifications
                 <span className="group-hover:translate-x-1 transition-transform">
                   →
                 </span>
