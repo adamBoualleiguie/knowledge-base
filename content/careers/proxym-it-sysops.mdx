@@ -1,0 +1,29 @@
+---
+company: "Proxym IT"
+role: "SysOps Engineer — IT Team"
+startDate: "February 2024"
+endDate: "February 2025"
+location: "Tunisia"
+tags: ["Kubernetes", "Rancher", "Proxmox", "vSphere", "Terraform", "Kubespray", "Longhorn", "Velero", "OPA", "Disaster Recovery", "Ransomware"]
+media: "public/assets/careers/prx.png"
+---
+
+After the TGO chapter, I moved into the **IT team** at Proxym IT as a **SysOps Engineer**. My role was to be the **bridge** between TGO (governance, DevOps, security) and IT (servers, hypervisors, networks): I understood both worlds and built solutions that made both teams work together smoothly. That meant **upgrading core platforms** (GitLab, SonarQube), **automating client infrastructure** (e.g. Bankerise at La Poste Tunisie), and **improving resilience**—including responding to a **ransomware incident**.
+
+<Callout type="danger" title="Ransomware response (Akira)">
+A zero-day exploit led to an **Akira** infection in one part of the company DC; years of data were encrypted. With the team, we **recovered in about 24 hours** using existing DR plans and clear coordination. I helped **identify and isolate the source**, apply remediations, and then **roll out AdGuard** across the company to harden DNS and reduce exposure. That period reinforced how critical DR and calm incident response are.
+</Callout>
+
+**La Poste Tunisie (end-to-end):**  
+I supported **La Poste Tunisie** from both the TGO and IT sides: CI/CD and repo governance as DevOps, then **production infrastructure** as SysOps. With the La Poste team we **automated provisioning** using **ProxGen**, **Kubespray**, **ECK**, and **Longhorn** so that a full, production-grade environment could be brought up in a **fraction of the time** that manual setup used to take.
+
+**Rancher and Kubernetes governance:**  
+We moved from vanilla K8s dev clusters to **Rancher** for central management. I set up **Rancher HA**, integrated it with our **vSphere** environment so that new VMs were provisioned automatically for scaling dev clusters, and we **replaced NFS with Longhorn** for distributed storage. **RBAC** and **OPA policies** (and admission hooks) were used to block unsafe practices in manifests; **Velero** operators and CRDs automated **backups of cluster state to S3** and supported **DR plans**.
+
+**ProxGen — VM provisioning in about a minute:**  
+IT was spending **30+ minutes** per VM (ISO, manual install, config drift). I led the shift to **cloud-init templates** and **Terraform**: the **ProxGen** project lives in GitLab, with **centralized tfstate**, so an operator only needs to open a branch, set tfvars (OS, CPU, RAM, IP, etc.), and run the pipeline—**about one minute** later the VM is provisioned in Proxmox or vSphere. [ProxGen snippet on GitHub](https://github.com/adamBoualleiguie/ProxGen).
+
+**Total infra automation (Kubespray, Longhorn, ECK):**  
+For client deployments (e.g. Bankerise at La Poste), we cut **preparation from ~2 days to ~1.5 hours**. Using **ProxGen** for VMs, a **hardened Kubespray** for production-ready Kubernetes, and **Ansible playbooks** for Velero and other components, we then relied on **operators** (Keycloak, Redis, **ECK** for the Elastic stack) instead of ad-hoc installs. That reduced **config drift** between clients and made environments **stable and DR-ready**.
+
+<Highlight color="green">SysOps is where governance meets the metal: the same rigor we applied in CI/CD (templates, Git, automation) applied to servers and clusters made the whole organization faster and safer.</Highlight>

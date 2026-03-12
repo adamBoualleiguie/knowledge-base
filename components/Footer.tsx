@@ -159,7 +159,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href={`${basePath}/certifications`} className="text-muted-foreground hover:text-foreground transition-colors">
-                  Certifications
+                  Career & Certifications
                 </Link>
               </li>
             </ul>

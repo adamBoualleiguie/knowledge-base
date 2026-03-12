@@ -206,9 +206,63 @@ export const Certification = defineDocumentType(() => ({
   },
 }))
 
+export const Career = defineDocumentType(() => ({
+  name: 'Career',
+  filePathPattern: 'careers/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    company: {
+      type: 'string',
+      description: 'Company or organization name',
+      required: true,
+    },
+    role: {
+      type: 'string',
+      description: 'Job title or role',
+      required: true,
+    },
+    startDate: {
+      type: 'string',
+      description: 'Start date (e.g. "January 2024")',
+      required: true,
+    },
+    endDate: {
+      type: 'string',
+      description: 'End date (e.g. "Present" or "March 2026")',
+      required: true,
+    },
+    location: {
+      type: 'string',
+      description: 'Location (city, country, or remote)',
+      required: false,
+    },
+    tags: {
+      type: 'list',
+      of: { type: 'string' },
+      description: 'Skills or technologies used in this role',
+      required: false,
+    },
+    media: {
+      type: 'string',
+      description: 'Path to role/company image (e.g. public/assets/careers/logo.png)',
+      required: false,
+    },
+  },
+  computedFields: {
+    url: {
+      type: 'string',
+      resolve: () => `/certifications`,
+    },
+    slug: {
+      type: 'string',
+      resolve: (career) => career._raw.sourceFileName.replace(/\.mdx$/, ''),
+    },
+  },
+}))
+
 export default makeSource({
   contentDirPath: './content',
-  documentTypes: [Doc, Blog, Certification],
+  documentTypes: [Doc, Blog, Certification, Career],
   disableImportAliasWarning: true, // Suppress the baseUrl warning
   mdx: {
     remarkPlugins: [],
