@@ -2,9 +2,11 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import './globals.css'
 import { Navigation } from '@/components/Navigation'
+import { VantaScripts } from '@/components/VantaScripts'
 import { Footer } from '@/components/Footer'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { SidebarProvider } from '@/components/SidebarContext'
+import { HeroProvider } from '@/components/HeroContext'
 import { ReadingProgress } from '@/components/ReadingProgress'
 import { PageLoader } from '@/components/PageLoader'
 import { allDocs } from 'contentlayer/generated'
@@ -104,20 +106,24 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Cloudflare Web Analytics */}
-        <Script
-          defer
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon='{"token": "9c1ec2f6b17d48b482ca36c68dbb0fe1"}'
-          strategy="afterInteractive"
-        />
+        {/* Cloudflare Web Analytics - only in production to avoid CORS on localhost */}
+        {process.env.NODE_ENV === 'production' && (
+          <Script
+            defer
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon='{"token": "9c1ec2f6b17d48b482ca36c68dbb0fe1"}'
+            strategy="afterInteractive"
+          />
+        )}
         {/* End Cloudflare Web Analytics */}
+        <VantaScripts />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
+          <HeroProvider>
           <SidebarProvider>
             <PageLoader />
             <Navigation docs={docsForSearch} />
@@ -125,6 +131,7 @@ export default function RootLayout({
             <main className="min-h-screen">{children}</main>
             <Footer />
           </SidebarProvider>
+          </HeroProvider>
         </ThemeProvider>
       </body>
     </html>
