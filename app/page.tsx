@@ -27,18 +27,8 @@ function hasSeenHero(): boolean {
   }
 }
 
-// Get basePath from Next.js config (for static export)
-const getBasePath = () => {
-  // In browser, check if we're in a subdirectory
-  if (typeof window !== 'undefined') {
-    const path = window.location.pathname
-    // If path starts with /knowledge-base, return it
-    if (path.startsWith('/knowledge-base')) {
-      return '/knowledge-base'
-    }
-  }
-  return ''
-}
+// basePath from next.config (for static export / GitHub Pages)
+const BASE_PATH = '/knowledge-base'
 
 /**
  * Helper to extract section and subsection from a slug
@@ -128,8 +118,6 @@ export default function Home() {
       return dateB.getTime() - dateA.getTime()
     })
     .slice(0, 3)
-
-  const [basePath, setBasePath] = useState('')
 
   // Skip animation if user already saw it this session. Only check after mount to avoid hydration mismatch.
   const [skipAnimation, setSkipAnimation] = useState(false)
@@ -477,7 +465,7 @@ export default function Home() {
                 </Link>
 
                 <a
-                  href={`${basePath}/assets/general/pdfs/AdamBoualleiguie.pdf`}
+                  href={`${BASE_PATH}/assets/general/pdfs/AdamBoualleiguie.pdf`}
                   download
                   className="px-8 py-3.5 border-2 border-border rounded-lg
                            hover:bg-accent transition-all duration-300 font-medium
