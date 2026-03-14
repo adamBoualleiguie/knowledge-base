@@ -1,6 +1,7 @@
 /**
- * Generates sitemap.xml in a format that works well with Google Search Console
- * (schemaLocation + lastmod with timezone offset). Run after contentlayer build.
+ * Generates sitemap.xml and IndexNow key file.
+ * Optionally submits URLs to IndexNow (Bing, Yandex) when CI or SUBMIT_INDEXNOW is set.
+ * Run after contentlayer build.
  */
 import path from 'path'
 import fs from 'fs'
@@ -12,6 +13,9 @@ const root = path.join(__dirname, '..')
 
 const baseUrl = 'https://adamboualleiguie.github.io'
 const basePath = '/knowledge-base'
+
+const INDEXNOW_KEY = '286f7e2dbfac40018a3bbfc4a355c421'
+const INDEXNOW_KEY_URL = `${baseUrl}${basePath}/${INDEXNOW_KEY}.txt`
 
 function fullUrl(pathSegment) {
   const normalized = pathSegment.endsWith('/') ? pathSegment : `${pathSegment}/`
@@ -87,6 +91,35 @@ async function main() {
   fs.mkdirSync(path.dirname(outPath), { recursive: true })
   fs.writeFileSync(outPath, urlset, 'utf8')
   console.log('Wrote sitemap.xml with', entries.length, 'entries')
+
+  // IndexNow: write key file (always) and submit URLs (only in CI or when SUBMIT_INDEXNOW=1)
+  const keyFilePath = path.join(root, 'public', `${INDEXNOW_KEY}.txt`)
+  fs.writeFileSync(keyFilePath, INDEXNOW_KEY, 'utf8')
+  console.log('Wrote IndexNow key file:', `${INDEXNOW_KEY}.txt`)
+
+  const shouldSubmit = process.env.CI === 'true' || process.env.SUBMIT_INDEXNOW === '1'
+  if (shouldSubmit) {
+    const urlList = entries.map((e) => e.url)
+    try {
+      const res = await fetch('https://api.indexnow.org/indexnow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: JSON.stringify({
+          host: 'adamboualleiguie.github.io',
+          key: INDEXNOW_KEY,
+          keyLocation: INDEXNOW_KEY_URL,
+          urlList,
+        }),
+      })
+      if (res.ok) {
+        console.log('IndexNow: submitted', urlList.length, 'URLs to Bing/Yandex')
+      } else {
+        console.warn('IndexNow: submission failed', res.status, await res.text())
+      }
+    } catch (err) {
+      console.warn('IndexNow: submission error', err.message)
+    }
+  }
 }
 
 main().catch((err) => {
