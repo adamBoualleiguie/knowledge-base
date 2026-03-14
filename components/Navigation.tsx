@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from './ThemeToggle'
 import { DocsSearchBar } from './DocsSearchBar'
+import { useHero } from './HeroContext'
 
 // Get basePath from Next.js config (for static export)
 const getBasePath = () => {
@@ -30,10 +31,18 @@ interface NavigationProps {
   docs?: Doc[]
 }
 
+function isHomePath(pathname: string): boolean {
+  return pathname === '/' || pathname === '/knowledge-base' || pathname === '/knowledge-base/'
+}
+
 export function Navigation({ docs = [] }: NavigationProps) {
   const pathname = usePathname()
+  const { heroComplete } = useHero()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [basePath, setBasePath] = useState('')
+
+  const isHome = isHomePath(pathname)
+  const navVisible = !isHome || heroComplete
 
   useEffect(() => {
     setBasePath(getBasePath())
@@ -47,7 +56,13 @@ export function Navigation({ docs = [] }: NavigationProps) {
   ]
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+    <nav
+      className={`sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        navVisible
+          ? 'translate-y-0 opacity-100'
+          : '-translate-y-full opacity-0 pointer-events-none'
+      }`}
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center gap-4">
           {/* Left side: Logo - Always visible */}

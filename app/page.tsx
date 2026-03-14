@@ -1,13 +1,31 @@
 'use client'
 
 import Link from 'next/link'
+import { useTheme } from 'next-themes'
 import { allBlogs, allDocs, allCertifications } from 'contentlayer/generated'
 import { compareDesc } from 'date-fns'
 import { Typewriter } from 'react-simple-typewriter'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { Highlight } from '@/components/Highlight'
 import { getBlogTagColor } from '@/lib/tag-colors'
 import { CertImage } from '@/components/CertImage'
+import { ScrollIndicator } from '@/components/ScrollIndicator'
+import { useHero } from '@/components/HeroContext'
+
+// Vanta NET colors: black bg (0x0) + site orange (0xff823f / #ff823f)
+const VANTA_COLOR = 0xff823f
+const VANTA_BG = 0x0
+
+const HERO_SEEN_KEY = 'hero-animation-seen'
+
+function hasSeenHero(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return sessionStorage.getItem(HERO_SEEN_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
 
 // Get basePath from Next.js config (for static export)
 const getBasePath = () => {
@@ -113,12 +131,11 @@ export default function Home() {
 
   const [basePath, setBasePath] = useState('')
 
-  // Determine basePath dynamically (same approach as Navigation.tsx)
-  useEffect(() => {
-    setBasePath(getBasePath())
-  }, [])
+  // Skip animation if user already saw it this session. Only check after mount to avoid hydration mismatch.
+  const [skipAnimation, setSkipAnimation] = useState(false)
 
   // Enhanced state sequence: Hi → Name → Title → Value Statement → CTAs → Why → About → Skills → Certs → Docs → Blog → Recruiter
+  // Initial state always matches server (first-time) to prevent hydration errors
   const [showHi, setShowHi] = useState(true)
   const [showName, setShowName] = useState(false)
   const [showTitle, setShowTitle] = useState(false)
@@ -136,6 +153,83 @@ export default function Home() {
   // Connect Animation state
   const [activeConnectIndex, setActiveConnectIndex] = useState<number>(-1)
   const isConnectHoveredRef = useRef(false)
+
+  // Vanta NET 3D background (dark theme only)
+  const vantaRef = useRef<HTMLDivElement>(null)
+  const vantaEffectRef = useRef<{ destroy: () => void } | null>(null)
+  const [vantaReady, setVantaReady] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const { resolvedTheme } = useTheme()
+  const isDark = mounted && resolvedTheme === 'dark'
+
+  // Avoid hydration mismatch: theme is only known after client mount
+  useEffect(() => setMounted(true), [])
+
+  const { setHeroComplete } = useHero()
+
+  // Check sessionStorage after mount (client-only) to skip animation for returning visitors.
+  // Must run after hydration to avoid server/client mismatch.
+  useLayoutEffect(() => {
+    if (hasSeenHero()) {
+      setSkipAnimation(true)
+      setShowHi(false)
+      setShowName(true)
+      setShowTitle(true)
+      setShowValueStatement(true)
+      setShowCTAs(true)
+      setShowConnect(true)
+      setShowWhy(true)
+      setShowAbout(true)
+      setShowSkills(true)
+      setShowCerts(true)
+      setShowDocs(true)
+      setShowBlog(true)
+      setShowRecruiter(true)
+    }
+  }, [])
+
+  // Hide navbar on home mount (before paint), show when scroll enabled. Skip if returning visitor.
+  useLayoutEffect(() => {
+    if (skipAnimation) {
+      setHeroComplete(true) // show navbar immediately when skipping
+    } else {
+      setHeroComplete(false)
+    }
+    return () => setHeroComplete(true) // show navbar when navigating away
+  }, [setHeroComplete, skipAnimation])
+
+  // Show navbar when scroll indicator appears (showConnect)
+  useEffect(() => {
+    if (showConnect) setHeroComplete(true)
+  }, [showConnect, setHeroComplete])
+
+  // Block scroll until hero sequence finishes (Let's Connect appears at 8.5s)
+  useEffect(() => {
+    if (showConnect) {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+      return
+    }
+    document.body.style.overflow = 'hidden'
+    document.body.style.touchAction = 'none'
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+  }, [showConnect])
+
+  // Vanta scripts load in layout and persist across navigation — check on mount or listen for ready event
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const win = window as Window & { VANTA?: { NET: (opts: Record<string, unknown>) => { destroy: () => void } } }
+    if (win.VANTA?.NET) {
+      setVantaReady(true)
+      return
+    }
+    const onReady = () => setVantaReady(true)
+    window.addEventListener('vanta-ready', onReady)
+    return () => window.removeEventListener('vanta-ready', onReady)
+  }, [])
 
   useEffect(() => {
     if (showConnect) {
@@ -159,7 +253,45 @@ export default function Home() {
     }
   }, [showConnect])
 
+  // Initialize Vanta NET only in dark theme; destroy when switching to light
   useEffect(() => {
+    if (!isDark) {
+      vantaEffectRef.current?.destroy?.()
+      vantaEffectRef.current = null
+      return
+    }
+    if (!vantaReady || !vantaRef.current || typeof window === 'undefined') return
+    const win = window as Window & { VANTA?: { NET: (opts: Record<string, unknown>) => { destroy: () => void } } }
+    if (!win.VANTA?.NET) return
+
+    vantaEffectRef.current?.destroy?.()
+    const effect = win.VANTA.NET({
+      el: vantaRef.current,
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200,
+      minWidth: 200,
+      scale: 1,
+      scaleMobile: 1,
+      color: VANTA_COLOR,
+      backgroundColor: VANTA_BG,
+      points: 7,
+      maxDistance: 18,
+      spacing: 18,
+    })
+    vantaEffectRef.current = effect
+
+    return () => {
+      effect?.destroy?.()
+      vantaEffectRef.current = null
+    }
+  }, [vantaReady, isDark])
+
+  // Run animation sequence only for first-time visitors
+  useEffect(() => {
+    if (skipAnimation) return
+
     const hiTimeout = setTimeout(() => {
       setShowHi(false)
       setShowName(true)
@@ -184,20 +316,6 @@ export default function Home() {
     const whyTimeout = setTimeout(() => {
       setShowWhy(true)
     }, 9500) // Why section appears
-
-    // We calculate when the connect animation ends: 
-    // connect section appears at 8500ms
-    // animation takes 7 steps * 300ms = 2100ms
-    // So animation finishes at ~10600ms. 
-    // We add a little breathing room and scroll at 11500ms, which aligns perfectly with "About" section appearing
-    const autoScrollTimeout = setTimeout(() => {
-      if (window.scrollY < 100) {
-        window.scrollBy({ 
-          top: window.innerHeight * 0.4,
-          behavior: 'smooth' 
-        })
-      }
-    }, 11500)
 
     const aboutTimeout = setTimeout(() => {
       setShowAbout(true)
@@ -230,7 +348,6 @@ export default function Home() {
       clearTimeout(ctaTimeout)
       clearTimeout(connectTimeout)
       clearTimeout(whyTimeout)
-      clearTimeout(autoScrollTimeout)
       clearTimeout(aboutTimeout)
       clearTimeout(skillsTimeout)
       clearTimeout(certsTimeout)
@@ -238,123 +355,161 @@ export default function Home() {
       clearTimeout(blogTimeout)
       clearTimeout(recruiterTimeout)
     }
-  }, [])
+  }, [skipAnimation])
+
+  // Mark hero as seen when animation completes (enables skip on return)
+  useEffect(() => {
+    if (showConnect && typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem(HERO_SEEN_KEY, 'true')
+      } catch {
+        // ignore
+      }
+    }
+  }, [showConnect])
 
   return (
     <div className="flex flex-col">
-      {/* ================= HERO ================= */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 text-center relative overflow-hidden">
-        {/* Subtle background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
-        
-        {/* Hi + waving hand */}
-        {showHi && (
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in">
-            Hi{' '}
-            <span className="inline-block animate-wave origin-bottom-right">👋</span>
-          </h1>
-        )}
+      {/* ================= HERO + CONNECT ================= */}
+      <div
+        className={`relative min-h-[100dvh] min-h-screen flex flex-col overflow-hidden ${
+          isDark ? '' : 'bg-background'
+        }`}
+      >
+        {/* Scroll-down indicator (visible when scroll enabled) */}
+        <ScrollIndicator visible={showConnect} />
 
-        {/* Typed Name */}
-        {showName && (
-          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6
-                     bg-gradient-to-r from-primary via-primary/90 to-primary/70
-                     bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(59,130,246,0.35)]
-                     animate-fade-in">
-            <Typewriter
-              words={["I'm Adam Boualleiguie"]}
-              cursor
-              cursorStyle="▍"
-              typeSpeed={70}
+        {/* Vanta NET 3D animated background — dark theme only */}
+        {isDark && (
+          <>
+            <div ref={vantaRef} className="absolute inset-0 z-0" aria-hidden="true" />
+            <div
+              className="absolute inset-0 z-[1] pointer-events-none bg-[radial-gradient(ellipse_80%_70%_at_50%_45%,transparent_0%,rgba(0,0,0,0.15)_40%,rgba(0,0,0,0.35)_100%)]"
+              aria-hidden="true"
             />
-          </h2>
+          </>
         )}
 
-        {/* Enhanced Title with scope */}
-        {showTitle && (
-          <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <p className="text-xl sm:text-2xl text-muted-foreground mb-2 max-w-4xl mx-auto leading-relaxed">
-              DevOps · DevSecOps · SysOps Engineer
-            </p>
-            <p className="text-base sm:text-lg text-muted-foreground/80 mb-6 max-w-3xl mx-auto">
-              Building, operating, and documenting production systems
-            </p>
-          </div>
-        )}
+        {/* Content above Vanta */}
+        <div className="relative z-10 flex flex-1 flex-col justify-center container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 text-center">
+          {/* Hi + waving hand */}
+          {showHi && (
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 animate-fade-in">
+              Hi{' '}
+              <span className="inline-block animate-wave origin-bottom-right">👋</span>
+            </h1>
+          )}
 
-        {/* Core Value Statement (CRITICAL) */}
-        {showValueStatement && (
-          <div className="animate-fade-in max-w-4xl mx-auto" style={{ animationDelay: '300ms' }}>
-            <p className="text-lg sm:text-xl text-foreground/90 mb-4 leading-relaxed font-medium">
-              I design, operate, and secure production-grade infrastructures — and I document everything I learn.
-            </p>
-            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-              This website is my <span className="text-primary font-medium">living knowledge base</span>: real-world DevOps and DevSecOps practices, architecture decisions, experiments, failures, and continuous learning from production environments.
-            </p>
-          </div>
-        )}
+          {/* Typed Name - vibrant orange, floats above glass */}
+          {showName && (
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6
+                       bg-gradient-to-r from-primary via-primary/90 to-primary/70
+                       bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,130,63,0.5)]
+                       animate-fade-in">
+              {skipAnimation ? (
+                "I'm Adam Boualleiguie"
+              ) : (
+                <Typewriter
+                  words={["I'm Adam Boualleiguie"]}
+                  cursor
+                  cursorStyle="▍"
+                  typeSpeed={70}
+                />
+              )}
+            </h2>
+          )}
 
-        {/* CTAs */}
-        {showCTAs && (
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10 animate-fade-in" style={{ animationDelay: '400ms' }}>
-            <Link
-              href="/docs"
-              className="px-8 py-3.5 bg-primary text-primary-foreground rounded-lg
-                       hover:bg-primary/90 transition-all duration-300 font-medium
-                       shadow-lg hover:shadow-xl hover:scale-105 active:scale-95
-                       relative overflow-hidden group"
-            >
-              <span className="relative z-10">Explore the Knowledge Base</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/10 to-primary/0 
-                            translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            </Link>
+          {/* Glass container: frosted panel behind text for readability */}
+          {(showTitle || showValueStatement || showCTAs || showConnect) && (
+          <div
+            className="mx-auto w-full max-w-4xl rounded-2xl sm:rounded-3xl px-6 sm:px-10 py-8 sm:py-10
+                       backdrop-blur-xl bg-black/5 border border-white/5
+                       shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)]
+                       animate-fade-in"
+          >
+            {/* Enhanced Title with scope */}
+            {showTitle && (
+              <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+                <p className="text-xl sm:text-2xl text-foreground/95 mb-1 sm:mb-2 max-w-4xl mx-auto leading-relaxed">
+                  DevOps · DevSecOps · SysOps Engineer
+                </p>
+                <p className="text-base sm:text-lg text-foreground/90 mb-4 sm:mb-6 max-w-3xl mx-auto">
+                  Building, operating, and documenting production systems
+                </p>
+              </div>
+            )}
 
-            <Link
-              href="/certifications"
-              className="px-8 py-3.5 border-2 border-primary/50 text-foreground rounded-lg
-                       hover:bg-primary/10 transition-all duration-300 font-medium
-                       shadow-lg hover:shadow-xl hover:scale-105 active:scale-95
-                       relative overflow-hidden group"
-            >
-              <span className="relative z-10">Career & Certifications</span>
-            </Link>
+            {/* Core Value Statement (CRITICAL) */}
+            {showValueStatement && (
+              <div className="animate-fade-in max-w-4xl mx-auto" style={{ animationDelay: '300ms' }}>
+                <p className="text-lg sm:text-xl text-foreground mb-3 sm:mb-4 leading-relaxed font-medium">
+                  I design, operate, and secure production-grade infrastructures — and I document everything I learn.
+                </p>
+                <p className="text-base sm:text-lg text-foreground/95 leading-relaxed">
+                  This website is my <span className="text-primary font-medium">living knowledge base</span>: real-world DevOps and DevSecOps practices, architecture decisions, experiments, failures, and continuous learning from production environments.
+                </p>
+              </div>
+            )}
 
-            <a
-              href={`${basePath}/assets/general/pdfs/AdamBoualleiguie.pdf`}
-              download
-              className="px-8 py-3.5 border-2 border-border rounded-lg
-                       hover:bg-accent transition-all duration-300 font-medium
-                       hover:border-primary/50 hover:scale-105 active:scale-95"
-            >
-              Download CV
-            </a>
-          </div>
-        )}
+            {/* CTAs */}
+            {showCTAs && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6 sm:mt-8 animate-fade-in" style={{ animationDelay: '400ms' }}>
+                <Link
+                  href="/docs"
+                  className="px-8 py-3.5 bg-primary text-primary-foreground rounded-lg
+                           hover:bg-primary/90 transition-all duration-300 font-medium
+                           shadow-lg hover:shadow-xl hover:scale-105 active:scale-95
+                           relative overflow-hidden group"
+                >
+                  <span className="relative z-10">Explore the Knowledge Base</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/10 to-primary/0 
+                                translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                </Link>
 
-        {/* Microtext under CTAs */}
-        {showCTAs && (
-          <p className="text-xs sm:text-sm text-muted-foreground/70 mt-4 animate-fade-in" style={{ animationDelay: '500ms' }}>
-            <em>Everything here reflects how I work in real environments.</em>
-          </p>
-        )}
-      </section>
+                <Link
+                  href="/certifications"
+                  className="px-8 py-3.5 border-2 border-primary/50 text-foreground rounded-lg
+                           hover:bg-primary/10 transition-all duration-300 font-medium
+                           shadow-lg hover:shadow-xl hover:scale-105 active:scale-95
+                           relative overflow-hidden group"
+                >
+                  <span className="relative z-10">Career & Certifications</span>
+                </Link>
 
-      {/* ================= CONTACT IN HOME (AFTER HERO) ================= */}
-      {showConnect && (
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16 animate-fade-in" style={{ animationDelay: '600ms' }}>
-          <div className="max-w-3xl mx-auto flex flex-col items-center justify-center">
-            <h3 className="text-xl font-medium mb-6 text-muted-foreground">Let's Connect</h3>
-            <div 
-              className="flex flex-wrap gap-6 justify-center"
-              onMouseEnter={() => {
-                isConnectHoveredRef.current = true
-                setActiveConnectIndex(-1)
-              }}
-              onTouchStart={() => {
-                isConnectHoveredRef.current = true
-                setActiveConnectIndex(-1)
-              }}
-            >
+                <a
+                  href={`${basePath}/assets/general/pdfs/AdamBoualleiguie.pdf`}
+                  download
+                  className="px-8 py-3.5 border-2 border-border rounded-lg
+                           hover:bg-accent transition-all duration-300 font-medium
+                           hover:border-primary/50 hover:scale-105 active:scale-95"
+                >
+                  Download CV
+                </a>
+              </div>
+            )}
+
+            {/* Microtext under CTAs - reduced spacing before Let's Connect */}
+            {showCTAs && (
+              <p className="text-xs sm:text-sm text-foreground/90 mt-3 sm:mt-4 animate-fade-in" style={{ animationDelay: '500ms' }}>
+                <em>Everything here reflects how I work in real environments.</em>
+              </p>
+            )}
+
+            {/* Let's Connect - tight spacing after microtext */}
+            {showConnect && (
+              <div className="mt-4 sm:mt-6 animate-fade-in" style={{ animationDelay: '600ms' }}>
+                <h3 className="text-xl font-medium mb-4 sm:mb-5 text-foreground/95">Let's Connect</h3>
+              <div
+                className="flex flex-wrap gap-4 sm:gap-6 justify-center"
+                onMouseEnter={() => {
+                  isConnectHoveredRef.current = true
+                  setActiveConnectIndex(-1)
+                }}
+                onTouchStart={() => {
+                  isConnectHoveredRef.current = true
+                  setActiveConnectIndex(-1)
+                }}
+              >
               {[
                 {
                   name: 'GitHub',
@@ -430,10 +585,13 @@ export default function Home() {
                   </div>
                 </a>
               ))}
+              </div>
             </div>
+          )}
           </div>
-        </section>
-      )}
+          )}
+        </div>
+      </div>
 
       {/* ================= WHY THIS SITE EXISTS ================= */}
       {showWhy && (

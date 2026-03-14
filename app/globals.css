@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -427,6 +429,115 @@ code, pre {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Scroll indicator - animated mouse + "Scroll" text (orange theme) */
+.scroll-indicator__mouse {
+  --scroll-primary: hsl(var(--primary));
+  --scroll-fade: hsl(var(--primary) / 0.5);
+  position: relative;
+  width: 52px;
+  height: 88px;
+  border-radius: 100px;
+  background: var(--scroll-fade)
+    linear-gradient(
+      transparent 0%,
+      transparent 50%,
+      var(--scroll-primary) 50%,
+      var(--scroll-primary) 100%
+    );
+  background-size: 100% 200%;
+  animation: scrollColorSlide 5s linear infinite,
+    scrollNudgeMouse 5s ease-out infinite;
+}
+.scroll-indicator__mouse::before,
+.scroll-indicator__mouse::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+}
+.scroll-indicator__mouse::before {
+  width: 40px;
+  height: 76px;
+  background-color: hsl(var(--background));
+  border-radius: 100px;
+}
+.scroll-indicator__mouse::after {
+  background-color: var(--scroll-primary);
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  animation: scrollTrackballSlide 5s linear infinite;
+}
+.scroll-indicator__text {
+  font-family: 'Cabin', system-ui, sans-serif;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  color: hsl(var(--primary));
+  font-size: 0.625rem;
+  animation: scrollColorText 5s ease-out infinite,
+    scrollNudgeText 5s ease-out infinite;
+}
+@keyframes scrollColorSlide {
+  0% { background-position: 0% 100%; }
+  20% { background-position: 0% 0%; }
+  21% { background-color: var(--scroll-fade); }
+  29.99% { background-color: var(--scroll-primary); background-position: 0% 0%; }
+  30% { background-color: var(--scroll-fade); background-position: 0% 100%; }
+  50% { background-position: 0% 0%; }
+  51% { background-color: var(--scroll-fade); }
+  59% { background-color: var(--scroll-primary); background-position: 0% 0%; }
+  60% { background-color: var(--scroll-fade); background-position: 0% 100%; }
+  80% { background-position: 0% 0%; }
+  81% { background-color: var(--scroll-fade); }
+  90%, 100% { background-color: var(--scroll-primary); }
+}
+@keyframes scrollTrackballSlide {
+  0% { opacity: 1; transform: scale(1) translateY(-20px); }
+  6% { opacity: 1; transform: scale(0.9) translateY(5px); }
+  14% { opacity: 0; transform: scale(0.4) translateY(40px); }
+  15%, 19% { opacity: 0; transform: scale(0.4) translateY(-20px); }
+  28%, 29.99% { opacity: 1; transform: scale(1) translateY(-20px); }
+  30% { opacity: 1; transform: scale(1) translateY(-20px); }
+  36% { opacity: 1; transform: scale(0.9) translateY(5px); }
+  44% { opacity: 0; transform: scale(0.4) translateY(40px); }
+  45%, 49% { opacity: 0; transform: scale(0.4) translateY(-20px); }
+  58%, 59.99% { opacity: 1; transform: scale(1) translateY(-20px); }
+  60% { opacity: 1; transform: scale(1) translateY(-20px); }
+  66% { opacity: 1; transform: scale(0.9) translateY(5px); }
+  74% { opacity: 0; transform: scale(0.4) translateY(40px); }
+  75%, 79% { opacity: 0; transform: scale(0.4) translateY(-20px); }
+  88%, 100% { opacity: 1; transform: scale(1) translateY(-20px); }
+}
+@keyframes scrollNudgeMouse {
+  0% { transform: translateY(0); }
+  20% { transform: translateY(8px); }
+  30% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+  60% { transform: translateY(0); }
+  80% { transform: translateY(8px); }
+  90% { transform: translateY(0); }
+}
+@keyframes scrollNudgeText {
+  0% { transform: translateY(0); }
+  20% { transform: translateY(2px); }
+  30% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+  60% { transform: translateY(0); }
+  80% { transform: translateY(2px); }
+  90% { transform: translateY(0); }
+}
+@keyframes scrollColorText {
+  21% { color: var(--scroll-fade); }
+  30% { color: var(--scroll-primary); }
+  51% { color: var(--scroll-fade); }
+  60% { color: var(--scroll-primary); }
+  81% { color: var(--scroll-fade); }
+  90% { color: var(--scroll-primary); }
 }
 
 /* Hide scrollbar but keep scrolling functionality */
