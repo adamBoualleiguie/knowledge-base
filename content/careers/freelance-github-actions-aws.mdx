@@ -1,24 +1,35 @@
 ---
-company: "Freelance / Side project"
-role: "CI/CD & Cloud Automation (Next.js, AWS)"
+company: "Freelance / Side Projects"
+role: "Platform & Build Engineer"
 startDate: "September 2024"
-endDate: "November 2024"
+endDate: "December 2025"
 location: "Remote"
-tags: ["GitHub Actions", "AWS", "EC2", "IAM", "Next.js", "Terraform", "CI/CD", "Code Quality"]
+tags: ["GitLab CI", "Bazel", "AWS", "EC2", "IAM", "Next.js", "Terraform", "GitHub Actions", "SonarQube", "SSDLC", "Monorepo", "Kubernetes", "ArgoCD"]
 media: "public/assets/careers/freelance.webp"
 ---
 
-As a **side freelance engagement** I took a **Next.js** project and brought it to a **fully automated** lifecycle: **GitHub Actions** for CI (build, test, code quality), **automatic deployment**, and **infrastructure provisioning** on **AWS** (EC2, IAM, and related services).
+Over the course of two freelance engagements, I helped clients modernise their delivery pipelines and build systems—from **full‑stack web apps** to **polyglot monorepos** with mobile apps and microservices.
 
-**What I delivered:**
+### Project 1: Next.js Cloud Automation (Sept–Nov 2024)
+Took a **Next.js** project from manual deployment to a fully automated lifecycle on AWS:
 
-- **Continuous integration:** Workflows for build, test, and code quality checks on every push or PR.
-- **Deployment automation:** From merge to deployment with minimal manual steps.
-- **Infrastructure as Code:** Provisioning of EC2, networking, and IAM via **Terraform** (or equivalent) so the environment was versioned and repeatable.
-- **Documentation:** Clear runbooks and pipeline descriptions so the client could maintain or extend the setup.
+- **CI/CD:** GitHub Actions workflows for build, test, and code quality on every push/PR.
+- **Deployment automation:** Merge‑to‑production with zero‑touch pipelines.
+- **Infrastructure as Code:** Provisioned EC2, IAM, networking, and related services using **Terraform** – versioned, repeatable, and secure.
+- **Documentation:** Clear runbooks and pipeline descriptions for client maintenance.
+
+### Project 2: Bazel Monorepo for E‑commerce (Mar–Dec 2025)
+Architected a **Bazel‑powered monorepo** unifying 10+ microservices (Java, Go, Python) and mobile apps (iOS/Android with 4 flavors each). Delivered a **secure, scalable build system** with measurable impact:
+
+- **Unified build:** Custom Bazel macros reduced boilerplate by **70%**; used `rules_apple`, `rules_android`, `rules_go`, etc. for polyglot support.
+- **Performance:** Incremental builds and remote caching (RBE) cut full‑workspace CI times from **45 min → 12 min**; mobile flavor builds from **20 min → under 5 min**.
+- **SSDLC integration:** Custom SonarQube rule for SAST, dependency scanning (`bazel query` + SBOM), and mandatory container scanning (Trivy/Grype) – **zero critical vulnerabilities in production for 6 months**.
+- **GitLab CI:** Dynamic child pipelines, remote cache sharing, and artifact promotion (container images, IPA, APK) via GitLab registry.
+- **Developer experience:** Onboarded 20+ engineers; pre‑commit hooks reduced failed CI runs by **40%**; built remote execution clusters for consistent builds.
+- **Outcome:** **70% build time reduction, 40% cloud cost savings**—all while maintaining GitOps deployments to Kubernetes.
 
 <Callout type="note" title="Why side projects matter">
-Freelance and side work keep my automation and cloud skills sharp and let me apply the same patterns I use in larger organisations—CI/CD, IaC, and security—in a lean, client-focused way.
+Freelance work lets me apply platform engineering patterns—CI/CD, IaC, security—across different domains, from lean web apps to complex monorepos. These projects also keep my skills sharp with tools like **Bazel**, **GitLab CI**, and **AWS**.
 </Callout>
 
-<Highlight color="blue">Good automation is portable: the same principles—versioned pipelines, IaC, and clear gates—work whether the scope is one app or hundreds of projects.</Highlight>
+<Highlight color="blue">Good automation is portable: versioned pipelines, declarative infrastructure, and security gates work just as well for a single Next.js app as they do for a monorepo with 10,000+ build targets.</Highlight>
