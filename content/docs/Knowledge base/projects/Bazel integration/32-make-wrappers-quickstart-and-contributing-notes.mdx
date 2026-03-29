@@ -1,0 +1,100 @@
+---
+title: "Make wrappers, contributor quickstart, and notes I wish every fork had"
+description: "Thin Makefile targets and CONTRIBUTING notes that mirror CI entrypoints so new contributors skip README archaeology."
+publishedAt: 2024-01-01
+order: 32
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+tags: [bazel-integration, build-system, opentelemetry, astronomy-shop, otel-demo]
+showMetadata: true
+---
+
+# Make wrappers, contributor quickstart, and notes I wish every fork had
+
+Muscle memory beats README archaeology. I added **thin Makefile targets** so my fingers do not forget paths — they mirror what **`bazel_ci`** runs, just shorter.
+
+---
+
+## Makefile targets
+
+```makefile
+# Thin wrappers — same entrypoints as CI.
+.PHONY: bazel-check-oci-allowlist bazel-test-unit bazel-ci-fast bazel-ci-full
+bazel-check-oci-allowlist:
+	python3 ./tools/bazel/policy/check_oci_allowlist.py
+
+bazel-test-unit:
+	bazelisk test //... --config=ci --config=unit --build_tests_only
+
+bazel-ci-fast:
+	bash ./tools/bazel/ci/ci_fast.sh
+
+bazel-ci-full:
+	bash ./tools/bazel/ci/ci_full.sh
+```
+
+---
+
+## Two-minute quickstart (if you have the fork checked out)
+
+**Prerequisites** — match the **`bazel_ci`** job where you touch those languages: **Go**, **Node 22**, **Python**, **.NET 10**, **Elixir / OTP**, **PHP + Composer**, **Docker** (for **`oci_load`**), plus **Bazelisk** (`bazel` → Bazelisk).
+
+<table>
+  <thead>
+    <tr>
+      <th>Goal</th>
+      <th>Command</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Fast loop (no heavy <strong><code>oci_image</code></strong> builds)</td>
+      <td><code>make bazel-ci-fast</code> or <code>bash ./tools/bazel/ci/ci_fast.sh</code></td>
+    </tr>
+    <tr>
+      <td>Full CI parity (build + unit tests + <code>//:lint</code>)</td>
+      <td><code>make bazel-ci-full</code> or <code>bash ./tools/bazel/ci/ci_full.sh</code></td>
+    </tr>
+    <tr>
+      <td>Unit tests only</td>
+      <td><code>make bazel-test-unit</code> or <code>bazelisk test //... --config=ci --config=unit --build_tests_only</code></td>
+    </tr>
+    <tr>
+      <td>OCI base allowlist check</td>
+      <td><code>make bazel-check-oci-allowlist</code></td>
+    </tr>
+  </tbody>
+</table>
+
+**Tags:** **`--config=unit`** runs tests tagged **`unit`** and excludes **`integration`**, **`e2e`**, **`manual`**, etc. New **`sh_test` / `go_test` / `js_test`** targets need explicit tags so the unit sweep stays meaningful.
+
+**Release images (Bazel):** push pattern is **`bazel run //src/checkout:checkout_push -- --repository … --tag …`** after registry auth; release automation lives in the **`Bazel checkout OCI (release)`** workflow with optional secret **`BAZEL_CHECKOUT_PUSH_REPOSITORY`**.
+
+**Remote cache (optional):** gitignored **`.bazelrc.user`** loaded via **`try-import`** in **`.bazelrc`**; never commit API keys.
+
+---
+
+## CONTRIBUTING-style Bazel notes (inlined)
+
+If you maintain a **CONTRIBUTING** file next to this migration, these are the bullets I actually want newcomers to see:
+
+- Tests use **tags** (`unit`, `integration`, `e2e`, …). Use **`--config=unit`** for fast tests; **untagged tests do not run** under that config.  
+- PR checks run **`bash ./tools/bazel/ci/ci_full.sh`**. For a quicker loop (skips most **`oci_image`** builds), use **`bash ./tools/bazel/ci/ci_fast.sh`** or **`make bazel-ci-fast`** — you still need the same language toolchains where those packages are built (e.g. **Composer** for quote, **Elixir** for flagd-ui).  
+- **Proto / Go codegen:** prefer **`bazel run //:gazelle`** and **`//pb:*`** targets over ad-hoc scripts where possible.  
+- **Optional remote cache:** **`.bazelrc.user`** (see the **remote cache** article in this series).
+
+This is how you stop answering the same chat question forty times.
+
+```mermaid
+flowchart LR
+  MK[make bazel-ci-full]
+  SH[ci_full.sh]
+  BZ[bazel build + test + lint]
+  MK --> SH --> BZ
+```
+
+---
+
+## Interview line
+
+> “I don’t rely on tribal knowledge for **CI entrypoints** — **Make targets** and **one shell script** mirror **Actions**, and **CONTRIBUTING** states the **tag contract** explicitly.”
