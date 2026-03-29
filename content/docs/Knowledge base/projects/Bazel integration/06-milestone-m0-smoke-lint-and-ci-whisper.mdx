@@ -85,12 +85,12 @@ Before touching Starlark, I locked **scope** and **inventory** so future me coul
     <tr>
       <td><strong>BZ-001</strong></td>
       <td>Charter</td>
-      <td><strong>Purpose:</strong> Bazel becomes the main <strong>build/test</strong> engine; <strong>Compose</strong> stays for <strong>running</strong> the demo during the transition. <strong>Scope:</strong> build graph, tests, protos, images, CI — not random product behavior changes. <strong>Branches:</strong> <code>main</code> + optional <code>feat/bazel-*</code> for big chunks; short-lived PRs preferred. <strong>Per-service “done”:</strong> build in Bazel, tests where they exist (with tags), image in Bazel or a written waiver, <strong>runtime parity</strong> with the old path unless we mean to change it.</td>
+      <td><strong>Purpose:</strong> Bazel becomes the main <strong>build/test</strong> engine; <strong>Compose</strong> stays for <strong>running</strong> the demo during the transition. <strong>Scope:</strong> build graph, tests, protos, images, CI — not random product behavior changes. <strong>Branches:</strong> <code>main</code> + optional <code>{'feat/bazel-*'}</code> for big chunks; short-lived PRs preferred. <strong>Per-service “done”:</strong> build in Bazel, tests where they exist (with tags), image in Bazel or a written waiver, <strong>runtime parity</strong> with the old path unless we mean to change it.</td>
     </tr>
     <tr>
       <td><strong>BZ-002</strong></td>
       <td>Service tracker</td>
-      <td>A <strong>table of every major <code>src/*</code> service</strong>: language, how it used to build (Dockerfile, Gradle, …), proto yes/no, status starting at <strong>NS</strong> (not started). This became my <strong>scoreboard</strong>.</td>
+      <td>A <strong>table of every major <code>{'src/*'}</code> service</strong>: language, how it used to build (Dockerfile, Gradle, …), proto yes/no, status starting at <strong>NS</strong> (not started). This became my <strong>scoreboard</strong>.</td>
     </tr>
     <tr>
       <td><strong>BZ-003</strong></td>
@@ -157,7 +157,7 @@ flowchart TB
     <tr>
       <td><strong>BZ-015</strong></td>
       <td><strong><code>tools/bazel/</code></strong> skeleton</td>
-      <td>Folders like <strong><code>defs/</code></strong>, <strong><code>ci/</code></strong>, <strong><code>platforms/</code></strong> plus <strong><code>lint/*.sh</code></strong> — a place for shared Starlark and shell glue to grow.</td>
+      <td>Folders like <strong><code>defs/</code></strong>, <strong><code>ci/</code></strong>, <strong><code>platforms/</code></strong> plus <strong><code>{'lint/*.sh'}</code></strong> — a place for shared Starlark and shell glue to grow.</td>
     </tr>
     <tr>
       <td><strong>BZ-016</strong></td>
