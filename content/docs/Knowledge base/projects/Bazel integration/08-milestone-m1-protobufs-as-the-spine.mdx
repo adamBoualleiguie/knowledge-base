@@ -71,10 +71,10 @@ If **`//pb:demo_proto`** fails, every downstream **`go_library`** that imports g
     </tr>
     <tr>
       <td><strong>Docker + <code>make clean docker-generate-protobuf</code></strong></td>
-      <td>Still the path that produces <strong>committed</strong> files under <code>src/*</code> (Go <code>genproto/</code>, Python <code>demo_pb2*.py</code>, TS, etc.). CI <strong><code>protobufcheck</code></strong> insists the tree is <strong>clean</strong> after regeneration.</td>
+      <td>Still the path that produces <strong>committed</strong> files under <code>{'src/*'}</code> (Go <code>genproto/</code>, Python <code>{'demo_pb2*.py'}</code>, TS, etc.). CI <strong><code>protobufcheck</code></strong> insists the tree is <strong>clean</strong> after regeneration.</td>
     </tr>
     <tr>
-      <td><strong>Bazel <code>//pb:*</code></strong></td>
+      <td><strong>Bazel <code>{'//pb:*'}</code></strong></td>
       <td><strong>Parallel proof</strong> the same <code>.proto</code> builds under the Bazel graph — first <strong>descriptor / Go gRPC</strong>, later more languages as the graph grew.</td>
     </tr>
   </tbody>
