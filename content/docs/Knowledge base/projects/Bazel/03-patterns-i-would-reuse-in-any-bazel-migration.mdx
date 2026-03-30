@@ -1,0 +1,167 @@
+---
+title: "Patterns I would reuse in any Bazel migration"
+description: "A professional recap of the migration patterns that proved durable: milestone slicing, dual-build policy, CI tag routing, lockfile discipline, and runfiles-aware testing."
+publishedAt: 2024-01-01
+order: 3
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+tags: [bazel, migration-patterns, ci, reproducibility, software-architecture]
+showMetadata: true
+---
+
+# Patterns I would reuse in any Bazel migration
+
+If I had to do this again in another company repo, I would not copy files blindly. I would copy patterns. This chapter is the distilled version of those patterns, explained in my voice and grounded in what actually worked.
+
+---
+
+## Pattern 1: milestone slicing beats "big bang"
+
+<Callout type="note" title="Core principle">
+I treated migration as a sequence of milestones with acceptance criteria, not a single branch where everything changes at once.
+</Callout>
+
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/bazel/bazel-millestones.png"
+  alt="Milestone flow from M0 bootstrap through M5 supply-chain hardening for a staged Bazel migration."
+  caption="Staged migration milestones: bootstrap, protobuf spine, language waves, service breadth, CI gates, and supply-chain hardening."
+/>
+
+Why it works:
+
+- teams can review incremental risk,
+- CI remains interpretable,
+- regression ownership stays clear.
+
+---
+
+## Pattern 2: dual-build policy is a feature, not a failure
+
+I explicitly kept Dockerfile and Bazel OCI paths side by side where needed. That protected release confidence while still forcing Bazel maturity where it mattered.
+
+<table>
+  <thead>
+    <tr>
+      <th>Concern</th>
+      <th>What I enforced</th>
+      <th>Why this is professional</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Release confidence</td>
+      <td>Dockerfile matrix remains for specific release paths.</td>
+      <td>No fake parity claims; production behavior remains explicit.</td>
+    </tr>
+    <tr>
+      <td>Build graph discipline</td>
+      <td>Bazel OCI builds in CI with pinned bases and visible targets.</td>
+      <td>Migration progress is measurable and enforceable.</td>
+    </tr>
+    <tr>
+      <td>Parity gaps</td>
+      <td>Documented in policy docs and chapter notes.</td>
+      <td>Teams can reason about risk instead of discovering surprises late.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Pattern 3: CI tag routing gives one graph many operating modes
+
+I used tag-based routing in `.bazelrc` to keep one graph but multiple execution intents.
+
+<Terminal
+  title="Representative CI/test routing commands"
+  commands={[
+    {
+      command: "bazelisk test //... --config=ci --config=unit --build_tests_only",
+      output: "# Fast unit gate",
+    },
+    {
+      command: "bazelisk test //... --config=ci --config=integration",
+      output: "# Integration lane",
+    },
+    {
+      command: "bash ./tools/bazel/ci/ci_full.sh",
+      output: "# Full policy and quality flow",
+    },
+  ]}
+/>
+
+<Callout type="warning" title="Pragmatic discipline">
+Tags like <code>requires-network</code> or <code>no-sandbox</code> are not excuses. They are explicit contracts that need periodic reduction over time.
+</Callout>
+
+---
+
+## Pattern 4: lockfile and dependency policy are social contracts
+
+`MODULE.bazel.lock` is not just a generated file. It is the shared dependency fact that keeps local and CI behavior aligned.
+
+What I would always enforce:
+
+1. version changes happen intentionally,
+2. lockfile diffs are reviewed,
+3. CI and local workflows consume the same lock state.
+
+
+---
+
+## Pattern 5: runfiles-aware tests prevent hidden path assumptions
+
+A lot of migration pain comes from scripts that work under `bazel run` but fail under `bazel test`. The fix is not magical: declare inputs and resolve paths through runfiles-aware logic.
+
+<table>
+  <thead>
+    <tr>
+      <th>Anti-pattern</th>
+      <th>Migration-safe pattern</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Assume cwd-relative paths to repo files.</td>
+      <td>Use declared <code>data</code> and runfiles-aware resolution.</td>
+    </tr>
+    <tr>
+      <td>Undeclared tools/files in shell tests.</td>
+      <td>Declare all required inputs, then verify in CI under test mode.</td>
+    </tr>
+    <tr>
+      <td>Fix failures with ad-hoc absolute paths.</td>
+      <td>Fix target definitions so behavior is stable across machines.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Pattern 6: documentation is part of the build system
+
+I consider docs part of operational quality, not decoration. In this migration:
+
+- chapters explain trade-offs in sequence,
+- policy docs define allowed behavior,
+- milestone reports define acceptance boundaries.
+
+This turns Bazel adoption into a reusable practice, not just a temporary burst of engineering effort.
+
+---
+
+## Professional summary
+
+This project proves that a polyglot Bazel migration can stay practical and defensible when you combine:
+
+- <Highlight color="blue">milestone-driven delivery</Highlight>,
+- <Highlight color="purple">explicit dual-build policy</Highlight>,
+- <Highlight color="orange">CI tag routing and governance</Highlight>,
+- <Highlight color="green">lockfile and runfiles discipline</Highlight>,
+- and <Highlight color="yellow">docs that carry institutional memory</Highlight>.
+
+<Callout type="info" title="How to use this chapter">
+Use these patterns as a reusable checklist before you start your own migration plan. They are technology-agnostic enough to transfer, but concrete enough to execute.
+</Callout>
+
