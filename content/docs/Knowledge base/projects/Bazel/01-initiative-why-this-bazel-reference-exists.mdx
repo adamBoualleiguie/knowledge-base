@@ -1,0 +1,322 @@
+---
+title: "Why this Bazel reference exists"
+description: "Why I used the OpenTelemetry Astronomy Shop as a serious Bazel learning lab, what changed in the migration, and which services make this repo a deep polyglot reference."
+publishedAt: 2026-03-27
+order: 1
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+tags: [bazel, bazel-learning, monorepo, opentelemetry, astronomy-shop]
+showMetadata: true
+heroMedia: assets/docs/images/knowledge-base/projects/bazel/bazelhero.png
+---
+
+# Why this Bazel reference exists
+
+I did not want another Bazel tutorial that only compiles a tiny toy project. I wanted a <Highlight color="blue">real migration reference</Highlight> that reflects the friction people actually face in production: many languages, many toolchains, many packaging styles, CI constraints, and imperfect trade-offs.
+
+That is why I used the OpenTelemetry Astronomy Shop fork as the core lab: a polyglot monorepo where Bazel has to coexist with Docker-based runtime flows, language ecosystems, and team realities.
+
+<Callout type="info" title="Project context">
+This work is based on my fork of the OpenTelemetry demo: [adamBoualleiguie/opentelemetry-demo-basel-integration](https://github.com/adamBoualleiguie/opentelemetry-demo-basel-integration).
+</Callout>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/bazel/astronomy-shop-service-architecture.png"
+  alt="Service architecture diagram of the Astronomy Shop demo application."
+  caption="Astronomy Shop service architecture used as the baseline for this Bazel integration initiative."
+/>
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/bazel/astronomy-services-stack.png"
+  alt="Technology stack for Astronomy Shop services, spanning more than twelve programming languages."
+  caption="Polyglot service stack in the Astronomy Shop demo, showing why this project is a strong Bazel learning ground."
+/>
+
+---
+
+## Why this is a strong Bazel learning ground
+
+<table>
+  <thead>
+    <tr>
+      <th>What I needed to learn deeply</th>
+      <th>Why this repo is ideal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Graph modeling across stacks</td>
+      <td>Go, Node, Python, JVM, .NET, Rust, C++, Ruby, Elixir, PHP, edge proxies, and mobile concerns in one place.</td>
+    </tr>
+    <tr>
+      <td>Bzlmod and dependency governance</td>
+      <td><code>MODULE.bazel</code> and <code>MODULE.bazel.lock</code> are central and evolve with real service work.</td>
+    </tr>
+    <tr>
+      <td>OCI build policy</td>
+      <td>Dual build tracks force explicit policy instead of pretending one path can replace everything overnight.</td>
+    </tr>
+    <tr>
+      <td>CI realism</td>
+      <td>Tag-routed tests, partial hermeticity, network exceptions, and staged hardening toward blocking gates.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Before and after: how the project changed
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/bazel/bazel-before-after.png"
+  alt="Before-and-after migration flow from Make and Compose to a Bazel-centered CI graph with dual OCI policy."
+  caption="Before and after view of the migration: from Make/Compose workflows to milestone-driven Bazel adoption in CI."
+/>
+
+<Callout type="note" title="No fake simplification">
+I deliberately kept this migration honest: Bazel adoption is staged, not magic. Some paths remain Dockerfile-driven by policy, and those boundaries are documented.
+</Callout>
+
+### High-level evolution
+
+- **Before:** mostly Make + Docker Compose orchestration, language-specific commands, and mixed dependency control.
+- **Transition:** milestone-based rollout (`M0` to `M5`) with explicit task IDs and acceptance criteria.
+- **Current state:** Bazel is a serious build/test authority in CI, while OCI policy distinguishes Bazel images from Dockerfile release concerns.
+
+---
+
+## Current service landscape (polyglot table)
+
+<table>
+  <thead>
+    <tr>
+      <th>Service / Area</th>
+      <th>Primary language or runtime</th>
+      <th>Bazel role in this reference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>checkout</code>, <code>product-catalog</code></td>
+      <td>Go</td>
+      <td>Core early migration examples: proto wiring, Gazelle, and first stable service targets.</td>
+    </tr>
+    <tr>
+      <td><code>payment</code>, <code>frontend</code></td>
+      <td>Node / Next.js</td>
+      <td>Lockfile discipline, runfiles correctness, and practical sandbox constraints.</td>
+    </tr>
+    <tr>
+      <td><code>recommendation</code>, <code>load-generator</code></td>
+      <td>Python</td>
+      <td><code>rules_python</code>, pip hubs, image packaging, and CI-reproducible dependency behavior.</td>
+    </tr>
+    <tr>
+      <td><code>ad</code>, <code>fraud-detection</code></td>
+      <td>Java / Kotlin</td>
+      <td>JVM graph modeling, maven pinning, proto dependencies, and OCI packaging parity decisions.</td>
+    </tr>
+    <tr>
+      <td><code>accounting</code>, <code>cart</code></td>
+      <td>.NET</td>
+      <td>Host toolchain integration under Bazel orchestration with explicit CI expectations.</td>
+    </tr>
+    <tr>
+      <td><code>shipping</code>, <code>currency</code></td>
+      <td>Rust / C++</td>
+      <td>Native toolchain complexity, linking choices, and reproducible build discipline.</td>
+    </tr>
+    <tr>
+      <td><code>email</code>, <code>flagd-ui</code>, <code>quote</code></td>
+      <td>Ruby / Elixir / PHP</td>
+      <td>Custom packaging flows and pragmatic rules where ecosystem constraints matter.</td>
+    </tr>
+    <tr>
+      <td><code>frontend-proxy</code>, <code>image-provider</code></td>
+      <td>Envoy / nginx configs</td>
+      <td>Config-as-artifact modeling, bake scripts, and OCI image policy trade-offs.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## My objective for readers
+
+I want this to function as a <Highlight color="green">serious learning reference</Highlight>:
+
+1. You can understand Bazel architecture in a non-trivial monorepo.
+2. You can trace design choices from policy to implementation to CI.
+3. You can reuse the migration patterns in your own repository without cargo-culting commands.
+
+The table below is the **service map**: each path shows how the service is built today, how protos are wired in Bazel (M1), and the **Bazel support status** for that component.
+
+Legend: **NS** = Not started | **P** = Proto in Bazel | **B** = Build | **T** = Test | **I** = Image | **CI** = included in **blocking** <code>bazel_ci</code> job (<code>tools/bazel/ci/ci_full.sh</code>)
+
+<table>
+  <thead>
+    <tr>
+      <th>Path</th>
+      <th>Language</th>
+      <th>Build entrypoint (today)</th>
+      <th>Bazel proto (M1)</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>src/accounting</code></td>
+      <td>.NET</td>
+      <td>Dockerfile / <code>dotnet</code></td>
+      <td><code>//pb:demo.proto</code> → <code>src/protos</code> (Bazel)</td>
+      <td>B/I</td>
+    </tr>
+    <tr>
+      <td><code>src/ad</code></td>
+      <td>Java</td>
+      <td>Gradle / Dockerfile</td>
+      <td><code>//pb:demo_java_grpc</code></td>
+      <td>B/I</td>
+    </tr>
+    <tr>
+      <td><code>src/cart</code></td>
+      <td>.NET</td>
+      <td>Dockerfile / <code>dotnet</code></td>
+      <td><code>//pb:demo.proto</code> → <strong>pb/demo.proto</strong> in publish tree (Bazel)</td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/checkout</code></td>
+      <td>Go</td>
+      <td>Dockerfile / <code>go</code></td>
+      <td><code>//pb:demo_go_proto_checkout</code></td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/currency</code></td>
+      <td>C++</td>
+      <td>Dockerfile / cmake</td>
+      <td><code>//pb:demo.proto</code> → genrule copy + <code>proto_library</code> in <code>//src/currency</code> (<strong>BZ-092</strong>); optional <code>//pb:demo_cpp_grpc</code> for other C++ consumers</td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/email</code></td>
+      <td>Ruby</td>
+      <td>Dockerfile / bundler</td>
+      <td>—</td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/flagd-ui</code></td>
+      <td>Elixir</td>
+      <td>Dockerfile / mix</td>
+      <td>—</td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/fraud-detection</code></td>
+      <td>Kotlin</td>
+      <td>Gradle / Dockerfile</td>
+      <td><code>//pb:demo_java_grpc</code></td>
+      <td>B/I</td>
+    </tr>
+    <tr>
+      <td><code>src/frontend</code></td>
+      <td>TS/Next</td>
+      <td>Dockerfile / npm</td>
+      <td>—</td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/frontend-proxy</code></td>
+      <td>Envoy</td>
+      <td>Dockerfile / Bazel baked YAML</td>
+      <td>—</td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/image-provider</code></td>
+      <td>nginx</td>
+      <td>Dockerfile / Bazel baked nginx.conf</td>
+      <td>—</td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/kafka</code></td>
+      <td>infra</td>
+      <td>Dockerfile</td>
+      <td>—</td>
+      <td>Dockerfile (<strong>BZ-110</strong>)</td>
+    </tr>
+    <tr>
+      <td><code>src/llm</code></td>
+      <td>Python</td>
+      <td>Dockerfile</td>
+      <td>—</td>
+      <td>B/I</td>
+    </tr>
+    <tr>
+      <td><code>src/load-generator</code></td>
+      <td>Python</td>
+      <td>Dockerfile</td>
+      <td>—</td>
+      <td>B/I</td>
+    </tr>
+    <tr>
+      <td><code>src/opensearch</code></td>
+      <td>infra</td>
+      <td>Dockerfile</td>
+      <td>—</td>
+      <td>Dockerfile (<strong>BZ-110</strong>)</td>
+    </tr>
+    <tr>
+      <td><code>src/payment</code></td>
+      <td>Node</td>
+      <td>Dockerfile / npm</td>
+      <td>—</td>
+      <td>B/I</td>
+    </tr>
+    <tr>
+      <td><code>src/product-catalog</code></td>
+      <td>Go</td>
+      <td>Dockerfile / <code>go</code></td>
+      <td><code>//pb:demo_go_proto_product_catalog</code></td>
+      <td>B/T</td>
+    </tr>
+    <tr>
+      <td><code>src/product-reviews</code></td>
+      <td>Python</td>
+      <td>Dockerfile</td>
+      <td><code>//pb:demo_py_grpc</code></td>
+      <td>B/I</td>
+    </tr>
+    <tr>
+      <td><code>src/quote</code></td>
+      <td>PHP</td>
+      <td>Dockerfile / Composer</td>
+      <td>—</td>
+      <td>B/T/I</td>
+    </tr>
+    <tr>
+      <td><code>src/react-native-app</code></td>
+      <td>TS/RN (Expo)</td>
+      <td>npm / Gradle (<strong>Android only</strong> in Bazel)</td>
+      <td>—</td>
+      <td>B/T</td>
+    </tr>
+    <tr>
+      <td><code>src/recommendation</code></td>
+      <td>Python</td>
+      <td>Dockerfile</td>
+      <td><code>//pb:demo_py_grpc</code></td>
+      <td>B</td>
+    </tr>
+    <tr>
+      <td><code>src/shipping</code></td>
+      <td>Rust</td>
+      <td>Dockerfile / cargo</td>
+      <td>— (proto in Bazel TBD)</td>
+      <td>B/T/I</td>
+    </tr>
+  </tbody>
+</table>

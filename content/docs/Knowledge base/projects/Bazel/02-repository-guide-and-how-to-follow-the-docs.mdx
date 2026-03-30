@@ -1,0 +1,156 @@
+---
+title: "Repository guide and how to follow the docs"
+description: "How to use the Bazel migration fork repository, where to start in the documentation, and the exact reading path to move from strategy to implementation."
+publishedAt: 2026-03-27
+order: 2
+author: Adam Boualleiguie
+authorPhoto: adam-boualleiguie.jpeg
+tags: [bazel, documentation, learning-path, monorepo, opentelemetry]
+showMetadata: true
+---
+
+# Repository guide and how to follow the docs
+
+This document is the practical map I wanted when I started: where the repository lives, what each documentation block means, and how to read in the right order without getting lost.
+
+<Callout type="info" title="Repository">
+Main project fork: [adamBoualleiguie/opentelemetry-demo-basel-integration](https://github.com/adamBoualleiguie/opentelemetry-demo-basel-integration)
+</Callout>
+
+---
+
+## How to approach the repo
+
+<table>
+  <thead>
+    <tr>
+      <th>Area</th>
+      <th>What you should expect</th>
+      <th>How I recommend using it</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>docs/planification</code></td>
+      <td>Strategy, architecture, concepts, environment, and backlog framing.</td>
+      <td>Read first to understand goals and milestone logic before touching BUILD files.</td>
+    </tr>
+    <tr>
+      <td><code>docs/knowledge-base</code></td>
+      <td>Narrated 01-40 chapter journey with commands, trade-offs, and service details.</td>
+      <td>Read in order for contextual learning; use chapters as reference during implementation.</td>
+    </tr>
+    <tr>
+      <td><code>docs/bazel</code></td>
+      <td>Policy and technical references (milestones, test tags, OCI, risk, charter).</td>
+      <td>Treat as canonical policy surface when deciding CI and release behavior.</td>
+    </tr>
+    <tr>
+      <td>Repo root config files</td>
+      <td><code>MODULE.bazel</code>, <code>MODULE.bazel.lock</code>, <code>.bazelrc</code>, workflows, and scripts.</td>
+      <td>Use as implementation truth; docs explain intent, these files enforce behavior.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Reading order I recommend (serious learning path)
+
+
+<DocImage
+  src="/assets/docs/images/knowledge-base/projects/bazel/bazel-reading-order.png"
+  alt="Recommended reading flow from planning docs to knowledge base chapters, Bazel policy documents, and root CI/config files."
+  caption="Reading order for this Bazel reference: planification docs, knowledge base chapters, Bazel policy/milestones, then root CI and config scripts."
+/>
+
+### Step-by-step
+
+1. **Planification first**: understand the "why" and migration shape.
+2. **Knowledge base in order**: move from fundamentals to language lanes to CI hardening.
+3. **Policy cross-check**: validate assumptions with `docs/bazel/*`.
+4. **Implementation verification**: inspect repo root and workflow scripts.
+
+<Callout type="warning" title="Common mistake">
+Do not jump directly to one language chapter and assume you understand the system. The choices in those chapters depend on earlier policy and milestone context.
+</Callout>
+
+---
+
+## What to read if you have limited time
+
+<table>
+  <thead>
+    <tr>
+      <th>If your goal is...</th>
+      <th>Read this minimum set</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Understand the migration narrative quickly</td>
+      <td>Knowledge base <code>01</code>, <code>03</code>, <code>04</code>, <code>06</code>, <code>08</code>, <code>10</code>, <code>26</code>, <code>29</code>, <code>30</code>.</td>
+    </tr>
+    <tr>
+      <td>Implement Bazel in a polyglot environment</td>
+      <td>Add language chapters <code>13-24</code> plus OCI/policy <code>12</code>, <code>27</code>, <code>28</code>.</td>
+    </tr>
+    <tr>
+      <td>Focus on CI governance and reproducibility</td>
+      <td>Read <code>25</code>, <code>29</code>, <code>30</code>, <code>31</code>, <code>37</code>, <code>38</code>, <code>39</code>.</td>
+    </tr>
+    <tr>
+      <td>Prepare interview/project defense</td>
+      <td>Read <code>34</code>, <code>35</code>, <code>36</code>, <code>40</code> after milestone context.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Practical command entry points
+
+<Terminal
+  title="Core commands I use to follow/validate the project"
+  commands={[
+    {
+      command: "bash ./tools/bazel/ci/ci_full.sh",
+      output: "# Full CI parity path",
+    },
+    {
+      command: "bash ./tools/bazel/ci/ci_fast.sh",
+      output: "# Faster local loop",
+    },
+    {
+      command: "bazelisk test //... --config=ci --config=unit --build_tests_only",
+      output: "# Unit-only gate",
+    },
+    {
+      command: "bazelisk query //...",
+      output: "# Explore target graph scope",
+    },
+  ]}
+/>
+
+---
+
+## Resource map (what each reference gives you)
+
+- <Highlight color="blue">Repository README</Highlight>: top-level purpose, quick commands, documentation map.
+- <Highlight color="purple">Knowledge base README</Highlight>: chapter ordering and intent (including no chapter 05).
+- <Highlight color="orange">Milestone docs</Highlight>: acceptance criteria and "done means done" checks.
+- <Highlight color="green">Policy docs</Highlight>: OCI dual-build, allowlist, push behavior, risk register, test tag contracts.
+
+
+---
+
+## How I suggest contributors use this
+
+I designed this repository so someone can learn and contribute without guessing:
+
+- read the strategy,
+- follow the chapter sequence,
+- verify against policy docs,
+- then run the same CI scripts locally.
+
+That is the shortest path to building confidence and avoiding "works on my machine" migration myths.
