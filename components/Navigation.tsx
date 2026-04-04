@@ -7,15 +7,11 @@ import { ThemeToggle } from './ThemeToggle'
 import { DocsSearchBar } from './DocsSearchBar'
 import { useHero } from './HeroContext'
 
-// Get basePath from Next.js config (for static export)
+// Detect the deployed GitHub Pages subpath at runtime.
+// In local dev the app should run at /. In production Pages it lives under /knowledge-base.
 const getBasePath = () => {
-  // In browser, check if we're in a subdirectory
-  if (typeof window !== 'undefined') {
-    const path = window.location.pathname
-    // If path starts with /knowledge-base, return it
-    if (path.startsWith('/knowledge-base')) {
-      return '/knowledge-base'
-    }
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/knowledge-base')) {
+    return '/knowledge-base'
   }
   return ''
 }

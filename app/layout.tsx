@@ -75,7 +75,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        {/* Fix favicon paths to respect basePath */}
+        {/* Fix favicon paths to respect the GitHub Pages basePath when present */}
         <Script
           id="fix-favicon"
           strategy="beforeInteractive"

@@ -5,13 +5,13 @@
  */
 import path from 'path'
 import fs from 'fs'
-import { pathToFileURL } from 'url'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(__dirname, '..')
 
 const baseUrl = 'https://adamboualleiguie.github.io'
+// GitHub Pages production deploy stays under the repository subpath.
 const basePath = '/knowledge-base'
 
 const INDEXNOW_KEY = '286f7e2dbfac40018a3bbfc4a355c421'
@@ -37,13 +37,16 @@ function escapeXml(str) {
     .replace(/'/g, '&apos;')
 }
 
+function readGeneratedJson(relativePath) {
+  const filePath = path.join(root, '.contentlayer', 'generated', relativePath)
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+}
+
 async function main() {
-  const generatedPath = path.join(root, '.contentlayer', 'generated', 'index.mjs')
   let allDocs, allBlogs
   try {
-    const gen = await import(pathToFileURL(generatedPath).href)
-    allDocs = gen.allDocs ?? []
-    allBlogs = gen.allBlogs ?? []
+    allDocs = readGeneratedJson(path.join('Doc', '_index.json'))
+    allBlogs = readGeneratedJson(path.join('Blog', '_index.json'))
   } catch (err) {
     console.error('Run contentlayer build first. Missing or invalid .contentlayer/generated:', err.message)
     process.exit(1)

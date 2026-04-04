@@ -1,5 +1,8 @@
 const { withContentlayer } = require('next-contentlayer')
 
+const isGitHubPagesBuild = process.env.GITHUB_ACTIONS === 'true' || process.env.NODE_ENV === 'production'
+const basePath = isGitHubPagesBuild ? '/knowledge-base' : ''
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -14,8 +17,9 @@ const nextConfig = {
   },
   // Enable static export for GitHub Pages / static hosting
   output: 'export',
-  // IMPORTANT: Set basePath to match your repository name for GitHub Pages
-  basePath: '/knowledge-base',
+  // Use the GitHub Pages repo subpath only for production/static deployments.
+  // In local dev we keep the app at / so routes and assets behave naturally.
+  basePath,
   // Enable trailing slashes for better GitHub Pages compatibility
   trailingSlash: true,
   images: {
