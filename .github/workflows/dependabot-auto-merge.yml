@@ -1,0 +1,50 @@
+name: Dependabot auto-merge
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge-safe-dependabot-prs:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge for safe Dependabot PRs
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const pr = context.payload.pull_request
+            const actor = context.actor
+            if (actor !== 'dependabot[bot]') {
+              core.info('Not a Dependabot PR; skipping.')
+              return
+            }
+
+            const title = pr.title || ''
+            const labels = (pr.labels || []).map((label) => label.name)
+            const isGithubActionsUpdate = pr.head.ref.startsWith('dependabot/github_actions/') || labels.includes('github_actions')
+            const isJavascriptDependency = pr.head.ref.startsWith('dependabot/npm_and_yarn/') || labels.includes('javascript')
+            const isFrameworkRisk = /\b(next|react|react-dom|contentlayer|next-contentlayer|eslint-config-next)\b/i.test(title)
+            const isMajorBump = /\bfrom\s+[^\s]+\s+to\s+([1-9]\d*)\./i.test(title) && !/\bfrom\s+0\./i.test(title)
+
+            const safeToAutomerge = isGithubActionsUpdate || (isJavascriptDependency && !isFrameworkRisk && !isMajorBump)
+
+            if (!safeToAutomerge) {
+              core.info(`PR #${pr.number} is not in the safe auto-merge bucket.`)
+              return
+            }
+
+            await github.graphql(
+              `mutation($pullRequestId: ID!) {
+                enablePullRequestAutoMerge(input: { pullRequestId: $pullRequestId, mergeMethod: SQUASH }) {
+                  pullRequest { number }
+                }
+              }`,
+              { pullRequestId: pr.node_id },
+            )
+
+            core.info(`Enabled auto-merge for PR #${pr.number}.`)
