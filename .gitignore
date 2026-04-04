@@ -41,5 +41,9 @@ next-env.d.ts
 drafts
 task.md 
 
+# build-generated public artifacts
+public/sitemap.xml
+public/286f7e2dbfac40018a3bbfc4a355c421.txt
+
 
 
