@@ -32,6 +32,15 @@ const nextConfig = {
     // Disable image optimization for static export
     unoptimized: true,
   },
+  webpack: (config) => {
+    config.ignoreWarnings = config.ignoreWarnings || []
+    config.ignoreWarnings.push({
+      module: /@excalidraw\/excalidraw/,
+      message: /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
+    })
+
+    return config
+  },
 }
 
 module.exports = withContentlayer(nextConfig)

@@ -6,10 +6,13 @@ import { Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 
-// Dynamically import Excalidraw to avoid SSR issues
+// Dynamically import Excalidraw to avoid SSR/bundling issues and keep it strictly client-only.
 const Excalidraw = dynamic(
-  async () => (await import('@excalidraw/excalidraw')).Excalidraw,
-  { ssr: false }
+  () => import('@excalidraw/excalidraw').then((mod) => mod.Excalidraw),
+  {
+    ssr: false,
+    loading: () => null,
+  }
 )
 
 interface ExcalidrawDiagramProps {
