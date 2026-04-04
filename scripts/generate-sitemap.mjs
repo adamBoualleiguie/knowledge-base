@@ -12,6 +12,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(__dirname, '..')
 
 const baseUrl = 'https://adamboualleiguie.github.io'
+// GitHub Pages production deploy stays under the repository subpath.
 const basePath = '/knowledge-base'
 
 const INDEXNOW_KEY = '286f7e2dbfac40018a3bbfc4a355c421'
