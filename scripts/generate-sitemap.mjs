@@ -95,12 +95,13 @@ async function main() {
   fs.writeFileSync(outPath, urlset, 'utf8')
   console.log('Wrote sitemap.xml with', entries.length, 'entries')
 
-  // IndexNow: write key file (always) and submit URLs (only in CI or when SUBMIT_INDEXNOW=1)
+  // IndexNow: always write the key file, but only submit when explicitly enabled.
+  // CI builds for GitHub Pages should stay clean and deterministic by default.
   const keyFilePath = path.join(root, 'public', `${INDEXNOW_KEY}.txt`)
   fs.writeFileSync(keyFilePath, INDEXNOW_KEY, 'utf8')
   console.log('Wrote IndexNow key file:', `${INDEXNOW_KEY}.txt`)
 
-  const shouldSubmit = process.env.CI === 'true' || process.env.SUBMIT_INDEXNOW === '1'
+  const shouldSubmit = process.env.SUBMIT_INDEXNOW === '1'
   if (shouldSubmit) {
     const urlList = entries.map((e) => e.url)
     try {

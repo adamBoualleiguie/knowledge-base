@@ -53,7 +53,7 @@ export function Navigation({ docs = [] }: NavigationProps) {
 
   return (
     <nav
-      className={`sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 transition-all duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${
         navVisible
           ? 'translate-y-0 opacity-100'
           : '-translate-y-full opacity-0 pointer-events-none'
