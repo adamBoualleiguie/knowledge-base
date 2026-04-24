@@ -518,14 +518,14 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.1.tgz#de633db3ec2ef6a3c89e2f19038063e8a122e2c2"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
-"@excalidraw/excalidraw@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@excalidraw/excalidraw/-/excalidraw-0.18.0.tgz#9f818e2df80a8735af54f8cc21da67997785532f"
-  integrity sha512-QkIiS+5qdy8lmDWTKsuy0sK/fen/LRDtbhm2lc2xcFcqhv2/zdg95bYnl+wnwwXGHo7kEmP65BSiMHE7PJ3Zpw==
+"@excalidraw/excalidraw@^0.18.1":
+  version "0.18.1"
+  resolved "https://registry.yarnpkg.com/@excalidraw/excalidraw/-/excalidraw-0.18.1.tgz#fd6ad752807c814698c5f51dab778845b7e4bba7"
+  integrity sha512-6i5Gt7IDTOH//qa0Z315Ly5iVRhjWpu2whrlQFqkuwrkKUWgRsMk0P5qdE7bpyDpai7jeLeWYkyj1eVAfni1lw==
   dependencies:
     "@braintree/sanitize-url" "6.0.2"
     "@excalidraw/laser-pointer" "1.3.1"
-    "@excalidraw/mermaid-to-excalidraw" "1.1.2"
+    "@excalidraw/mermaid-to-excalidraw" "2.2.2"
     "@excalidraw/random-username" "1.1.0"
     "@radix-ui/react-popover" "1.1.6"
     "@radix-ui/react-tabs" "1.0.2"
@@ -565,13 +565,14 @@
   resolved "https://registry.yarnpkg.com/@excalidraw/markdown-to-text/-/markdown-to-text-0.1.2.tgz#1703705e7da608cf478f17bfe96fb295f55a23eb"
   integrity sha512-1nDXBNAojfi3oSFwJswKREkFm5wrSjqay81QlyRv2pkITG/XYB5v+oChENVBQLcxQwX4IUATWvXM5BcaNhPiIg==
 
-"@excalidraw/mermaid-to-excalidraw@1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@excalidraw/mermaid-to-excalidraw/-/mermaid-to-excalidraw-1.1.2.tgz#74d9507971976a7d3d960a1b2e8fb49a9f1f0d22"
-  integrity sha512-hAFv/TTIsOdoy0dL5v+oBd297SQ+Z88gZ5u99fCIFuEMHfQuPgLhU/ztKhFSTs7fISwVo6fizny/5oQRR3d4tQ==
+"@excalidraw/mermaid-to-excalidraw@2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@excalidraw/mermaid-to-excalidraw/-/mermaid-to-excalidraw-2.2.2.tgz#ee6b597a0d95b9a76f7ae41ce0e3733a9b96e4a0"
+  integrity sha512-5VKQq5CdRocC82vOIUpQ5ufJOVV9FpBTdHGA+ULqazeIVV+cr299877omQCibsdS3Bpitz2fsnTwnIXEmLVDSg==
   dependencies:
     "@excalidraw/markdown-to-text" "0.1.2"
-    mermaid "10.9.3"
+    "@mermaid-js/parser" "^0.6.3"
+    mermaid "^11.12.1"
     nanoid "4.0.2"
 
 "@excalidraw/random-username@1.1.0":
@@ -5110,7 +5111,7 @@ merge2@^1.3.0:
   resolved "https://registry.yarnpkg.com/merge2/-/merge2-1.4.1.tgz#4368892f885e907455a6fd7dc55c0c9d404990ae"
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
-mermaid@10.9.3, mermaid@^10.9.4:
+mermaid@^10.9.4, mermaid@^11.12.1:
   version "10.9.5"
   resolved "https://registry.yarnpkg.com/mermaid/-/mermaid-10.9.5.tgz#b10606abb323d34154751b5358ebe325a78c94e5"
   integrity sha512-eRlKEjzak4z1rcXeCd1OAlyawhrptClQDo8OuI8n6bSVqJ9oMfd5Lrf3Q+TdJHewi/9AIOc3UmEo8Fz+kNzzuQ==
