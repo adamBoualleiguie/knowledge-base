@@ -10,7 +10,7 @@
     "postinstall": "node scripts/contentlayer-postinstall.mjs"
   },
   "dependencies": {
-    "@excalidraw/excalidraw": "^0.18.0",
+    "@excalidraw/excalidraw": "^0.18.1",
     "contentlayer": "^0.3.4",
     "date-fns": "^3.3.0",
     "lucide-react": "^0.562.0",
